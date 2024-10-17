@@ -1,10 +1,10 @@
 {
-  "name": "sales-crm",
+  "name": "freesend",
   "version": "0.3.1",
   "private": true,
   "author": {
-    "name": "metafog",
-    "url": "https://metafog.io"
+    "name": "mokshablr",
+    "url": "https://github.com/mokshablr"
   },
   "scripts": {
     "dev": "next dev",
