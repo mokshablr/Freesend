@@ -27,57 +27,6 @@ async function convertToArray(rows) {
   return dataRows;
 }
 
-export async function searchServers(
-  stxt: string,
-  page: number,
-  pageSize: number,
-): Promise<any[]> {
-  try {
-    const user = await getCurrentUser();
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
-
-    const rows = await prisma.smtpConfig.findMany({
-      where: {
-        // deleted: false,
-        tenant_id: user.tenant_id,
-        OR: [
-          {
-            name: {
-              contains: stxt || "",
-              mode: "insensitive",
-            },
-          },
-          //   {
-          //     sector: {
-          //       name: {
-          //         contains: stxt || '',
-          //         mode: 'insensitive'
-          //       },
-          //     },
-          //   },
-        ],
-      },
-      //   include: {
-      //     sector: true,
-      //   },
-      orderBy: [
-        {
-          createdAt: "asc",
-        },
-      ],
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-    });
-
-    return convertToArray(rows);
-  } catch (error) {
-    console.log(error);
-    return [];
-  }
-}
-
 export const createApiKey = async (data) => {
   try {
     const user = await getCurrentUser();
@@ -89,13 +38,11 @@ export const createApiKey = async (data) => {
     const token = generateApiKey();
     const { name, smtpConfigId } = data;
 
-    console.log("hi", tenant_id, name, token, smtpConfigId);
-
     if (!tenant_id || !name || !token || !smtpConfigId) {
       throw new Error("Missing required fields");
     }
 
-    const newApiKey = await prisma.APIKey.create({
+    const newApiKey = await prisma.apiKey.create({
       data: {
         tenant_id: tenant_id,
         name: name,
@@ -116,7 +63,7 @@ export const getApiKeysByTenant = async () => {
     if (!user) {
       throw new Error("Unauthorized");
     }
-    const rows = await prisma.APIKey.findMany({
+    const rows = await prisma.apiKey.findMany({
       select: {
         name: true,
         token: true,
@@ -142,15 +89,15 @@ export const getApiKeysByTenant = async () => {
 };
 
 export const getSmtpConfigByApiKey = async (
-  apiKey: string,
+  ApiKey: string,
 ): Promise<SmtpConfig | null> => {
   try {
-    const row = await prisma.APIKey.findFirst({
+    const row = await prisma.apiKey.findFirst({
       select: {
         smtpConfig: true,
       },
       where: {
-        token: apiKey,
+        token: ApiKey,
       },
     });
     if (!row) return null;
@@ -158,83 +105,5 @@ export const getSmtpConfigByApiKey = async (
   } catch (error) {
     console.log(error);
     return null;
-  }
-};
-
-export const getServerNames = async () => {
-  try {
-    const user = await getCurrentUser();
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
-
-    const rows = await prisma.smtpConfig.findMany({
-      select: {
-        name: true, // Only select the 'name' field
-      },
-      where: {
-        tenant_id: user.tenant_id,
-      },
-      orderBy: [
-        {
-          name: "asc",
-        },
-      ],
-    });
-
-    let names = new Array(rows.length);
-    for (var i = 0; i < rows.length; i++) {
-      let row = rows[i];
-      names[i] = row.name;
-    }
-
-    return names;
-  } catch (error) {
-    console.log(error);
-    return [];
-  }
-};
-
-export const getServerIdFromName = async (name: string) => {
-  try {
-    const user = await getCurrentUser();
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
-
-    const row = await prisma.smtpConfig.findFirst({
-      where: {
-        name: name,
-        tenant_id: user.tenant_id,
-      },
-    });
-    if (!row) return null;
-    return row.id;
-  } catch (error) {
-    console.log(error);
-    return null;
-  }
-};
-
-export const getServerNameFromId = async (id: string | null) => {
-  try {
-    const user = await getCurrentUser();
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
-
-    if (id == null) return "";
-
-    const row = await prisma.smtpConfig.findFirst({
-      where: {
-        id: id,
-        tenant_id: user.tenant_id,
-      },
-    });
-
-    return row?.name;
-  } catch (error) {
-    console.log(error);
-    return "";
   }
 };

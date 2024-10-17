@@ -1,10 +1,11 @@
 "use server";
 
-import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { getCurrentUser } from "@/lib/session"
 import { UserRole } from "@prisma/client";
-import { sendInviteEmail } from "@/lib/email"
+
+import { prisma } from "@/lib/db";
+import { sendInviteEmail } from "@/lib/email";
+import { getCurrentUser } from "@/lib/session";
 
 async function convertToArray(rows) {
   //DATA ARRAY
@@ -12,17 +13,17 @@ async function convertToArray(rows) {
   for (var i = 0; i < rows.length; i++) {
     let row = rows[i];
     dataRows[i] = [
-      row.id, 
-      row.name, 
-      row.email, 
-      row.quotaMonth, 
-      row.quotaYear, 
-      row.isActive, 
-      row.role
+      row.id,
+      row.name,
+      row.email,
+      row.quotaMonth,
+      row.quotaYear,
+      row.isActive,
+      row.role,
     ];
   }
   return dataRows;
-};
+}
 
 export const getTenant = async (user) => {
   if (!user) return null;
@@ -44,18 +45,18 @@ export const getTenant = async (user) => {
     tenant = await prisma.tenant.create({
       data: {
         id: user.tenant_id,
-        name: '',
+        name: "",
       },
-    })
+    });
 
     //console.log("tenant created ", tenant.id)
 
     return tenant;
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return null;
   }
-}
+};
 
 export const getUserByEmail = async (email: string) => {
   try {
@@ -67,7 +68,7 @@ export const getUserByEmail = async (email: string) => {
 
     return row;
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return null;
   }
 };
@@ -81,7 +82,11 @@ export const getUserById = async (id: string) => {
   }
 };
 
-export async function searchUsers(stxt: string, page: number, pageSize: number): Promise<any[]> {
+export async function searchUsers(
+  stxt: string,
+  page: number,
+  pageSize: number,
+): Promise<any[]> {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -92,25 +97,25 @@ export async function searchUsers(stxt: string, page: number, pageSize: number):
       where: {
         tenant_id: user.tenant_id,
         name: {
-          contains: stxt || '', // Return all rows if no search
-          mode: 'insensitive', // Ignore case
+          contains: stxt || "", // Return all rows if no search
+          mode: "insensitive", // Ignore case
         },
       },
       orderBy: [
         {
-          createdAt: 'desc',
+          createdAt: "desc",
         },
       ],
-      skip: (page-1) * pageSize,
+      skip: (page - 1) * pageSize,
       take: pageSize,
     });
 
-    return convertToArray(rows);;
+    return convertToArray(rows);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return [];
   }
-};
+}
 
 export const getUserNames = async () => {
   try {
@@ -128,9 +133,9 @@ export const getUserNames = async () => {
       },
       orderBy: [
         {
-          name: 'asc',
+          name: "asc",
         },
-      ]
+      ],
     });
 
     let names = new Array(rows.length);
@@ -141,7 +146,7 @@ export const getUserNames = async () => {
 
     return names;
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return [];
   }
 };
@@ -161,10 +166,10 @@ export const getUserIdFromName = async (name: string) => {
     });
     return row?.id;
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return null;
   }
-}
+};
 
 export const getUserNameFromId = async (id: string | null) => {
   try {
@@ -173,7 +178,7 @@ export const getUserNameFromId = async (id: string | null) => {
       throw new Error("Unauthorized");
     }
 
-    if (id == null) return ''
+    if (id == null) return "";
 
     const row = await prisma.user.findFirst({
       where: {
@@ -183,10 +188,10 @@ export const getUserNameFromId = async (id: string | null) => {
     });
     return row?.name;
   } catch (error) {
-    console.log(error)
-    return '';
+    console.log(error);
+    return "";
   }
-}
+};
 
 export const isCurrentUserActive = async () => {
   try {
@@ -203,40 +208,12 @@ export const isCurrentUserActive = async () => {
 
     return row?.isActive;
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return false;
   }
-}
+};
 
-export const isCurrentUserHasQuota = async () => {
-  try {
-    const user = await getCurrentUser()
-    if (!user) {
-      throw new Error("Unauthorized");
-    }
-
-    const row = await prisma.user.findFirst({
-      where: {
-        id: user.id,
-      },
-    });
-
-    if (row?.quotaMonth && row?.quotaMonth > 0) {
-      return true;
-    }
-
-    if (row?.quotaYear && row?.quotaYear > 0) {
-      return true;
-    }
-
-    return false;
-  } catch (error) {
-    console.log(error)
-    return false;
-  }
-}
-
-async function isDuplicate(email:string, recId:string) {
+async function isDuplicate(email: string, recId: string) {
   const u = await getUserByEmail(email);
   if (!u) return false; //good
   return u.id != recId;
@@ -256,7 +233,7 @@ export async function updateUser(editedRecords) {
       if (!row || row.length < 2 || row[1] == null) continue;
 
       if (!row[2]) {
-        return { status: "validation", reason: "Email is mandatory" }
+        return { status: "validation", reason: "Email is mandatory" };
       }
 
       let recId = row[0];
@@ -264,10 +241,13 @@ export async function updateUser(editedRecords) {
       const email = row[2];
       const dup = await isDuplicate(email, recId);
       if (dup) {
-        return { status: "validation", reason: "Email " + email + " is already in use." }
+        return {
+          status: "validation",
+          reason: "Email " + email + " is already in use.",
+        };
       }
 
-      var role = row[6]
+      var role = row[6];
       if (!role) {
         role = UserRole.USER;
       }
@@ -280,10 +260,10 @@ export async function updateUser(editedRecords) {
         active = true; //forced
       }
 
-      var qM=0;
-      var qY=0;
-      if(row[3])qM=row[3];
-      if(row[4])qY=row[4];
+      var qM = 0;
+      var qY = 0;
+      if (row[3]) qM = row[3];
+      if (row[4]) qY = row[4];
 
       if (recId) {
         //update
@@ -294,24 +274,21 @@ export async function updateUser(editedRecords) {
           data: {
             name: row[1].trim(),
             email: email,
-            quotaMonth: qM,
-            quotaYear: qY,
             isActive: active,
             role: role,
           },
-        })
-      }
-      else {
+        });
+      } else {
         //insert
         //shouldnt come here
       }
     }
 
-    revalidatePath('/users')
+    revalidatePath("/users");
     return { status: "success" };
   } catch (error) {
-    console.log(error)
-    return { status: "error", reason: error.toString() }
+    console.log(error);
+    return { status: "error", reason: error.toString() };
   }
 }
 
@@ -325,20 +302,23 @@ export async function createUser(data) {
     if (!user) {
       throw new Error("Unauthorized");
     }
-    
+
     if (!name) {
-      return { status: "validation", reason: "Name is mandatory" }
+      return { status: "validation", reason: "Name is mandatory" };
     }
     if (!email) {
-      return { status: "validation", reason: "Email is mandatory" }
+      return { status: "validation", reason: "Email is mandatory" };
     }
     if (!role) {
-      return { status: "validation", reason: "Role is mandatory" }
+      return { status: "validation", reason: "Role is mandatory" };
     }
 
-    const dup = await isDuplicate(email, '');
+    const dup = await isDuplicate(email, "");
     if (dup) {
-      return { status: "validation", reason: "Email " + email + " is already in use." }
+      return {
+        status: "validation",
+        reason: "Email " + email + " is already in use.",
+      };
     }
 
     const tenant = await getTenant(user);
@@ -348,19 +328,17 @@ export async function createUser(data) {
         tenant_id: user.tenant_id, //same tenant
         name: name.trim(),
         email: email,
-        quotaMonth: 0,
-        quotaYear: 0,
         isActive: true,
         role: role,
       },
-    })
+    });
 
     //send invite email
     await sendInviteEmail(newUser, tenant);
 
     return { status: "success" };
   } catch (error) {
-    console.log(error)
-    return { status: "error", reason: error.toString() }
+    console.log(error);
+    return { status: "error", reason: error.toString() };
   }
 }
