@@ -56,7 +56,7 @@ model Tenant {
   createdAt     DateTime    @default(now()) @map(name: "created_at")
   updatedAt     DateTime    @updatedAt @map(name: "updated_at")
   smtpConfigs   SmtpConfig[]
-  APIKeys      APIKey[]
+  ApiKeys      ApiKey[]
 
   @@map(name: "tenants")
 }
@@ -107,7 +107,7 @@ model SmtpConfig {
   user      String
   pass      String
   tenant    Tenant  @relation(fields: [tenant_id], references: [id])
-  apiKeys   APIKey[]
+  apiKeys   ApiKey[]
   createdAt     DateTime  @default(now()) @map(name: "created_at")
   updatedAt     DateTime  @updatedAt @map(name: "updated_at")
 
@@ -115,7 +115,7 @@ model SmtpConfig {
   @@map(name: "smtp_configs")
 }
 
-model APIKey {
+model ApiKey {
   id            String  @id @default(nanoid(10))
   tenant_id     String
   smtpConfigId  String
