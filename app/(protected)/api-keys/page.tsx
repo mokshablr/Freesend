@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 import { getApiKeysByTenant } from "@/lib/api-key";
-import { formatDate } from "@/lib/utils";
-import { DataTable } from "@/components/ui/data-table"; // Make sure to import your DataTable component
 
 import CreateApiKeyDialog from "./add-key-dialog";
 import ApiKeyTable from "./api-key-table";
 
 type ApiKeys = {
+  id: string;
   name: string;
   token: string;
   createdAt: string;
@@ -24,8 +24,6 @@ export default function ApiKeys() {
   const fetchApiKeys = async () => {
     try {
       const result = await getApiKeysByTenant();
-      // setApiKeys(result);
-      console.log("Raw result:", result);
 
       const formattedData = result.map((item: any) => ({
         ...item,
@@ -36,7 +34,7 @@ export default function ApiKeys() {
       }));
       setApiKeys(formattedData);
     } catch (error) {
-      console.error("Error fetching servers:", error);
+      toast.error("Error fetching servers:" + error);
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +57,7 @@ export default function ApiKeys() {
           </div>
         </div>
         <div className="mx-auto max-w-5xl px-6">
-          <ApiKeyTable apiKeys={apiKeys} isLoading={isLoading} />
+          <ApiKeyTable initialApiKeys={apiKeys} initialIsLoading={isLoading} />
         </div>
       </div>
     </>

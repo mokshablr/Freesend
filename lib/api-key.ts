@@ -65,6 +65,7 @@ export const getApiKeysByTenant = async () => {
     }
     const rows = await prisma.apiKey.findMany({
       select: {
+        id: true,
         name: true,
         token: true,
         createdAt: true,
@@ -103,7 +104,32 @@ export const getSmtpConfigByApiKey = async (
     if (!row) return null;
     return row.smtpConfig;
   } catch (error) {
-    console.log(error);
+    console.log("Error getting SMTP Config by API Key:", error);
     return null;
+  }
+};
+
+export const updateApiKeyName = async (apiKeyId: string, newName: string) => {
+  try {
+    const updatedApiKey = await prisma.apiKey.update({
+      where: { id: apiKeyId },
+      data: { name: newName },
+    });
+    return updatedApiKey;
+  } catch (error) {
+    console.error("Error updating API key name:", error);
+    throw error;
+  }
+};
+
+export const deleteApiKey = async (id: string) => {
+  try {
+    const deletedApiKey = await prisma.apiKey.delete({
+      where: { id: id },
+    });
+    return deletedApiKey;
+  } catch (error) {
+    console.error("Error deleting API key:", error);
+    throw error;
   }
 };

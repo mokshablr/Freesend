@@ -29,7 +29,6 @@ export function DataTable<TData>({
   data,
   isLoading = false,
 }: DataTableProps<TData>) {
-  console.log(isLoading);
   const table = useReactTable({
     data: data || [],
     columns,
