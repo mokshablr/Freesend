@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { SmtpConfig } from "@prisma/client";
 import { NumericCellType } from "handsontable/cellTypes";
 
 import { prisma } from "@/lib/db";

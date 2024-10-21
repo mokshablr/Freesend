@@ -1,8 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { SmtpConfig } from "@prisma/client";
-
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 
@@ -68,6 +65,7 @@ export const getApiKeysByTenant = async () => {
         id: true,
         name: true,
         token: true,
+        status: true,
         createdAt: true,
         smtpConfig: true,
         // status: true,
@@ -89,9 +87,7 @@ export const getApiKeysByTenant = async () => {
   }
 };
 
-export const getSmtpConfigByApiKey = async (
-  ApiKey: string,
-): Promise<SmtpConfig | null> => {
+export const getSmtpConfigByApiKey = async (ApiKey: string) => {
   try {
     const row = await prisma.apiKey.findFirst({
       select: {
@@ -130,6 +126,33 @@ export const deleteApiKey = async (id: string) => {
     return deletedApiKey;
   } catch (error) {
     console.error("Error deleting API key:", error);
+    throw error;
+  }
+};
+
+export const toggleApiKeyStatus = async (apiKeyId: string) => {
+  try {
+    // Retrieve the current status of the API key
+    const apiKey = await prisma.apiKey.findUnique({
+      where: { id: apiKeyId },
+    });
+
+    if (!apiKey) {
+      throw new Error("API key not found");
+    }
+
+    // Determine the new status
+    const newStatus = apiKey.status === "active" ? "inactive" : "active";
+
+    // Update the status of the API key
+    const updatedApiKey = await prisma.apiKey.update({
+      where: { id: apiKeyId },
+      data: { status: newStatus },
+    });
+
+    return updatedApiKey.status;
+  } catch (error) {
+    console.error("Error toggling API key status:", error);
     throw error;
   }
 };

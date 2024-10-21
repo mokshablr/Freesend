@@ -1,12 +1,25 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { CopyCheck, CopyIcon, Edit, MoreHorizontal, Trash } from "lucide-react";
+import {
+  CopyCheck,
+  CopyIcon,
+  Edit,
+  MoreHorizontal,
+  Pause,
+  Play,
+  Trash,
+} from "lucide-react";
 import { toast } from "sonner";
 
-import { deleteApiKey, updateApiKeyName } from "@/lib/api-key";
+import {
+  deleteApiKey,
+  toggleApiKeyStatus,
+  updateApiKeyName,
+} from "@/lib/api-key";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DataTable } from "@/components/ui/data-table"; // Your DataTable component
+import { DataTable } from "@/components/ui/data-table";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,11 +35,11 @@ interface ApiKey {
   id: string;
   name: string;
   token: string;
-  createdAt: string; // Keeping createdAt as a string from your API
+  createdAt: string;
 }
 
 interface ApiKeyTableProps {
-  initialApiKeys: ApiKey[]; // Expecting an array of ApiKey objects
+  initialApiKeys: ApiKey[];
   initialIsLoading: boolean;
 }
 
@@ -68,6 +81,20 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
     }
   };
 
+  const handleToggleStatus = async (id: string) => {
+    try {
+      const updatedStatus = await toggleApiKeyStatus(id);
+      setApiKeys((prevKeys) =>
+        prevKeys.map((key) =>
+          key.id === id ? { ...key, status: updatedStatus } : key,
+        ),
+      );
+      toast.success(`API Key status is now ${updatedStatus}.`);
+    } catch (error) {
+      toast.error("Error toggling API Key status: " + error);
+    }
+  };
+
   const openUpdateDialog = (apiKey: ApiKey) => {
     setSelectedApiKey(apiKey);
     setUpdateDialogOpen(true);
@@ -85,7 +112,7 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
       header: "API Key",
       accessorKey: "token",
       cell: ({ getValue }) => {
-        const tokenValue = getValue(); // Get the entire value
+        const tokenValue = getValue();
         const [copied, setCopied] = useState(false);
 
         const handleCopy = () => {
@@ -127,6 +154,31 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
       },
     },
     {
+      id: "status",
+      header: "Status",
+      accessorKey: "status",
+      cell: ({ row }) => {
+        const status = row.getValue("status");
+        const getStatusClass = (status: string) => {
+          switch (status) {
+            case "active":
+              return "bg-green-700 text-green-100";
+            case "inactive":
+              return "bg-red-900 text-red-200";
+            default:
+              return "bg-gray-700 text-gray-100";
+          }
+        };
+        return (
+          <Badge
+            className={`pointer-events-none capitalize ${getStatusClass(status)}`}
+          >
+            {status}
+          </Badge>
+        );
+      },
+    },
+    {
       id: "createdAt",
       header: "Created",
       accessorKey: "createdAt",
@@ -150,6 +202,19 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
               <DropdownMenuItem onClick={() => openUpdateDialog(apiKey)}>
                 <Edit className="mr-2 h-4 w-4" />
                 Update
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleToggleStatus(apiKey.id)}>
+                {apiKey.status === "active" ? (
+                  <>
+                    <Pause className="mr-2 h-4 w-4" />
+                    Pause
+                  </>
+                ) : (
+                  <>
+                    <Play className="mr-2 h-4 w-4" />
+                    Resume
+                  </>
+                )}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => handleDelete(apiKey.id)}>
