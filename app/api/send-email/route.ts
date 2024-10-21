@@ -1,8 +1,9 @@
+import { stat } from "fs";
 import { send } from "process";
 import { NextApiRequest, NextApiResponse } from "next";
 import nodemailer from "nodemailer";
 
-import { getSmtpConfigByApiKey } from "@/lib/api-key"; // Ensure this import is correct
+import { getApiKeyStatus, getSmtpConfigByApiKey } from "@/lib/api-key"; // Ensure this import is correct
 
 export const POST = async (req: Request, res: Response) => {
   const authHeader = await req.headers.get("authorization");
@@ -28,6 +29,20 @@ export const POST = async (req: Request, res: Response) => {
     });
   }
 
+  const smtpConfig = await getSmtpConfigByApiKey(token);
+  if (!smtpConfig) {
+    return new Response("Invalid API Key or no SMTP configuration found.", {
+      status: 403,
+    });
+  }
+
+  const status = await getApiKeyStatus(token);
+  if (status == "inactive") {
+    return new Response("This API key is currently inactive.", {
+      status: 400,
+    });
+  }
+
   const sender_data = await req.json();
   const { from, to, subject, text, html } = sender_data;
   if (!from) {
@@ -48,13 +63,6 @@ export const POST = async (req: Request, res: Response) => {
   if (!from && !html) {
     return new Response("Missing required field 'text' or 'html. ", {
       status: 400,
-    });
-  }
-
-  const smtpConfig = await getSmtpConfigByApiKey(token);
-  if (!smtpConfig) {
-    return new Response("Invalid API Key or no SMTP configuration found.", {
-      status: 403,
     });
   }
 

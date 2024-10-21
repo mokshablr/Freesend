@@ -156,3 +156,19 @@ export const toggleApiKeyStatus = async (apiKeyId: string) => {
     throw error;
   }
 };
+
+export const getApiKeyStatus = async (apiKeyToken: string) => {
+  try {
+    const apiKey = await prisma.apiKey.findUnique({
+      where: { token: apiKeyToken },
+    });
+
+    if (!apiKey) {
+      throw new Error("API key not found");
+    }
+    return apiKey.status;
+  } catch (error) {
+    console.error("Error fetching API key status:", error);
+    throw error;
+  }
+};
