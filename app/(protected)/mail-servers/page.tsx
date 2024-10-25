@@ -9,10 +9,12 @@ import CreateMailServerDialog from "./add-server-dialog";
 import MailServerTable from "./mail-server-table";
 
 type SmtpConfig = {
+  id: string;
   name: string;
   host: string;
   port: number;
   user: string;
+  security: string;
 };
 
 export default function MailServers() {
@@ -49,7 +51,10 @@ export default function MailServers() {
           </div>
         </div>
         <div className="mx-auto max-w-5xl px-6">
-          <MailServerTable mailServers={data} isLoading={isLoading} />
+          <MailServerTable
+            initialMailServers={data}
+            initialIsLoading={isLoading}
+          />
         </div>
       </div>
     </>

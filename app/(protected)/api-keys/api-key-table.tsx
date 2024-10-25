@@ -125,7 +125,7 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
 
         return (
           <div className="flex items-center">
-            <span className="inline-flex h-6 items-center rounded-md bg-zinc-800 p-1 text-zinc-400">
+            <span className="inline-flex h-6 items-center rounded-md bg-zinc-200 p-1 dark:bg-zinc-800 dark:text-zinc-400">
               {tokenValue.slice(0, 3)}...{tokenValue.slice(-5)}
             </span>
             <Button
@@ -185,7 +185,7 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
     },
     {
       id: "actions",
-      header: "Actions",
+      header: "",
       cell: ({ row }) => {
         const apiKey = row.original;
 

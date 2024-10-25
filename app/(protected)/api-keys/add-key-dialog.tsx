@@ -87,7 +87,7 @@ export default function CreateApiKeyDialog({
         <DialogTrigger asChild>
           <Button onClick={() => setIsOpen(true)}>Create API Key</Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="w-[95vw] max-w-[95vw] sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add API Key</DialogTitle>
           </DialogHeader>

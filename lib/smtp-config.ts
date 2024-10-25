@@ -127,6 +127,7 @@ export const getServersByTenant: () => Promise<
     host: string;
     port: number;
     user: string;
+    security: string;
   }[]
 > = async () => {
   try {
@@ -142,6 +143,7 @@ export const getServersByTenant: () => Promise<
         host: true,
         port: true,
         user: true,
+        security: true,
         // status: true,
       },
       where: {
@@ -236,5 +238,40 @@ export const getServerNameFromId = async (id: string | null) => {
   } catch (error) {
     console.log(error);
     return "";
+  }
+};
+
+export const deleteServer = async (id: string) => {
+  try {
+    const deletedMailServer = await prisma.smtpConfig.delete({
+      where: { id: id },
+    });
+    return deletedMailServer;
+  } catch (error) {
+    console.error("Error deleting API key:", error);
+    throw error;
+  }
+};
+
+export const updateMailServer = async (
+  mailServerId: string,
+  updateData: {
+    name?: string;
+    host?: string;
+    port?: number;
+    security?: string;
+    user?: string;
+    pass?: string;
+  },
+) => {
+  try {
+    const updatedMailServer = await prisma.smtpConfig.update({
+      where: { id: mailServerId },
+      data: updateData,
+    });
+    return updatedMailServer;
+  } catch (error) {
+    console.error("Error updating mail server:", error);
+    throw error;
   }
 };
