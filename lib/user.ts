@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { UserRole } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
-import { sendInviteEmail } from "@/lib/email";
 import { getCurrentUser } from "@/lib/session";
 
 async function convertToArray(rows) {
@@ -334,7 +333,7 @@ export async function createUser(data) {
     });
 
     //send invite email
-    await sendInviteEmail(newUser, tenant);
+    // await sendInviteEmail(newUser, tenant);
 
     return { status: "success" };
   } catch (error) {
