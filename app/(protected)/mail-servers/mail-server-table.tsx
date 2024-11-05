@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import UpdateApiKeyDialog from "./update-server-dialog";
+import UpdateMailServerDialog from "./update-server-dialog";
 
 interface MailServer {
   id: string;
@@ -59,9 +59,9 @@ const MailServerTable: React.FC<MailServerTableProps> = ({
     try {
       await deleteServer(id);
       setMailServers((prevKeys) => prevKeys.filter((key) => key.id !== id));
-      toast.success("API Key has been deleted.");
+      toast.success("Mail Server has been deleted.");
     } catch (error) {
-      toast.error("Error deleting API Key: " + error);
+      toast.error("Error deleting Mail Server: " + error);
     }
   };
 
@@ -144,7 +144,7 @@ const MailServerTable: React.FC<MailServerTableProps> = ({
   return (
     <>
       <DataTable columns={columns} data={mailServers} isLoading={isLoading} />
-      <UpdateApiKeyDialog
+      <UpdateMailServerDialog
         initialIsOpen={updateDialogOpen}
         onClose={closeUpdateDialog}
         selectedMailServerId={selectedMailServer.id}

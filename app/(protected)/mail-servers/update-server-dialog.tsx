@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface UpdateApiKeyDialogProps {
+interface UpdateMailServerDialogProps {
   initialIsOpen: boolean;
   onClose: () => void;
   selectedMailServerId: string;
@@ -40,13 +40,13 @@ interface UpdateApiKeyDialogProps {
   ) => Promise<void>;
 }
 
-export default function UpdateApiKeyDialog({
+export default function UpdateMailServerDialog({
   initialIsOpen,
   onClose,
   selectedMailServerId,
   initialData,
   onUpdate,
-}: UpdateApiKeyDialogProps) {
+}: UpdateMailServerDialogProps) {
   const [name, setName] = useState<string>(initialData.name);
   const [host, setHost] = useState<string>(initialData.host);
   const [port, setPort] = useState<number>(initialData.port);
@@ -79,7 +79,7 @@ export default function UpdateApiKeyDialog({
         onClose();
       }
     } catch (error) {
-      toast.error("Error updating API Key: " + error);
+      toast.error("Error updating Mail Server: " + error);
     }
   };
 

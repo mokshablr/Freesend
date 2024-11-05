@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 
 import { getServersByTenant } from "@/lib/smtp-config";
-import { DataTable } from "@/components/ui/data-table"; // Make sure to import your DataTable component
 
 import CreateMailServerDialog from "./add-server-dialog";
 import MailServerTable from "./mail-server-table";
@@ -25,7 +24,6 @@ export default function MailServers() {
   const fetchMailServers = async () => {
     try {
       const result = await getServersByTenant();
-      // console.log("result", result); // Fixed log statement
       setData(result);
     } catch (error) {
       console.error("Error fetching servers:", error);
