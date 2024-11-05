@@ -172,3 +172,19 @@ export const getApiKeyStatus = async (apiKeyToken: string) => {
     throw error;
   }
 };
+
+export const getTenantIdByApiKey = async (apiKeyToken: string) => {
+  try {
+    const apiKey = await prisma.apiKey.findUnique({
+      where: { token: apiKeyToken },
+    });
+
+    if (!apiKey) {
+      throw new Error("API key not found");
+    }
+    return apiKey.tenant_id;
+  } catch (error) {
+    console.error("Error fetching Tenant Id from API Key:", error);
+    throw error;
+  }
+};

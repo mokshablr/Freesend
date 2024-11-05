@@ -51,12 +51,13 @@ model Session {
 }
 
 model Tenant {
-  id            String      @id
-  name          String?
-  createdAt     DateTime    @default(now()) @map(name: "created_at")
-  updatedAt     DateTime    @updatedAt @map(name: "updated_at")
-  smtpConfigs   SmtpConfig[]
-  ApiKeys      ApiKey[]
+  id          String       @id
+  name        String?
+  createdAt   DateTime     @default(now()) @map(name: "created_at")
+  updatedAt   DateTime     @updatedAt @map(name: "updated_at")
+  smtpConfigs SmtpConfig[]
+  ApiKeys     ApiKey[]
+  Emails      Emails[]
 
   @@map(name: "tenants")
 }
@@ -71,7 +72,7 @@ model User {
   updatedAt     DateTime  @updatedAt @map(name: "updated_at")
   role          UserRole  @default(ADMIN)
 
-  isActive    Boolean @default(true)
+  isActive  Boolean @default(true)
   tenant_id String  @default(cuid())
 
   accounts Account[]
@@ -98,35 +99,52 @@ model VerificationToken {
 
 //(status    String) to be implemented
 model SmtpConfig {
-  id        String  @id @default(nanoid(10))
+  id        String   @id @default(nanoid(10))
   tenant_id String
-  name      String  @unique
+  name      String   @unique
   host      String
   port      Int
   security  String
   user      String
   pass      String
-  tenant    Tenant  @relation(fields: [tenant_id], references: [id])
+  tenant    Tenant   @relation(fields: [tenant_id], references: [id])
   apiKeys   ApiKey[]
-  createdAt     DateTime  @default(now()) @map(name: "created_at")
-  updatedAt     DateTime  @updatedAt @map(name: "updated_at")
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
 
   @@index([tenant_id], name: "smtpconfig_tenant_id_idx")
   @@map(name: "smtp_configs")
 }
 
 model ApiKey {
-  id            String  @id @default(nanoid(10))
-  tenant_id     String
-  smtpConfigId  String
-  name          String 
-  token         String  @unique
-  status        String  @default("inactive")
-  tenant        Tenant  @relation(fields: [tenant_id], references: [id])
-  smtpConfig    SmtpConfig @relation(fields: [smtpConfigId], references: [id])
+  id           String     @id @default(nanoid(10))
+  tenant_id    String
+  smtpConfigId String
+  name         String
+  token        String     @unique
+  status       String     @default("inactive")
+  tenant       Tenant     @relation(fields: [tenant_id], references: [id])
+  smtpConfig   SmtpConfig @relation(fields: [smtpConfigId], references: [id])
 
-  createdAt     DateTime  @default(now()) @map(name: "created_at")
-  updatedAt     DateTime  @updatedAt @map(name: "updated_at")
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+  Emails    Emails[]
 
   @@map(name: "api_keys")
+}
+
+model Emails {
+  id        String   @id @default(nanoid(10))
+  tenant_id String
+  apiKey    ApiKey   @relation(fields: [apiKeyId], references: [id])
+  from      String
+  to        String
+  subject   String
+  text_body String?
+  html_body String?
+  tenant    Tenant   @relation(fields: [tenant_id], references: [id])
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  apiKeyId  String
+
+  @@map(name: "emails")
 }

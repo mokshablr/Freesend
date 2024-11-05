@@ -1,9 +1,7 @@
-import { stat } from "fs";
-import { send } from "process";
-import { NextApiRequest, NextApiResponse } from "next";
 import nodemailer from "nodemailer";
 
 import { getApiKeyStatus, getSmtpConfigByApiKey } from "@/lib/api-key"; // Ensure this import is correct
+import { createEmail } from "@/lib/emails";
 
 export const POST = async (req: Request, res: Response) => {
   const authHeader = await req.headers.get("authorization");
@@ -85,16 +83,15 @@ export const POST = async (req: Request, res: Response) => {
 
   try {
     await transporter.sendMail({
-      from, // sender address
-      to, // list of receivers
-      subject, // Subject line
-      text, // plain text body
-      html, // html body
+      from,
+      to,
+      subject,
+      text,
+      html,
     });
+    await createEmail(token, from, to, subject, html, text);
 
     return new Response("Email sent successfully", { status: 200 });
-    // return new Response(JSON.stringify({smtpConfig:jsonRes}), {status:200})
-    // return res.status(200).json({ message: jsonRes });
   } catch (error) {
     return new Response(`Error sending email: ${error.message}`, {
       status: 500,
