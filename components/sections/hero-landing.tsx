@@ -137,8 +137,8 @@ export default function Component() {
                   Ready to get started?
                 </h2>
                 <p className="max-w-[900px] text-gray-500 dark:text-gray-400 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Join thousands of developers who trust Resend for their email
-                  needs. Sign up now and start sending emails in minutes.
+                  Be one of the first developers who trust Freesend for their
+                  email needs. Sign up now and start sending emails in minutes.
                 </p>
               </div>
               <div className="w-full max-w-sm space-y-2">
