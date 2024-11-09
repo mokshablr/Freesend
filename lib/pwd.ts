@@ -1,7 +1,5 @@
 import crypto from "crypto";
 
-import { env } from "@/env.mjs";
-
 const encryptionKey = process.env.ENCRYPTION_KEY;
 const encryptionIv = process.env.ENCRYPTION_IV;
 
@@ -21,8 +19,6 @@ const iv = Buffer.from(encryptionIv, "base64");
  * @returns The encrypted text.
  */
 export function encrypt(text: string): string {
-  console.log("the keey", key);
-
   const cipher = crypto.createCipheriv(algorithm, key, iv);
   let encrypted = cipher.update(text, "utf8", "hex");
   encrypted += cipher.final("hex");
@@ -35,7 +31,6 @@ export function encrypt(text: string): string {
  * @returns The decrypted text.
  */
 export function decrypt(text: string): string {
-  console.log("the keey", key);
   const [ivText, encryptedText] = text.split(":");
   const ivBuffer = Buffer.from(ivText, "hex");
   const encryptedBuffer = Buffer.from(encryptedText, "hex");

@@ -31,7 +31,6 @@ export const getTenant = async (user) => {
   try {
     //check if tenant row exist
 
-    //console.log("checking tenant ", user.tenant_id)
     var tenant = await prisma.tenant.findUnique({
       where: {
         id: user.tenant_id,
@@ -47,8 +46,6 @@ export const getTenant = async (user) => {
         name: "",
       },
     });
-
-    //console.log("tenant created ", tenant.id)
 
     return tenant;
   } catch (error) {
