@@ -1,0 +1,58 @@
+---
+title: Setup locally
+description: Setting up Freesend locally.
+---
+
+You can get started now by visiting [Freesend](/) or setup the project locally following the steps below.
+
+## Steps
+
+<Steps>
+
+### Clone the repository
+
+Start by cloning the Freesend repository:
+
+With SSH:
+
+```bash
+git clone git@github.com:mokshablr/Freesend.git
+```
+
+With HTTPS:
+
+```bash
+git clone https://github.com/mokshablr/Freesend.git
+```
+
+### Install dependencies
+
+Enter in the folder and install dependencies for your project:
+
+```bash
+cd Freesend
+pnpm install
+```
+
+### Create a `.env` file
+
+Copy/paste the `.env.example` in the `.env` file:
+
+```md title=".env"
+NEXT_PUBLIC_APP_URL=
+
+AUTH_SECRET=
+
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+DATABASE_URL=
+```
+
+### Run the development server
+
+```bash
+pnpm run dev
+```
+
+</Steps>

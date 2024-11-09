@@ -1,0 +1,79 @@
+---
+title: Sending emails
+description: Sending emails through Freesend.
+---
+
+## Prerequisites
+
+- [Add the mail servers](/docs/configuration/mail-server)
+- [Create an API Key](/docs/configuration/api-keys)
+
+## Steps
+<Steps>
+
+### Bearer Token
+
+Ensure you put your API Key as a Bearer token in the Authorization header of the HTTP request:
+
+```http
+'Authorization': `Bearer YOUR_API_KEY`
+```
+
+### HTTP Body
+
+Ensure you have these details in your HTTP body:
+
+```http
+{
+    "from": "hello@yourdomain.com",  // Sender address
+    "to": "recipient@email.com",  // Reciever address
+    "subject": "Email sent from Freesend!",  // Subject for the email
+    "html": "<h1>Yay! You got the email.</h1>",  // (optional) HTML format of the email body
+    "text": "Yay! You got the email."  // (optional) Text format of the email body
+}
+```
+
+### API Endpoint
+
+Send a `POST` Request to `/api/send-email`
+
+</Steps>
+
+## Example
+
+```js
+const sendEmail = async () => {
+  const url = "https://your-freesend-api-endpoint.com/send";
+  const apiKey = "YOUR_API_KEY"; // Replace with your actual API key
+
+  const emailData = {
+    from: "hello@yourdomain.com", // Sender address
+    to: "recipient@email.com", // Reciever address
+    subject: "Email sent from Freesend!", // Subject for the email
+    html: "<h1>Yay! You got the email.</h1>", // (optional) HTML format of the email body
+    text: "Yay! You got the email.", // (optional) Text format of the email body
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(emailData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log("Email sent successfully:", result);
+  } catch (error) {
+    console.error("Failed to send email:", error);
+  }
+};
+
+sendEmail()
+```

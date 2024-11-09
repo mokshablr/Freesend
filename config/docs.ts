@@ -2,14 +2,14 @@ import { DocsConfig } from "types";
 
 export const docsConfig: DocsConfig = {
   mainNav: [
-    {
-      title: "Documentation",
-      href: "/docs",
-    },
-    {
-      title: "Guides",
-      href: "/guides",
-    },
+    // {
+    //   title: "Documentation",
+    //   href: "/docs",
+    // },
+    // {
+    //   title: "Guides",
+    //   href: "/guides",
+    // },
   ],
   sidebarNav: [
     {
@@ -21,7 +21,7 @@ export const docsConfig: DocsConfig = {
         },
         {
           title: "Installation",
-          href: "/docs/installation",
+          href: "/docs/getting-started",
         },
       ],
     },
@@ -29,40 +29,21 @@ export const docsConfig: DocsConfig = {
       title: "Configuration",
       items: [
         {
-          title: "Authentification",
-          href: "/docs/configuration/authentification",
+          title: "Setup Mail Servers",
+          href: "/docs/configuration/mail-server",
         },
         {
-          title: "Blog",
-          href: "/docs/configuration/blog",
+          title: "Setup API Keys",
+          href: "/docs/configuration/api-keys",
         },
+      ],
+    },
+    {
+      title: "API",
+      items: [
         {
-          title: "Components",
-          href: "/docs/configuration/components",
-        },
-        {
-          title: "Config files",
-          href: "/docs/configuration/config-files",
-        },
-        {
-          title: "Database",
-          href: "/docs/configuration/database",
-        },
-        {
-          title: "Email",
-          href: "/docs/configuration/email",
-        },
-        {
-          title: "Layouts",
-          href: "/docs/configuration/layouts",
-        },
-        {
-          title: "Markdown files",
-          href: "/docs/configuration/markdown-files",
-        },
-        {
-          title: "Subscriptions",
-          href: "/docs/configuration/subscriptions",
+          title: "Sending Email",
+          href: "/docs/api/send-email",
         },
       ],
     },

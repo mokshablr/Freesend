@@ -52,3 +52,6 @@ yarn.lock
 
 # other config files
 .postcssrc.js
+
+# formatter
+.prettierignore
