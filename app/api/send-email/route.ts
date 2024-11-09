@@ -3,65 +3,102 @@ import nodemailer from "nodemailer";
 import { getApiKeyStatus, getSmtpConfigByApiKey } from "@/lib/api-key"; // Ensure this import is correct
 import { createEmail } from "@/lib/emails";
 
-export const POST = async (req: Request, res: Response) => {
+export const POST = async (req: Request) => {
   const authHeader = await req.headers.get("authorization");
   if (!authHeader) {
-    return new Response("Authorization header not found.", {
-      status: 400,
-    });
+    return new Response(
+      JSON.stringify({ error: "Authorization header not found." }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 
   if (!authHeader.startsWith("Bearer ")) {
     return new Response(
-      "Invalid authorization header. Create a Bearer Token.",
+      JSON.stringify({
+        error: "Invalid authorization header. Create a Bearer Token.",
+      }),
       {
         status: 400,
+        headers: { "Content-Type": "application/json" },
       },
     );
   }
 
   const token = authHeader.split(" ")[1];
   if (!token) {
-    return new Response("Invalid or missing API Key.", {
-      status: 400,
-    });
+    return new Response(
+      JSON.stringify({ error: "Invalid or missing API Key." }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 
   const smtpConfig = await getSmtpConfigByApiKey(token);
   if (!smtpConfig) {
-    return new Response("Invalid API Key or no SMTP configuration found.", {
-      status: 403,
-    });
+    return new Response(
+      JSON.stringify({
+        error: "Invalid API Key or no SMTP configuration found.",
+      }),
+      {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 
   const status = await getApiKeyStatus(token);
   if (status == "inactive") {
-    return new Response("This API key is currently inactive.", {
-      status: 400,
-    });
+    return new Response(
+      JSON.stringify({ error: "This API key is currently inactive." }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 
   const sender_data = await req.json();
   const { from, to, subject, text, html } = sender_data;
   if (!from) {
-    return new Response("Missing required field 'from'. ", {
-      status: 400,
-    });
+    return new Response(
+      JSON.stringify({ error: "Missing required field 'from'." }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
   if (!to) {
-    return new Response("Missing required field 'to'. ", {
-      status: 400,
-    });
+    return new Response(
+      JSON.stringify({ error: "Missing required field 'to'." }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
   if (!subject) {
-    return new Response("Missing required field 'subject'. ", {
-      status: 400,
-    });
+    return new Response(
+      JSON.stringify({ error: "Missing required field 'subject'." }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
-  if (!from && !html) {
-    return new Response("Missing required field 'text' or 'html. ", {
-      status: 400,
-    });
+  if (!text && !html) {
+    return new Response(
+      JSON.stringify({ error: "Missing required field 'text' or 'html'." }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 
   // Create a transporter object using the SMTP server details
@@ -76,9 +113,13 @@ export const POST = async (req: Request, res: Response) => {
   });
 
   if (!transporter) {
-    return new Response("Could not create the transporter object.", {
-      status: 502,
-    });
+    return new Response(
+      JSON.stringify({ error: "Could not create the transporter object." }),
+      {
+        status: 502,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 
   try {
@@ -91,10 +132,20 @@ export const POST = async (req: Request, res: Response) => {
     });
     await createEmail(token, from, to, subject, html, text);
 
-    return new Response("Email sent successfully", { status: 200 });
+    return new Response(
+      JSON.stringify({ message: "Email sent successfully" }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
-    return new Response(`Error sending email: ${error.message}`, {
-      status: 500,
-    });
+    return new Response(
+      JSON.stringify({ error: `Error sending email: ${error.message}` }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 };
