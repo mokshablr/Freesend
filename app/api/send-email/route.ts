@@ -4,6 +4,15 @@ import { getApiKeyStatus, getSmtpConfigByApiKey } from "@/lib/api-key"; // Ensur
 import { createEmail } from "@/lib/emails";
 import { decrypt } from "@/lib/pwd";
 
+type emailContent = {
+  from: string;
+  to: string;
+  subject: string;
+  text?: string;
+  html?: string;
+  attachments?: [{ path: string; filename?: string }];
+};
+
 export const POST = async (req: Request) => {
   const authHeader = await req.headers.get("authorization");
   if (!authHeader) {
@@ -64,8 +73,9 @@ export const POST = async (req: Request) => {
   }
 
   const sender_data = await req.json();
-  const { from, to, subject, text, html } = sender_data;
-  if (!from) {
+  const message = <emailContent>sender_data;
+
+  if (!message.from) {
     return new Response(
       JSON.stringify({ error: "Missing required field 'from'." }),
       {
@@ -74,7 +84,7 @@ export const POST = async (req: Request) => {
       },
     );
   }
-  if (!to) {
+  if (!message.to) {
     return new Response(
       JSON.stringify({ error: "Missing required field 'to'." }),
       {
@@ -83,7 +93,7 @@ export const POST = async (req: Request) => {
       },
     );
   }
-  if (!subject) {
+  if (!message.subject) {
     return new Response(
       JSON.stringify({ error: "Missing required field 'subject'." }),
       {
@@ -92,7 +102,7 @@ export const POST = async (req: Request) => {
       },
     );
   }
-  if (!text && !html) {
+  if (!message.text && !message.html) {
     return new Response(
       JSON.stringify({ error: "Missing required field 'text' or 'html'." }),
       {
@@ -126,13 +136,23 @@ export const POST = async (req: Request) => {
 
   try {
     await transporter.sendMail({
-      from,
-      to,
-      subject,
-      text,
-      html,
+      from: message.from,
+      to: message.to,
+      subject: message.subject,
+      text: message.text,
+      html: message.html,
+      attachments: message.attachments,
     });
-    await createEmail(token, from, to, subject, html, text);
+    const attachmentString = JSON.stringify(message.attachments);
+    await createEmail(
+      token,
+      message.from,
+      message.to,
+      message.subject,
+      message.html,
+      message.text,
+      attachmentString,
+    );
 
     return new Response(
       JSON.stringify({ message: "Email sent successfully" }),

@@ -14,6 +14,7 @@ export const createEmail = async (
   subject: string,
   html?: string,
   text?: string,
+  attachments?: string,
 ) => {
   try {
     const apiKey = await prisma.apiKey.findUnique({
@@ -38,6 +39,7 @@ export const createEmail = async (
         subject: subject,
         text_body: text || null,
         html_body: html || null,
+        attachments_metadata: attachments || null,
       },
     });
     return newEmail;

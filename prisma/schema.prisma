@@ -142,6 +142,7 @@ model Emails {
   subject   String
   text_body String?
   html_body String?
+  attachments_metadata String?
   tenant    Tenant   @relation(fields: [tenant_id], references: [id])
   createdAt DateTime @default(now()) @map(name: "created_at")
   apiKeyId  String
