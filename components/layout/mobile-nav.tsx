@@ -60,23 +60,25 @@ export function NavMobile() {
         )}
       >
         <ul className="grid divide-y divide-muted">
-          {links && links.length > 0 && links.map(({ title, href }) => (
-            <li key={href} className="py-3">
-              <Link
-                href={href}
-                onClick={() => setOpen(false)}
-                className="flex w-full font-medium capitalize"
-              >
-                {title}
-              </Link>
-            </li>
-          ))}
+          {links &&
+            links.length > 0 &&
+            links.map(({ title, href }) => (
+              <li key={href} className="py-3">
+                <Link
+                  href={href}
+                  onClick={() => setOpen(false)}
+                  className="flex w-full font-medium capitalize"
+                >
+                  {title}
+                </Link>
+              </li>
+            ))}
 
           {session ? (
             <>
               <li className="py-3">
                 <Link
-                  href="/dashboard"
+                  href="/emails"
                   onClick={() => setOpen(false)}
                   className="flex w-full font-medium capitalize"
                 >

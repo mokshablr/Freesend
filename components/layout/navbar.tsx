@@ -114,10 +114,7 @@ export function NavBar({ scroll = false }: NavBarProps) {
           ) : null}
 
           {session ? (
-            <Link
-              href={session.user.role === "ADMIN" ? "/dashboard" : "/dashboard"}
-              className="hidden md:block"
-            >
+            <Link href="/emails" className="hidden md:block">
               <Button
                 className="gap-2 rounded-md px-4"
                 variant="default"
