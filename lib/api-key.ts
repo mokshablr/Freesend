@@ -120,12 +120,14 @@ export const updateApiKeyName = async (apiKeyId: string, newName: string) => {
 
 export const deleteApiKey = async (id: string) => {
   try {
-    const deletedApiKey = await prisma.apiKey.delete({
+    // Update the status of the API key to "deleted"
+    const updatedApiKey = await prisma.apiKey.update({
       where: { id: id },
+      data: { status: "deleted" }, // Assuming the 'status' field exists in the apiKey model
     });
-    return deletedApiKey;
+    return updatedApiKey;
   } catch (error) {
-    console.error("Error deleting API key:", error);
+    console.error("Error updating API key status:", error);
     throw error;
   }
 };

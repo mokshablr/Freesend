@@ -25,13 +25,15 @@ export default function ApiKeys() {
     try {
       const result = await getApiKeysByTenant();
 
-      const formattedData = result.map((item: any) => ({
-        ...item,
-        mailServer: item["smtpConfig"].name,
-        createdAt: formatDistanceToNow(new Date(item.createdAt), {
-          addSuffix: true,
-        }),
-      }));
+      const formattedData = result
+        .filter((item: any) => item.status !== "deleted")
+        .map((item: any) => ({
+          ...item,
+          mailServer: item["smtpConfig"].name,
+          createdAt: formatDistanceToNow(new Date(item.createdAt), {
+            addSuffix: true,
+          }),
+        }));
       setApiKeys(formattedData);
     } catch (error) {
       toast.error("Error fetching servers:" + error);

@@ -244,12 +244,20 @@ export const getServerNameFromId = async (id: string | null) => {
 
 export const deleteServer = async (id: string) => {
   try {
-    const deletedMailServer = await prisma.smtpConfig.delete({
+    // First, remove or nullify the foreign key references in the api_keys table
+    await prisma.apiKey.updateMany({
+      where: { smtpConfigId: id },
+      data: { smtpConfigId: null }, // Or use deleteMany to delete the api_keys
+    });
+
+    // Now delete the smtpConfig record
+    const deletedSmtpConfig = await prisma.smtpConfig.delete({
       where: { id: id },
     });
-    return deletedMailServer;
+
+    return deletedSmtpConfig;
   } catch (error) {
-    console.error("Error deleting API key:", error);
+    console.error("Error deleting Mail Server:", error);
     throw error;
   }
 };
