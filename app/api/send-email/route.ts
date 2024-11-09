@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 
 import { getApiKeyStatus, getSmtpConfigByApiKey } from "@/lib/api-key"; // Ensure this import is correct
 import { createEmail } from "@/lib/emails";
+import { decrypt } from "@/lib/pwd";
 
 export const POST = async (req: Request) => {
   const authHeader = await req.headers.get("authorization");
@@ -101,6 +102,7 @@ export const POST = async (req: Request) => {
     );
   }
 
+  const decryptedPassword = decrypt(smtpConfig.pass);
   // Create a transporter object using the SMTP server details
   const transporter = nodemailer.createTransport({
     host: smtpConfig.host,
@@ -108,7 +110,7 @@ export const POST = async (req: Request) => {
     secure: smtpConfig.security === "SSL", // Use SSL if the security is set to 'SSL'
     auth: {
       user: smtpConfig.user,
-      pass: smtpConfig.pass,
+      pass: decryptedPassword,
     },
   });
 

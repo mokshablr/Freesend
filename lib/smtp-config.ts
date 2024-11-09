@@ -1,10 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { NumericCellType } from "handsontable/cellTypes";
-
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
+
+import { encrypt } from "./pwd";
 
 async function convertToArray(rows) {
   //DATA ARRAY
@@ -102,6 +101,8 @@ export const createServer = async (data) => {
       throw new Error("Missing required fields");
     }
 
+    const encryptedPassword = await encrypt(pass);
+
     const newSmtpConfig = await prisma.smtpConfig.create({
       data: {
         tenant_id: tenant_id,
@@ -110,7 +111,7 @@ export const createServer = async (data) => {
         port: port,
         security: security,
         user: username,
-        pass: pass,
+        pass: encryptedPassword,
       },
     });
     return newSmtpConfig;
