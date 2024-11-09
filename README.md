@@ -1,4 +1,5 @@
-[](https://github.com/mokshablr/Freesend/blob/main/public/freesend-icon.png?raw=true)
+<img src="./public/freesend-icon.png" width=100>
+
 # Freesend - Your email API using your infrastructure!
 
 ## Overview
