@@ -122,7 +122,7 @@ model ApiKey {
   smtpConfigId String
   name         String
   token        String     @unique
-  status       String     @default("inactive")
+  status       String     @default("active")
   tenant       Tenant     @relation(fields: [tenant_id], references: [id])
   smtpConfig   SmtpConfig @relation(fields: [smtpConfigId], references: [id])
 
