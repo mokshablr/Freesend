@@ -26,15 +26,17 @@ export default function Component() {
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-44">
-          <video
-            autoPlay
-            muted
-            loop
-            className="absolute left-0 top-[-400px] z-[-1] h-full rotate-180 object-cover sm:top-[-350px] sm:block"
-          >
-            <source src="/blackhole.webm" type="video/webm" />
-          </video>
+        <section className="relative w-full py-12 md:py-24 lg:py-32 xl:py-44">
+          <div className="absolute inset-0 top-[-400px] z-[-1] flex justify-center md:top-[-450px] lg:top-[-500px] xl:top-[-600px]">
+            <video
+              autoPlay
+              muted
+              loop
+              className="h-auto w-full rotate-180 object-cover"
+            >
+              <source src="/blackhole.webm" type="video/webm" />
+            </video>
+          </div>
           <div className="container px-4 pt-32 sm:pt-28 md:px-6 md:pt-20 lg:pt-14 xl:pt-10">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
