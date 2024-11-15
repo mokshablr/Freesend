@@ -42,7 +42,7 @@ export default function LoginPage() {
           </h1>
           {
             <p className="text-sm text-muted-foreground">
-              Enter your email to sign in to your account
+              Your email API using your infrastructure!
             </p>
           }
         </div>
