@@ -10,7 +10,7 @@
     "dev": "next dev",
     "build": "next build",
     "turbo": "next dev --turbo",
-    "start": "next start",
+    "start": "next start -p 5000",
     "lint": "next lint",
     "preview": "next build && next start",
     "postinstall": "prisma generate",

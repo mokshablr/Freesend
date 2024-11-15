@@ -59,25 +59,26 @@ export default async function PostPage({
 
   if (!post) {
     notFound();
+    return null;
   }
 
   const category = BLOG_CATEGORIES.find(
     (category) => category.slug === post.categories[0],
-  )!;
+  );
 
   const relatedArticles =
-    (post.related &&
-      post.related.map(
-        (slug) => allPosts.find((post) => post.slugAsParams === slug)!,
-      )) ||
-    [];
+    post.related
+      ?.map((slug) =>
+        allPosts.find((relatedPost) => relatedPost.slugAsParams === slug),
+      )
+      .filter((relatedPost) => relatedPost !== undefined) || [];
 
   const toc = await getTableOfContents(post.body.raw);
 
   const [thumbnailBlurhash, images] = await Promise.all([
     getBlurDataURL(post.image),
-    await Promise.all(
-      post.images.map(async (src: string) => ({
+    Promise.all(
+      post.images.map(async (src) => ({
         src,
         blurDataURL: await getBlurDataURL(src),
       })),
@@ -89,19 +90,21 @@ export default async function PostPage({
       <MaxWidthWrapper className="pt-6 md:pt-10">
         <div className="flex flex-col space-y-4">
           <div className="flex items-center space-x-4">
-            <Link
-              href={`/blog/category/${category.slug}`}
-              className={cn(
-                buttonVariants({
-                  variant: "outline",
-                  size: "sm",
-                  rounded: "lg",
-                }),
-                "h-8",
-              )}
-            >
-              {category.title}
-            </Link>
+            {category && (
+              <Link
+                href={`/blog/category/${category.slug}`}
+                className={cn(
+                  buttonVariants({
+                    variant: "outline",
+                    size: "sm",
+                    rounded: "lg",
+                  }),
+                  "h-8",
+                )}
+              >
+                {category.title}
+              </Link>
+            )}
             <time
               dateTime={post.date}
               className="text-sm font-medium text-muted-foreground"
@@ -117,7 +120,7 @@ export default async function PostPage({
           </p>
           <div className="flex flex-nowrap items-center space-x-5 pt-1 md:space-x-8">
             {post.authors.map((author) => (
-              <Author username={author} key={post._id + author} />
+              <Author username={author} key={`${post._id}-${author}`} />
             ))}
           </div>
         </div>
@@ -158,23 +161,26 @@ export default async function PostPage({
             </p>
 
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:gap-6">
-              {relatedArticles.map((post) => (
-                <Link
-                  key={post.slug}
-                  href={post.slug}
-                  className="flex flex-col space-y-2 rounded-xl border p-5 transition-colors duration-300 hover:bg-muted/80"
-                >
-                  <h3 className="font-heading text-xl text-foreground">
-                    {post.title}
-                  </h3>
-                  <p className="line-clamp-2 text-[15px] text-muted-foreground">
-                    {post.description}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {formatDate(post.date)}
-                  </p>
-                </Link>
-              ))}
+              {relatedArticles.map(
+                (relatedPost) =>
+                  relatedPost && (
+                    <Link
+                      key={relatedPost.slug}
+                      href={relatedPost.slug}
+                      className="flex flex-col space-y-2 rounded-xl border p-5 transition-colors duration-300 hover:bg-muted/80"
+                    >
+                      <h3 className="font-heading text-xl text-foreground">
+                        {relatedPost.title}
+                      </h3>
+                      <p className="line-clamp-2 text-[15px] text-muted-foreground">
+                        {relatedPost.description}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatDate(relatedPost.date)}
+                      </p>
+                    </Link>
+                  ),
+              )}
             </div>
           </div>
         )}

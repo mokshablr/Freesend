@@ -20,6 +20,10 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata | undefined> {
+  if (!params.slug) {
+    return;
+  }
+
   const page = allPages.find((page) => page.slugAsParams === params.slug);
   if (!page) {
     return;
