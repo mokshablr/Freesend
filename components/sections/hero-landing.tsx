@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -21,8 +23,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Icons } from "@/components/shared/icons";
 
 export default function Component() {
-  // const { data: session, status } = useSession();
-
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-1">
@@ -51,7 +51,7 @@ export default function Component() {
               </div>
               <div className="w-full max-w-sm space-y-2">
                 <Button size="lg" className="text-md w-full font-semibold">
-                  <Link href="/login">Get Started</Link>
+                  <Link href="/emails">Get Started</Link>
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <p className="text-xs text-gray-500 dark:text-gray-400">

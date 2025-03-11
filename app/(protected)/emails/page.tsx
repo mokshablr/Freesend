@@ -106,13 +106,13 @@ export default function Emails() {
             />
           </div>
         </div>
-        <div className="mx-auto max-w-5xl px-6">
-          <EmailTable
-            initialEmailList={filteredData}
-            initialIsLoading={isLoading}
-          />
-        </div>
-      </div>
+            <div className="mx-auto max-w-5xl px-6">
+              <EmailTable
+                initialEmailList={filteredData}
+                initialIsLoading={isLoading}
+              />
+            </div>
+          </div>
     </>
   );
 }

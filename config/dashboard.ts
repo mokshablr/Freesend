@@ -21,6 +21,7 @@ export const sidebarLinks: SidebarNavItem[] = [
       //   title: "Users",
       //   authorizeOnly: UserRole.ADMIN,
       // },
+      { href: "/docs", icon: "post", title: "Docs" },
       { href: "/settings", icon: "settings", title: "Settings" },
     ],
   },
