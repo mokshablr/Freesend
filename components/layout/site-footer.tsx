@@ -80,7 +80,6 @@ export function SiteFooter({ className }: React.HTMLAttributes<HTMLElement>) {
             >
               <Icons.gitHub className="size-5" />
             </Link>
-            <ModeToggle />
           </div>
         </div>
       </div>

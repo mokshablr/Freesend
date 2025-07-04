@@ -13,8 +13,6 @@ import { cn } from "@/lib/utils";
 import { DocsSidebarNav } from "@/components/docs/sidebar-nav";
 import { Icons } from "@/components/shared/icons";
 
-import { ModeToggle } from "./mode-toggle";
-
 export function NavMobile() {
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
@@ -106,10 +104,6 @@ export function NavMobile() {
             <DocsSidebarNav setOpen={setOpen} />
           </div>
         ) : null}
-
-        <div className="mt-5 flex items-center justify-end space-x-4">
-          <ModeToggle />
-        </div>
       </nav>
     </>
   );

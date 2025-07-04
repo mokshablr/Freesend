@@ -7,7 +7,6 @@ import {
   DashboardSidebar,
   MobileSheetSidebar,
 } from "@/components/layout/dashboard-sidebar";
-import { ModeToggle } from "@/components/layout/mode-toggle";
 import { UserAccountNav } from "@/components/layout/user-account-nav";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
 import { Badge } from "@/components/ui/badge"
@@ -46,7 +45,6 @@ export default async function Dashboard({ children }: ProtectedLayoutProps) {
             {tenant?.name && 
               <Badge variant="secondary"> {tenant?.name}</Badge>
             }
-            <ModeToggle />
             <UserAccountNav />
           </MaxWidthWrapper>
         </header>
