@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import type { Emails } from "@prisma/client";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, parseISO, startOfDay, endOfDay } from "date-fns";
+import { isAfter, isBefore, isSameDay } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import type { DateRange } from "react-day-picker";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { DateRangePicker } from "@/components/ui/DateRangePicker";
 
 import { getEmailsByTenant } from "@/lib/emails";
 import { getApiKeysByTenant } from "@/lib/api-key";
@@ -25,6 +30,7 @@ export default function Emails() {
   const [searchQuery, setSearchQuery] = useState("");
   const [apiKeys, setApiKeys] = useState<any[]>([]);
   const [selectedApiKey, setSelectedApiKey] = useState<string>("all");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
   // Map of apiKeyId to apiKey name for display in table
   const apiKeyMap = apiKeys.reduce((acc, key) => {
@@ -35,13 +41,8 @@ export default function Emails() {
   const fetchEmailsList = async () => {
     try {
       const result = await getEmailsByTenant();
-      const formattedData = result.map((item: any) => ({
-        ...item,
-        createdAt: formatDistanceToNow(new Date(item.createdAt), {
-          addSuffix: true,
-        }),
-      }));
-      setData(formattedData);
+      // Do NOT overwrite createdAt, keep the original value for filtering
+      setData(result);
     } catch (error) {
       console.error("Error fetching emails:", error);
     } finally {
@@ -101,7 +102,7 @@ export default function Emails() {
     return filters;
   };
 
-  // Filter emails based on the search query and selected API Key
+  // Filter emails based on the search query, selected API Key, and date range
   const filteredData = data.filter((email) => {
     const { from, to, subject } = parseSearchQuery(searchQuery);
     const fromMatch = from ? email.from.toLowerCase().includes(from) : true;
@@ -111,7 +112,29 @@ export default function Emails() {
       : true;
     const apiKeyMatch =
       selectedApiKey === "all" ? true : email.apiKeyId === selectedApiKey;
-    return fromMatch && toMatch && subjectMatch && apiKeyMatch;
+    let dateMatch = true;
+    if (dateRange?.from && dateRange?.to) {
+      // Parse the DB datetime string to a Date object
+      let emailDate = new Date(email.createdAt);
+      const start = startOfDay(dateRange.from);
+      const end = endOfDay(dateRange.to);
+      const inRange = emailDate >= start && emailDate <= end;
+      let emailDateStr;
+      if (isNaN(emailDate.getTime())) {
+        emailDateStr = `Invalid date: ${email.createdAt}`;
+        console.warn("Invalid email date:", email.createdAt);
+      } else {
+        emailDateStr = emailDate.toISOString();
+      }
+      console.log("Checking email:", {
+        emailDate: emailDateStr,
+        rangeStart: start.toISOString(),
+        rangeEnd: end.toISOString(),
+        inRange,
+      });
+      dateMatch = inRange;
+    }
+    return fromMatch && toMatch && subjectMatch && apiKeyMatch && dateMatch;
   });
 
   return (
@@ -148,6 +171,8 @@ export default function Emails() {
                 </SelectContent>
               </Select>
             </div>
+            {/* Date Range Selector */}
+            <DateRangePicker value={dateRange} onChange={setDateRange} />
           </div>
         </div>
         <div className="mx-auto max-w-5xl px-6">

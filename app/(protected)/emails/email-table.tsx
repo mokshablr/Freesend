@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 // import { Emails } from "@prisma/client";
 import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
 
 import { deleteServer, updateMailServer } from "@/lib/smtp-config";
 import { DataTable } from "@/components/ui/data-table";
@@ -110,7 +111,18 @@ const EmailTable: React.FC<EmailTableProps> = ({
         );
       },
     },
-    { id: "sent", header: "Sent", accessorKey: "createdAt" },
+    {
+      id: "sent",
+      header: "Sent",
+      accessorKey: "createdAt",
+      cell: ({ getValue }) => {
+        const value = getValue();
+        const date = value instanceof Date ? value : new Date(value);
+        return (
+          <span>{formatDistanceToNow(date, { addSuffix: true })}</span>
+        );
+      },
+    },
   ];
 
   // Calculate the current data slice based on pagination
