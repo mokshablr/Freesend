@@ -149,7 +149,8 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
       header: "Server",
       accessorKey: "smtpConfig",
       cell: ({ row }) => {
-        const serverName = row.getValue("mailServer").name;
+        const mailServer = row.getValue("mailServer");
+        const serverName = mailServer && mailServer.name ? mailServer.name : "Deleted";
         return <span>{serverName}</span>;
       },
     },

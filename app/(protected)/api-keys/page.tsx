@@ -29,7 +29,8 @@ export default function ApiKeys() {
         .filter((item: any) => item.status !== "deleted")
         .map((item: any) => ({
           ...item,
-          mailServer: item["smtpConfig"].name,
+          status: !item.smtpConfig ? "inactive" : item.status,
+          mailServer: item.smtpConfig?.name,
           createdAt: formatDistanceToNow(new Date(item.createdAt), {
             addSuffix: true,
           }),

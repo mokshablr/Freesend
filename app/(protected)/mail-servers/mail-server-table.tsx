@@ -28,6 +28,8 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Callout } from "@/components/shared/callout";
 
 interface MailServer {
   id: string;
@@ -188,6 +190,9 @@ const MailServerTable: React.FC<MailServerTableProps> = ({
             <AlertDialogTitle>Delete Mail Server</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete the mail server <b>{serverToDelete?.name}</b>? This action cannot be undone.
+              <Callout type="warning" twClass="mt-4 text-sm [&>div:first-child]:mt-0.5">
+                All API keys linked to this mail server will become <b>inactive</b>.
+              </Callout>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
