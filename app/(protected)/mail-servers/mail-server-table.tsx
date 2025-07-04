@@ -17,6 +17,17 @@ import {
 import UpdateMailServerDialog from "./update-server-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 interface MailServer {
   id: string;
@@ -53,6 +64,8 @@ const MailServerTable: React.FC<MailServerTableProps> = ({
     useState<MailServer>(empty_mailServer);
   const [testDialogOpen, setTestDialogOpen] = useState<boolean>(false);
   const [testMailServer, setTestMailServer] = useState<MailServer | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
+  const [serverToDelete, setServerToDelete] = useState<MailServer | null>(null);
 
   useEffect(() => {
     setMailServers(initialMailServers);
@@ -141,7 +154,13 @@ const MailServerTable: React.FC<MailServerTableProps> = ({
                 Send Test Email
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleDelete(mailServer.id)}>
+              <DropdownMenuItem
+                className="text-red-600 bg-red-600/10 font-medium rounded-md px-2 py-1.5 focus:text-red-600 focus:bg-red-600/20 hover:text-red-600 hover:bg-red-600/20 dark:text-red-500 dark:bg-red-500/10 dark:focus:text-red-500 dark:focus:bg-red-500/20 dark:hover:text-red-500 dark:hover:bg-red-500/20"
+                onClick={() => {
+                  setServerToDelete(mailServer);
+                  setDeleteDialogOpen(true);
+                }}
+              >
                 <Trash className="mr-2 h-4 w-4" />
                 Delete
               </DropdownMenuItem>
@@ -163,6 +182,31 @@ const MailServerTable: React.FC<MailServerTableProps> = ({
         onUpdate={handleUpdate}
       />
       <TestEmailDialog open={testDialogOpen} onClose={() => setTestDialogOpen(false)} mailServer={testMailServer} />
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Mail Server</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the mail server <b>{serverToDelete?.name}</b>? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteDialogOpen(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="text-red-600 bg-red-600/10 font-medium rounded-md px-4 py-2 focus:text-red-600 focus:bg-red-600/20 hover:text-red-600 hover:bg-red-600/20 dark:text-red-500 dark:bg-red-500/10 dark:focus:text-red-500 dark:focus:bg-red-500/20 dark:hover:text-red-500 dark:hover:bg-red-500/20"
+              onClick={async () => {
+                if (serverToDelete) {
+                  await handleDelete(serverToDelete.id);
+                  setDeleteDialogOpen(false);
+                  setServerToDelete(null);
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
