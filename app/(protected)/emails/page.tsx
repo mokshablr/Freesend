@@ -26,9 +26,10 @@ import EmailTable from "./email-table";
 
 export default function Emails() {
   const [data, setData] = useState<Emails[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [emailsLoading, setEmailsLoading] = useState(true);
   const [apiKeys, setApiKeys] = useState<any[]>([]);
+  const [apiKeysLoading, setApiKeysLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedApiKey, setSelectedApiKey] = useState<string>("all");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
@@ -41,12 +42,11 @@ export default function Emails() {
   const fetchEmailsList = async () => {
     try {
       const result = await getEmailsByTenant();
-      // Do NOT overwrite createdAt, keep the original value for filtering
       setData(result);
     } catch (error) {
       console.error("Error fetching emails:", error);
     } finally {
-      setIsLoading(false);
+      setEmailsLoading(false);
     }
   };
 
@@ -56,6 +56,8 @@ export default function Emails() {
       setApiKeys(result.filter((k: any) => k.status !== "deleted"));
     } catch (error) {
       // ignore for now
+    } finally {
+      setApiKeysLoading(false);
     }
   };
 
@@ -63,6 +65,9 @@ export default function Emails() {
     fetchEmailsList();
     fetchApiKeysList();
   }, []);
+
+  // Single loading state: true if either is loading
+  const isLoading = emailsLoading || apiKeysLoading;
 
   // Function to parse the search query
   type FilterKey = "from" | "to" | "subject";
