@@ -37,9 +37,9 @@ export const createEmail = async (
         from: from,
         to: to,
         subject: subject,
-        text_body: text || null,
-        html_body: html || null,
-        attachments_metadata: attachments || null,
+        text_body: text || undefined,
+        html_body: html || undefined,
+        attachments_metadata: attachments || undefined,
       },
     });
     return newEmail;

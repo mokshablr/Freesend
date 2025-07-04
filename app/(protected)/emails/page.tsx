@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Emails } from "@prisma/client";
 import { formatDistanceToNow, parseISO, startOfDay, endOfDay } from "date-fns";
 import { isAfter, isBefore, isSameDay } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -25,7 +24,7 @@ import {
 import EmailTable from "./email-table";
 
 export default function Emails() {
-  const [data, setData] = useState<Emails[]>([]);
+  const [data, setData] = useState<any[]>([]);
   const [emailsLoading, setEmailsLoading] = useState(true);
   const [apiKeys, setApiKeys] = useState<any[]>([]);
   const [apiKeysLoading, setApiKeysLoading] = useState(true);
@@ -182,7 +181,12 @@ export default function Emails() {
         </div>
         <div className="mx-auto max-w-5xl px-6">
           <EmailTable
-            initialEmailList={filteredData}
+            initialEmailList={filteredData.map(email => ({
+              ...email,
+              html_body: email.html_body === null ? undefined : email.html_body,
+              text_body: email.text_body === null ? undefined : email.text_body,
+              attachments_metadata: email.attachments_metadata === null ? undefined : email.attachments_metadata,
+            }))}
             initialIsLoading={isLoading}
             apiKeyMap={apiKeyMap}
           />
