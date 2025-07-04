@@ -5,9 +5,17 @@ import type { Emails } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 
 import { getEmailsByTenant } from "@/lib/emails";
+import { getApiKeysByTenant } from "@/lib/api-key";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Icons } from "@/components/shared/icons";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 
 import EmailTable from "./email-table";
 
@@ -15,6 +23,14 @@ export default function Emails() {
   const [data, setData] = useState<Emails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [apiKeys, setApiKeys] = useState<any[]>([]);
+  const [selectedApiKey, setSelectedApiKey] = useState<string>("all");
+
+  // Map of apiKeyId to apiKey name for display in table
+  const apiKeyMap = apiKeys.reduce((acc, key) => {
+    acc[key.id] = key.name;
+    return acc;
+  }, {} as Record<string, string>);
 
   const fetchEmailsList = async () => {
     try {
@@ -33,8 +49,18 @@ export default function Emails() {
     }
   };
 
+  const fetchApiKeysList = async () => {
+    try {
+      const result = await getApiKeysByTenant();
+      setApiKeys(result.filter((k: any) => k.status !== "deleted"));
+    } catch (error) {
+      // ignore for now
+    }
+  };
+
   useEffect(() => {
     fetchEmailsList();
+    fetchApiKeysList();
   }, []);
 
   // Function to parse the search query
@@ -75,7 +101,7 @@ export default function Emails() {
     return filters;
   };
 
-  // Filter emails based on the search query
+  // Filter emails based on the search query and selected API Key
   const filteredData = data.filter((email) => {
     const { from, to, subject } = parseSearchQuery(searchQuery);
     const fromMatch = from ? email.from.toLowerCase().includes(from) : true;
@@ -83,8 +109,9 @@ export default function Emails() {
     const subjectMatch = subject
       ? email.subject.toLowerCase().includes(subject)
       : true;
-
-    return fromMatch && toMatch && subjectMatch;
+    const apiKeyMatch =
+      selectedApiKey === "all" ? true : email.apiKeyId === selectedApiKey;
+    return fromMatch && toMatch && subjectMatch && apiKeyMatch;
   });
 
   return (
@@ -95,24 +122,42 @@ export default function Emails() {
           <h1 className="text-slate-12 pb-5 text-[28px] font-bold leading-[34px] tracking-[-0.416px]">
             Emails
           </h1>
-          <div className="relative flex items-center">
-            <Icons.search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
-            <Input
-              type="text"
-              placeholder="Search by from:, to:, subject: ..."
-              className="relative bg-muted/50 pl-8 text-sm font-normal text-muted-foreground sm:pr-12 md:w-72"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
-            <div className="mx-auto max-w-5xl px-6">
-              <EmailTable
-                initialEmailList={filteredData}
-                initialIsLoading={isLoading}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+            <div className="relative flex items-center">
+              <Icons.search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+              <Input
+                type="text"
+                placeholder="Search by from:, to:, subject: ..."
+                className="relative bg-muted/50 pl-8 text-sm font-normal text-muted-foreground sm:pr-12 md:w-72"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
+            <div className="relative flex items-center w-36 max-w-full sm:w-36">
+              <Select value={selectedApiKey} onValueChange={setSelectedApiKey}>
+                <SelectTrigger className="relative h-10 w-full bg-muted/50 pl-3 text-sm font-normal text-muted-foreground border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                  <SelectValue placeholder="Filter by API Key" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All API Keys</SelectItem>
+                  {apiKeys.map((key) => (
+                    <SelectItem key={key.id} value={key.id}>
+                      {key.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+        </div>
+        <div className="mx-auto max-w-5xl px-6">
+          <EmailTable
+            initialEmailList={filteredData}
+            initialIsLoading={isLoading}
+            apiKeyMap={apiKeyMap}
+          />
+        </div>
+      </div>
     </>
   );
 }

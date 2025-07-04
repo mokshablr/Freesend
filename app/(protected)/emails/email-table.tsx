@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Emails } from "@prisma/client";
+// import { Emails } from "@prisma/client";
 import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { toast } from "sonner";
 
@@ -7,14 +7,28 @@ import { deleteServer, updateMailServer } from "@/lib/smtp-config";
 import { DataTable } from "@/components/ui/data-table";
 import { Icons } from "@/components/shared/icons";
 
+type Emails = {
+  id: string;
+  tenant_id: string;
+  apiKeyId: string;
+  from: string;
+  to: string;
+  subject: string;
+  html_body?: string;
+  text_body?: string;
+  createdAt: string | Date;
+};
+
 interface EmailTableProps {
   initialEmailList: Emails[];
   initialIsLoading: boolean;
+  apiKeyMap?: Record<string, string>;
 }
 
 const EmailTable: React.FC<EmailTableProps> = ({
   initialEmailList,
   initialIsLoading = false,
+  apiKeyMap = {},
 }) => {
   const emptyEmail = {
     id: "",
@@ -76,6 +90,26 @@ const EmailTable: React.FC<EmailTableProps> = ({
     { id: "from", header: "From", accessorKey: "from" },
     { id: "to", header: "To", accessorKey: "to" },
     { id: "subject", header: "Subject", accessorKey: "subject" },
+    {
+      id: "apiKey",
+      header: "API Key",
+      accessorKey: "apiKeyId",
+      cell: ({ getValue }) => {
+        const apiKeyId = getValue();
+        if (!apiKeyId) return <span className="text-zinc-400">-</span>;
+        if (apiKeyMap[apiKeyId]) {
+          return (
+            <span className="font-mono text-xs text-zinc-400">
+              {apiKeyMap[apiKeyId]}
+            </span>
+          );
+        }
+        // Not found in map, treat as deleted
+        return (
+          <span className="italic text-xs text-zinc-500">Deleted</span>
+        );
+      },
+    },
     { id: "sent", header: "Sent", accessorKey: "createdAt" },
   ];
 
