@@ -284,3 +284,22 @@ export const updateMailServer = async (
     throw error;
   }
 };
+
+export const getSmtpConfigById = async (id: string) => {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      throw new Error("Unauthorized");
+    }
+    const row = await prisma.smtpConfig.findFirst({
+      where: {
+        id: id,
+        tenant_id: user.tenant_id,
+      },
+    });
+    return row;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};

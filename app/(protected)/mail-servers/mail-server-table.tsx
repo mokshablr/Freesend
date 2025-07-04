@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Edit, MoreHorizontal, Trash } from "lucide-react";
+import { Edit, MoreHorizontal, Trash, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 import { deleteServer, updateMailServer } from "@/lib/smtp-config";
@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import UpdateMailServerDialog from "./update-server-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 interface MailServer {
   id: string;
@@ -49,6 +51,8 @@ const MailServerTable: React.FC<MailServerTableProps> = ({
   const [updateDialogOpen, setUpdateDialogOpen] = useState<boolean>(false);
   const [selectedMailServer, setSelectedMailServer] =
     useState<MailServer>(empty_mailServer);
+  const [testDialogOpen, setTestDialogOpen] = useState<boolean>(false);
+  const [testMailServer, setTestMailServer] = useState<MailServer | null>(null);
 
   useEffect(() => {
     setMailServers(initialMailServers);
@@ -129,6 +133,13 @@ const MailServerTable: React.FC<MailServerTableProps> = ({
                 <Edit className="mr-2 h-4 w-4" />
                 Update
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                setTestMailServer(mailServer);
+                setTestDialogOpen(true);
+              }}>
+                <Mail className="mr-2 h-4 w-4" />
+                Send Test Email
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => handleDelete(mailServer.id)}>
                 <Trash className="mr-2 h-4 w-4" />
@@ -151,8 +162,65 @@ const MailServerTable: React.FC<MailServerTableProps> = ({
         initialData={selectedMailServer || empty_mailServer}
         onUpdate={handleUpdate}
       />
+      <TestEmailDialog open={testDialogOpen} onClose={() => setTestDialogOpen(false)} mailServer={testMailServer} />
     </>
   );
 };
+
+function TestEmailDialog({ open, onClose, mailServer }: { open: boolean; onClose: () => void; mailServer: MailServer | null }) {
+  const [recipient, setRecipient] = useState("");
+  const [isSending, setIsSending] = useState(false);
+
+  const handleSend = async () => {
+    if (!recipient || !mailServer) return;
+    setIsSending(true);
+    try {
+      const res = await fetch("/api/send-email/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mailServerId: mailServer.id, recipient }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Test email sent successfully");
+        onClose();
+      } else {
+        toast.error(data.error || "Failed to send test email");
+      }
+    } catch (error) {
+      toast.error("Failed to send test email");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Send Test Email</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Recipient Email</label>
+            <Input
+              type="email"
+              placeholder="you@example.com"
+              value={recipient}
+              onChange={e => setRecipient(e.target.value)}
+              disabled={isSending}
+              required
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSend} disabled={isSending || !recipient}>
+            {isSending ? "Sending..." : "Send Test Email"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default MailServerTable;
