@@ -37,6 +37,9 @@ export default function CreateMailServerDialog({
   const [security, setSecurity] = useState("None");
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
+  const [isTesting, setIsTesting] = useState(false);
+
+  const canTest = host && port && security && user && pass;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -61,6 +64,37 @@ export default function CreateMailServerDialog({
       toast.error("Error creating server:", {
         description: "Error: " + error,
       });
+    }
+  };
+
+  const handleTestEmail = async () => {
+    setIsTesting(true);
+    try {
+      const res = await fetch("/api/send-email/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mailServerId: undefined, // Not yet created, so send config directly
+          recipient: user,
+          config: {
+            host,
+            port: parseInt(port, 10),
+            security,
+            user,
+            pass,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Test email sent successfully");
+      } else {
+        toast.error(data.error || "Failed to send test email");
+      }
+    } catch (error) {
+      toast.error("Failed to send test email");
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -178,7 +212,17 @@ export default function CreateMailServerDialog({
                 </div>
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="flex flex-row items-center justify-between w-full">
+              <div className="flex-1 flex justify-start">
+                <Button
+                  type="button"
+                  onClick={handleTestEmail}
+                  disabled={!canTest || isTesting}
+                  className="bg-purple-600 text-white hover:bg-purple-700"
+                >
+                  {isTesting ? "Sending..." : "Send test email"}
+                </Button>
+              </div>
               <Button type="submit">Save changes</Button>
             </DialogFooter>
           </form>
