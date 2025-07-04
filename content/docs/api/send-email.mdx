@@ -3,6 +3,10 @@ title: Sending emails
 description: Sending emails through Freesend.
 ---
 
+## API Endpoint
+
+- <span className="method-pill rounded-lg font-bold px-1.5 py-0.5 text-sm leading-5 bg-blue-400/20 dark:bg-blue-400/20 text-blue-700 dark:text-blue-400">POST</span> <code>https://freesend.metafog.io/api/send-email</code>
+
 ## Prerequisites
 
 - [Add the mail servers](/docs/configuration/mail-server)
@@ -35,45 +39,98 @@ Ensure you have these details in your HTTP body:
 
 ### API Endpoint
 
-Send a `POST` Request to `/api/send-email`
+Send a `POST` Request to `https://freesend.metafog.io/api/send-email`
 
 </Steps>
 
-## Example
+## Example Usage
 
-```js
-const sendEmail = async () => {
-  const url = "https://your-freesend-api-endpoint.com/send";
-  const apiKey = "YOUR_API_KEY"; // Replace with your actual API key
+<CodeTabs>
+  <CodeTabs.Tab label="cURL">
+    ```bash
+    curl -X POST https://freesend.metafog.io/api/send-email \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "from": "hello@yourdomain.com",
+        "to": "recipient@email.com",
+        "subject": "Email sent from Freesend!",
+        "html": "<h1>Yay! You got the email.</h1>",
+        "text": "Yay! You got the email."
+      }'
+    ```
+  </CodeTabs.Tab>
+  <CodeTabs.Tab label="Python">
+    ```python
+    import requests
 
-  const emailData = {
-    from: "hello@yourdomain.com", // Sender address
-    to: "recipient@email.com", // Reciever address
-    subject: "Email sent from Freesend!", // Subject for the email
-    html: "<h1>Yay! You got the email.</h1>", // (optional) HTML format of the email body
-    text: "Yay! You got the email.", // (optional) Text format of the email body
-  };
+    url = "https://freesend.metafog.io/api/send-email"
+    headers = {
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "from": "hello@yourdomain.com",
+        "to": "recipient@email.com",
+        "subject": "Email sent from Freesend!",
+        "html": "<h1>Yay! You got the email.</h1>",
+        "text": "Yay! You got the email."
+    }
+    response = requests.post(url, headers=headers, json=data)
+    print(response.json())
+    ```
+  </CodeTabs.Tab>
+  <CodeTabs.Tab label="TypeScript">
+    ```ts
+    const sendEmail = async () => {
+      const url = "https://freesend.metafog.io/api/send-email";
+      const apiKey = "YOUR_API_KEY";
+      const emailData = {
+        from: "hello@yourdomain.com",
+        to: "recipient@email.com",
+        subject: "Email sent from Freesend!",
+        html: "<h1>Yay! You got the email.</h1>",
+        text: "Yay! You got the email."
+      };
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(emailData),
+      });
+      const result = await response.json();
+      console.log(result);
+    };
+    ```
+  </CodeTabs.Tab>
+  <CodeTabs.Tab label="Node.js">
+    ```js
+    const axios = require('axios');
 
-  try {
-    const response = await fetch(url, {
-      method: "POST",
+    const url = "https://freesend.metafog.io/api/send-email";
+    const apiKey = "YOUR_API_KEY";
+    const emailData = {
+      from: "hello@yourdomain.com",
+      to: "recipient@email.com",
+      subject: "Email sent from Freesend!",
+      html: "<h1>Yay! You got the email.</h1>",
+      text: "Yay! You got the email."
+    };
+
+    axios.post(url, emailData, {
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(emailData),
+      }
+    })
+    .then(response => {
+      console.log(response.data);
+    })
+    .catch(error => {
+      console.error(error);
     });
-
-    if (!response.ok) {
-      throw new Error(`Error: ${response.statusText}`);
-    }
-
-    const result = await response.json();
-    console.log("Email sent successfully:", result);
-  } catch (error) {
-    console.error("Failed to send email:", error);
-  }
-};
-
-sendEmail()
-```
+    ```
+  </CodeTabs.Tab>
+</CodeTabs>

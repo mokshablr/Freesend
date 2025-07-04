@@ -8,6 +8,7 @@ import { MdxCard } from "@/components/content/mdx-card";
 import BlurImage from "@/components/shared/blur-image";
 import { Callout } from "@/components/shared/callout";
 import { CopyButton } from "@/components/shared/copy-button";
+import { CodeTabs } from "@/components/content/CodeTabs";
 
 const components = {
   h1: ({ className, ...props }) => (
@@ -167,6 +168,7 @@ const components = {
   ),
   Callout,
   Card: MdxCard,
+  CodeTabs,
   Step: ({ className, ...props }: React.ComponentProps<"h3">) => (
     <h3
       className={cn(
