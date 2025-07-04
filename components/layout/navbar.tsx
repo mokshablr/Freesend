@@ -113,6 +113,18 @@ export function NavBar({ scroll = false }: NavBarProps) {
             </div>
           ) : null}
 
+          {/* Only show Documentation link if not on docs layout */}
+          {selectedLayout !== "docs" && (
+            <Link
+              href="/docs"
+              className={cn(
+                "hidden md:block text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm text-foreground/60 mr-4"
+              )}
+            >
+              Documentation
+            </Link>
+          )}
+
           {session ? (
             <Link href="/emails" className="hidden md:block">
               <Button
