@@ -5,12 +5,18 @@ import { createEmail } from "@/lib/emails";
 import { decrypt } from "@/lib/pwd";
 
 type emailContent = {
-  from: string;
+  fromName?: string;
+  fromEmail: string;
   to: string;
   subject: string;
   text?: string;
   html?: string;
-  attachments?: [{ path: string; filename?: string }];
+  attachments?: Array<{
+    filename: string;
+    content?: string;  // base64 encoded content
+    path?: string;     // file path (for server-side files)
+    contentType?: string;
+  }>;
 };
 
 export const POST = async (req: Request) => {
@@ -75,9 +81,19 @@ export const POST = async (req: Request) => {
   const sender_data = await req.json();
   const message = <emailContent>sender_data;
 
-  if (!message.from) {
+  // Build sender field from fromName and fromEmail
+  let fromField: string;
+  
+  if (message.fromEmail) {
+    // Use fromName + fromEmail format
+    if (message.fromName) {
+      fromField = `"${message.fromName}" <${message.fromEmail}>`;
+    } else {
+      fromField = message.fromEmail;
+    }
+  } else {
     return new Response(
-      JSON.stringify({ error: "Missing required field 'from'." }),
+      JSON.stringify({ error: "Missing required field 'fromEmail'." }),
       {
         status: 400,
         headers: { "Content-Type": "application/json" },
@@ -136,7 +152,7 @@ export const POST = async (req: Request) => {
 
   try {
     await transporter.sendMail({
-      from: message.from,
+      from: fromField,
       to: message.to,
       subject: message.subject,
       text: message.text,
@@ -146,7 +162,7 @@ export const POST = async (req: Request) => {
     const attachmentString = JSON.stringify(message.attachments);
     await createEmail(
       token,
-      message.from,
+      fromField,
       message.to,
       message.subject,
       message.html,
