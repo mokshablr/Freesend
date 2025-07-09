@@ -69,6 +69,21 @@ export default function Emails() {
     setSelectedApiKey("all");
   };
 
+  // Handle API key click from table
+  const handleApiKeyClick = (apiKeyId: string, apiKeyName: string) => {
+    // Switch to dropdown mode and select the clicked API key
+    setFilterMode("dropdown");
+    setSelectedApiKey(apiKeyId);
+    setSelectedApiKeys([]); // Clear multi-select
+  };
+
+  // Handle clear filter from table
+  const handleClearFilterFromTable = () => {
+    setSelectedApiKey("all");
+    setSelectedApiKeys([]);
+    setFilterMode("dropdown");
+  };
+
   const fetchEmailsList = async () => {
     try {
       const result = await getEmailsByTenant();
@@ -206,9 +221,16 @@ export default function Emails() {
                 <DropdownMenuTrigger asChild>
                   <Button 
                     variant="outline" 
-                    className="relative h-9 bg-muted/50 text-xs font-medium text-muted-foreground border border-input focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    className={`relative h-10 bg-muted/50 text-xs font-medium border border-input focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200 ${
+                      selectedApiKey !== "all" || selectedApiKeys.length > 0
+                        ? 'text-blue-700 bg-blue-50/80 border-blue-200 shadow-md shadow-blue-500/20 dark:text-blue-300 dark:bg-blue-950/50 dark:border-blue-800'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
                   >
                     <Icons.list className="mr-2 h-4 w-4" />
+                    {(selectedApiKey !== "all" || selectedApiKeys.length > 0) && (
+                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    )}
                     {filterMode === "dropdown" 
                       ? `API Key: ${selectedApiKey === "all" ? "All" : apiKeyMap[selectedApiKey] || "Select"}` 
                       : `API Keys ${selectedApiKeys.length > 0 ? `(${selectedApiKeys.length})` : ""}`
@@ -311,20 +333,27 @@ export default function Emails() {
               </DropdownMenu>
               
               {/* Selected API Keys Display for Multi Mode */}                  {filterMode === "multi" && selectedApiKeys.length > 0 && (
-                    <div className="flex flex-wrap gap-1 ml-2 max-w-xs">
+                    <div className="flex flex-wrap gap-1.5 ml-2 max-w-xs">
                       {selectedApiKeys.slice(0, 3).map((keyId) => (
-                        <Badge key={keyId} variant="secondary" className="text-xs h-6">
+                        <Badge 
+                          key={keyId} 
+                          variant="outline" 
+                          className="text-xs h-6 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-blue-200 shadow-sm hover:shadow-md transition-all duration-200 hover:shadow-blue-500/25 hover:border-blue-300 hover:from-blue-100 hover:to-indigo-100 animate-in fade-in slide-in-from-left-2 dark:from-blue-950/50 dark:to-indigo-950/50 dark:text-blue-300 dark:border-blue-800 dark:hover:border-blue-700"
+                        >
                           {apiKeyMap[keyId]}
                           <button
                             onClick={() => handleApiKeyToggle(keyId, false)}
-                            className="ml-1 hover:bg-muted-foreground/20 rounded-full"
+                            className="ml-1.5 hover:bg-red-100 hover:text-red-600 rounded-full p-0.5 transition-all duration-200 transform hover:scale-110 dark:hover:bg-red-900/50 dark:hover:text-red-400"
                           >
-                            <Icons.close className="h-3 w-3" />
+                            <Icons.close className="h-2.5 w-2.5" />
                           </button>
                         </Badge>
                       ))}
                       {selectedApiKeys.length > 3 && (
-                        <Badge variant="secondary" className="text-xs h-6">
+                        <Badge 
+                          variant="outline" 
+                          className="text-xs h-6 bg-gradient-to-r from-gray-50 to-slate-50 text-gray-600 border-gray-200 shadow-sm animate-in fade-in slide-in-from-left-2 dark:from-gray-950/50 dark:to-slate-950/50 dark:text-gray-300 dark:border-gray-800"
+                        >
                           +{selectedApiKeys.length - 3} more
                         </Badge>
                       )}
@@ -334,6 +363,24 @@ export default function Emails() {
 
             {/* Date Range Selector */}
             <DateRangePicker value={dateRange} onChange={setDateRange} />
+
+            {/* Clear Filters Button */}
+            {(selectedApiKey !== "all" || selectedApiKeys.length > 0 || searchQuery || dateRange) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSelectedApiKey("all");
+                  setSelectedApiKeys([]);
+                  setSearchQuery("");
+                  setDateRange(undefined);
+                }}
+                className="h-10 px-3 text-xs text-muted-foreground hover:text-foreground border border-dashed border-muted-foreground/30 hover:border-red-300 hover:bg-red-50/50 hover:text-red-600 transition-all duration-200 dark:hover:bg-red-950/30 dark:hover:text-red-400 dark:hover:border-red-800/50"
+              >
+                <Icons.close className="h-4 w-4 mr-1" />
+                Clear filters
+              </Button>
+            )}
           </div>
         </div>
         <div className="mx-auto max-w-7xl px-6">
@@ -346,6 +393,9 @@ export default function Emails() {
             }))}
             initialIsLoading={isLoading}
             apiKeyMap={apiKeyMap}
+            onApiKeyClick={handleApiKeyClick}
+            activeFilterApiKey={filterMode === "dropdown" && selectedApiKey !== "all" ? selectedApiKey : undefined}
+            onClearFilter={handleClearFilterFromTable}
           />
         </div>
       </div>

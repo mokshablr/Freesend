@@ -130,7 +130,7 @@ const MailServerTable: React.FC<MailServerTableProps> = ({
     { id: "user", header: "User", accessorKey: "user" },
     {
       id: "actions",
-      header: "",
+      header: "Actions",
       cell: ({ row }) => {
         const mailServer = row.original;
 
