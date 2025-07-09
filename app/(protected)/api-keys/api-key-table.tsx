@@ -106,7 +106,18 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
   };
 
   const columns = [
-    { id: "name", header: "Name", accessorKey: "name" },
+    { 
+      id: "name", 
+      header: "Name", 
+      accessorKey: "name",
+      cell: ({ getValue }) => (
+        <div className="flex items-center">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-green-50 text-green-700 border border-green-200 text-xs font-semibold dark:bg-green-950 dark:text-green-300 dark:border-green-800">
+            {getValue()}
+          </span>
+        </div>
+      )
+    },
     {
       id: "token",
       header: "API Key",
@@ -125,19 +136,19 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
 
         return (
           <div className="flex items-center">
-            <span className="inline-flex h-6 items-center rounded-md bg-zinc-200 p-1 dark:bg-zinc-800 dark:text-zinc-400">
+            <span className="inline-flex h-6 items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-mono text-gray-700 dark:bg-gray-800 dark:text-gray-300">
               {tokenValue.slice(0, 3)}...{tokenValue.slice(-5)}
             </span>
             <Button
-              className="ml-2 h-4 w-4"
+              className="ml-2 h-6 w-6"
               variant={"outline"}
               size={"icon"}
               onClick={handleCopy}
             >
               {copied ? (
-                <CopyCheck className="h-4 w-4" />
+                <CopyCheck className="h-3 w-3" />
               ) : (
-                <CopyIcon className="h-4 w-4" />
+                <CopyIcon className="h-3 w-3" />
               )}
             </Button>
           </div>
@@ -151,7 +162,11 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
       cell: ({ row }) => {
         const mailServer = row.getValue("mailServer");
         const serverName = mailServer && mailServer.name ? mailServer.name : "Deleted";
-        return <span>{serverName}</span>;
+        return (
+          <span className="text-xs text-muted-foreground">
+            {serverName}
+          </span>
+        );
       },
     },
     {
@@ -172,7 +187,7 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
         };
         return (
           <Badge
-            className={`pointer-events-none capitalize ${getStatusClass(status)}`}
+            className={`pointer-events-none capitalize text-xs ${getStatusClass(status)}`}
           >
             {status}
           </Badge>
@@ -183,6 +198,9 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
       id: "createdAt",
       header: "Created",
       accessorKey: "createdAt",
+      cell: ({ getValue }) => (
+        <span className="text-xs text-muted-foreground">{getValue()}</span>
+      )
     },
     {
       id: "actions",

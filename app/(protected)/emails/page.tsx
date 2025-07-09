@@ -184,8 +184,8 @@ export default function Emails() {
     <>
       <title>Emails</title>
       <div>
-        <div className="mx-auto max-w-5xl items-center justify-between px-6 py-8">
-          <h1 className="text-slate-12 pb-5 text-[28px] font-bold leading-[34px] tracking-[-0.416px]">
+        <div className="mx-auto max-w-7xl items-center justify-between px-6 py-8">
+          <h1 className="text-slate-12 pb-5 text-2xl font-semibold leading-tight tracking-tight">
             Emails
           </h1>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
@@ -194,134 +194,149 @@ export default function Emails() {
               <Input
                 type="text"
                 placeholder="Search by from:, to:, subject: ..."
-                className="relative bg-muted/50 pl-8 text-sm font-normal text-muted-foreground sm:pr-12 md:w-72"
+                className="relative bg-muted/50 pl-8 text-xs font-normal text-muted-foreground sm:pr-12 md:w-72"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
-            {/* Filter Mode Toggle */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant={filterMode === "dropdown" ? "default" : "outline"}
-                size="sm"
-                onClick={() => {
-                  setFilterMode("dropdown");
-                  setSelectedApiKeys([]);
-                }}
-                className="text-xs"
-              >
-                Single
-              </Button>
-              <Button
-                variant={filterMode === "multi" ? "default" : "outline"}
-                size="sm"
-                onClick={() => {
-                  setFilterMode("multi");
-                  setSelectedApiKey("all");
-                }}
-                className="text-xs"
-              >
-                Multi
-              </Button>
-            </div>
-
-            {/* API Key Filter - Dropdown Mode */}
-            {filterMode === "dropdown" && (
-              <div className="relative flex items-center w-48 max-w-full">
-                <Select value={selectedApiKey} onValueChange={setSelectedApiKey}>
-                  <SelectTrigger className="relative h-10 w-full bg-muted/50 pl-3 text-sm font-normal text-muted-foreground border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-                    <SelectValue placeholder="Filter by API Key" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">
-                      All API Keys ({data.length})
-                    </SelectItem>
-                    {apiKeys.map((key) => (
-                      <SelectItem key={key.id} value={key.id}>
-                        {key.name} ({emailCountsByApiKey[key.id] || 0})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {/* API Key Filter - Multi-select Mode */}
-            {filterMode === "multi" && (
-              <div className="relative flex items-center">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className="relative h-10 bg-muted/50 text-sm font-normal text-muted-foreground border border-input focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                    >
-                      <Icons.list className="mr-2 h-4 w-4" />
-                      API Keys {selectedApiKeys.length > 0 && `(${selectedApiKeys.length})`}
-                      <Icons.chevronRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 max-h-80 overflow-y-auto" align="start">
-                    <div className="p-2 border-b">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Select API Keys</span>
-                        {selectedApiKeys.length > 0 && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={clearApiKeyFilters}
-                            className="h-6 px-2 text-xs"
-                          >
-                            Clear
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                    {apiKeys.map((key) => (
-                      <DropdownMenuCheckboxItem
-                        key={key.id}
-                        checked={selectedApiKeys.includes(key.id)}
-                        onCheckedChange={(checked) => handleApiKeyToggle(key.id, checked)}
-                        className="flex items-center space-x-2"
-                      >
-                        <span className="flex-1">{key.name}</span>
-                        <Badge variant="secondary" className="text-xs">
-                          {emailCountsByApiKey[key.id] || 0}
-                        </Badge>
-                      </DropdownMenuCheckboxItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                
-                {/* Selected API Keys Display */}
-                {selectedApiKeys.length > 0 && (
-                  <div className="flex flex-wrap gap-1 ml-2 max-w-xs">
-                    {selectedApiKeys.slice(0, 3).map((keyId) => (
-                      <Badge key={keyId} variant="secondary" className="text-xs">
-                        {apiKeyMap[keyId]}
-                        <button
-                          onClick={() => handleApiKeyToggle(keyId, false)}
-                          className="ml-1 hover:bg-muted-foreground/20 rounded-full"
+            {/* API Key Filter with Integrated Mode Selection */}
+            <div className="relative flex items-center">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="relative h-9 bg-muted/50 text-xs font-medium text-muted-foreground border border-input focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  >
+                    <Icons.list className="mr-2 h-4 w-4" />
+                    {filterMode === "dropdown" 
+                      ? `API Key: ${selectedApiKey === "all" ? "All" : apiKeyMap[selectedApiKey] || "Select"}` 
+                      : `API Keys ${selectedApiKeys.length > 0 ? `(${selectedApiKeys.length})` : ""}`
+                    }
+                    <Icons.chevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64 max-h-80 overflow-y-auto" align="start">
+                  {/* Filter Mode Selection Header */}
+                  <div className="p-3 border-b bg-muted/30">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-medium">Filter by API Keys</span>
+                      {(selectedApiKeys.length > 0 || selectedApiKey !== "all") && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={clearApiKeyFilters}
+                          className="h-6 px-2 text-xs"
                         >
-                          <Icons.close className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                    {selectedApiKeys.length > 3 && (
-                      <Badge variant="secondary" className="text-xs">
-                        +{selectedApiKeys.length - 3} more
-                      </Badge>
-                    )}
+                          Clear
+                        </Button>
+                      )}
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant={filterMode === "dropdown" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => {
+                          setFilterMode("dropdown");
+                          setSelectedApiKeys([]);
+                        }}
+                        className="text-xs flex-1 h-8"
+                      >
+                        Single Select
+                      </Button>
+                      <Button
+                        variant={filterMode === "multi" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => {
+                          setFilterMode("multi");
+                          setSelectedApiKey("all");
+                        }}
+                        className="text-xs flex-1 h-8"
+                      >
+                        Multi Select
+                      </Button>
+                    </div>
                   </div>
-                )}
-              </div>
-            )}
+
+                  {/* Single Select Mode */}
+                  {filterMode === "dropdown" && (
+                    <div className="p-1">
+                      <div 
+                        className={`flex items-center justify-between px-3 py-2 text-xs rounded cursor-pointer hover:bg-muted/50 ${
+                          selectedApiKey === "all" ? "bg-muted text-foreground" : "text-muted-foreground"
+                        }`}
+                        onClick={() => setSelectedApiKey("all")}
+                      >
+                        <span>All API Keys</span>
+                        <Badge variant="secondary" className="text-xs">
+                          {data.length}
+                        </Badge>
+                      </div>
+                      {apiKeys.map((key) => (
+                        <div 
+                          key={key.id}
+                          className={`flex items-center justify-between px-3 py-2 text-xs rounded cursor-pointer hover:bg-muted/50 ${
+                            selectedApiKey === key.id ? "bg-muted text-foreground" : "text-muted-foreground"
+                          }`}
+                          onClick={() => setSelectedApiKey(key.id)}
+                        >
+                          <span>{key.name}</span>
+                          <Badge variant="secondary" className="text-xs">
+                            {emailCountsByApiKey[key.id] || 0}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Multi Select Mode */}
+                  {filterMode === "multi" && (
+                    <div className="p-1">
+                      {apiKeys.map((key) => (
+                        <DropdownMenuCheckboxItem
+                          key={key.id}
+                          checked={selectedApiKeys.includes(key.id)}
+                          onCheckedChange={(checked) => handleApiKeyToggle(key.id, checked)}
+                          className="flex items-center justify-between"
+                        >
+                          <span className="flex-1">{key.name}</span>
+                          <Badge variant="secondary" className="text-xs ml-2">
+                            {emailCountsByApiKey[key.id] || 0}
+                          </Badge>
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </div>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              {/* Selected API Keys Display for Multi Mode */}                  {filterMode === "multi" && selectedApiKeys.length > 0 && (
+                    <div className="flex flex-wrap gap-1 ml-2 max-w-xs">
+                      {selectedApiKeys.slice(0, 3).map((keyId) => (
+                        <Badge key={keyId} variant="secondary" className="text-xs h-6">
+                          {apiKeyMap[keyId]}
+                          <button
+                            onClick={() => handleApiKeyToggle(keyId, false)}
+                            className="ml-1 hover:bg-muted-foreground/20 rounded-full"
+                          >
+                            <Icons.close className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                      {selectedApiKeys.length > 3 && (
+                        <Badge variant="secondary" className="text-xs h-6">
+                          +{selectedApiKeys.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+            </div>
 
             {/* Date Range Selector */}
             <DateRangePicker value={dateRange} onChange={setDateRange} />
           </div>
         </div>
-        <div className="mx-auto max-w-5xl px-6">
+        <div className="mx-auto max-w-7xl px-6">
           <EmailTable
             initialEmailList={filteredData.map(email => ({
               ...email,

@@ -88,26 +88,51 @@ const EmailTable: React.FC<EmailTableProps> = ({
   };
 
   const columns = [
-    { id: "from", header: "From", accessorKey: "from" },
-    { id: "to", header: "To", accessorKey: "to" },
-    { id: "subject", header: "Subject", accessorKey: "subject" },
+    { 
+      id: "from", 
+      header: "From", 
+      accessorKey: "from",
+      cell: ({ getValue }) => (
+        <span className="text-xs text-foreground">{getValue()}</span>
+      )
+    },
+    { 
+      id: "to", 
+      header: "To", 
+      accessorKey: "to",
+      cell: ({ getValue }) => (
+        <span className="text-xs text-foreground">{getValue()}</span>
+      )
+    },
+    { 
+      id: "subject", 
+      header: "Subject", 
+      accessorKey: "subject",
+      cell: ({ getValue }) => (
+        <span className="text-xs text-foreground font-medium">{getValue()}</span>
+      )
+    },
     {
       id: "apiKey",
       header: "API Key",
       accessorKey: "apiKeyId",
       cell: ({ getValue }) => {
         const apiKeyId = getValue();
-        if (!apiKeyId) return <span className="text-zinc-400">-</span>;
+        if (!apiKeyId) return <span className="text-xs text-muted-foreground">-</span>;
         if (apiKeyMap[apiKeyId]) {
           return (
-            <span className="font-mono text-xs text-zinc-400">
-              {apiKeyMap[apiKeyId]}
-            </span>
+            <div className="flex items-center">
+              <span className="inline-flex items-center px-2 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-xs font-medium dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800">
+                {apiKeyMap[apiKeyId]}
+              </span>
+            </div>
           );
         }
         // Not found in map, treat as deleted
         return (
-          <span className="italic text-xs text-zinc-500">Deleted</span>
+          <span className="inline-flex items-center px-2 py-1 rounded-md bg-red-50 text-red-600 border border-red-200 text-xs font-medium dark:bg-red-950 dark:text-red-400 dark:border-red-800">
+            Deleted
+          </span>
         );
       },
     },
@@ -119,7 +144,9 @@ const EmailTable: React.FC<EmailTableProps> = ({
         const value = getValue();
         const date = value instanceof Date ? value : new Date(value);
         return (
-          <span>{formatDistanceToNow(date, { addSuffix: true })}</span>
+          <span className="text-xs text-muted-foreground">
+            {formatDistanceToNow(date, { addSuffix: true })}
+          </span>
         );
       },
     },

@@ -51,15 +51,15 @@ export default function ApiKeys() {
     <>
       <title>API Keys</title>
       <div>
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-8">
-          <h1 className="text-slate-12 text-[28px] font-bold leading-[34px] tracking-[-0.416px]">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-8">
+          <h1 className="text-slate-12 text-2xl font-semibold leading-tight tracking-tight">
             API Keys
           </h1>
           <div>
             <CreateApiKeyDialog onApiKeyCreated={fetchApiKeys} />
           </div>
         </div>
-        <div className="mx-auto max-w-5xl px-6">
+        <div className="mx-auto max-w-7xl px-6">
           <ApiKeyTable initialApiKeys={apiKeys} initialIsLoading={isLoading} />
         </div>
       </div>
