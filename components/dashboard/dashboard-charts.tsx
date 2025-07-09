@@ -184,8 +184,8 @@ export function DashboardCharts({
                   <AreaChart data={emailsByDay}>
                     <defs>
                       <linearGradient id="neonCyan" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#00f0ff" stopOpacity={0.7} />
-                        <stop offset="100%" stopColor="#00f0ff" stopOpacity={0.1} />
+                        <stop offset="0%" stopColor="#00f0ff" stopOpacity={0.3} />
+                        <stop offset="100%" stopColor="#00f0ff" stopOpacity={0.05} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="date" stroke="#fff" tick={{ fill: '#fff', fontSize: 12 }} axisLine={false} tickLine={false} />
@@ -293,8 +293,8 @@ export function DashboardCharts({
                   <AreaChart data={monthlyData}>
                     <defs>
                       <linearGradient id="neonCyanMonthly" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#00f0ff" stopOpacity={0.7} />
-                        <stop offset="100%" stopColor="#00f0ff" stopOpacity={0.1} />
+                        <stop offset="0%" stopColor="#00f0ff" stopOpacity={0.3} />
+                        <stop offset="100%" stopColor="#00f0ff" stopOpacity={0.05} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="month" stroke="#fff" tick={{ fill: '#fff', fontSize: 12 }} axisLine={false} tickLine={false} />
