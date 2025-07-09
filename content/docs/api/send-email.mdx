@@ -25,15 +25,21 @@ Ensure you put your API Key as a Bearer token in the Authorization header of the
 
 ### HTTP Body
 
-Ensure you have these details in your HTTP body:
-
 ```http
 {
-    "from": "hello@yourdomain.com",  // Sender address
-    "to": "recipient@email.com",  // Reciever address
+    "fromName": "Your Company",  // (optional) Display name for the sender
+    "fromEmail": "hello@yourdomain.com",  // Sender email address
+    "to": "recipient@email.com",  // Receiver address
     "subject": "Email sent from Freesend!",  // Subject for the email
     "html": "<h1>Yay! You got the email.</h1>",  // (optional) HTML format of the email body
-    "text": "Yay! You got the email."  // (optional) Text format of the email body
+    "text": "Yay! You got the email.",  // (optional) Text format of the email body
+    "attachments": [  // (optional) Array of attachments
+        {
+            "filename": "invoice.pdf",  // Name of the file
+            "content": "base64EncodedContent",  // Base64 encoded file content
+            "contentType": "application/pdf"  // (optional) MIME type
+        }
+    ]
 }
 ```
 
@@ -52,85 +58,450 @@ Send a `POST` Request to `https://freesend.metafog.io/api/send-email`
       -H "Authorization: Bearer YOUR_API_KEY" \
       -H "Content-Type: application/json" \
       -d '{
-        "from": "hello@yourdomain.com",
+        "fromName": "Your Company",
+        "fromEmail": "hello@yourdomain.com",
         "to": "recipient@email.com",
-        "subject": "Email sent from Freesend!",
-        "html": "<h1>Yay! You got the email.</h1>",
-        "text": "Yay! You got the email."
+        "subject": "Email with attachment from Freesend!",
+        "html": "<h1>Please find the invoice attached.</h1>",
+        "text": "Please find the invoice attached.",
+        "attachments": [
+          {
+            "filename": "invoice.pdf",
+            "content": "JVBERi0xLjQKJcOkw7zDtsOmCjUgMCBvYmoKPDwKL0ZpbHRlciAvRmxhdGVEZWNvZGUKL0xlbmd0aC...",
+            "contentType": "application/pdf"
+          }
+        ]
       }'
+    ```
+  </CodeTabs.Tab>
+  <CodeTabs.Tab label="JavaScript (Client-Side)">
+    ```js
+    // Client-side file upload with attachment
+    const sendEmailWithFile = async (file) => {
+      // Convert file to base64
+      const toBase64 = (file) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(',')[1]); // Remove data:mime;base64, prefix
+        reader.onerror = error => reject(error);
+      });
+
+      const fileContent = await toBase64(file);
+      
+      const emailData = {
+        fromName: "Your Company",
+        fromEmail: "hello@yourdomain.com",
+        to: "recipient@email.com",
+        subject: "Email with attachment from web app",
+        html: "<h1>Check out this file!</h1>",
+        text: "Check out this file!",
+        attachments: [
+          {
+            filename: file.name,
+            content: fileContent,
+            contentType: file.type
+          }
+        ]
+      };
+
+      const response = await fetch("https://freesend.metafog.io/api/send-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer YOUR_API_KEY",
+        },
+        body: JSON.stringify(emailData),
+      });
+
+      return response.json();
+    };
+
+    // Usage with file input
+    document.getElementById('fileInput').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const result = await sendEmailWithFile(file);
+        console.log(result);
+      }
+    });
+    ```
+  </CodeTabs.Tab>
+  <CodeTabs.Tab label="React">
+    ```jsx
+    import React, { useState } from 'react';
+
+    const EmailSender = () => {
+      const [file, setFile] = useState(null);
+      const [sending, setSending] = useState(false);
+
+      const handleFileChange = (e) => {
+        setFile(e.target.files[0]);
+      };
+
+      const sendEmail = async () => {
+        if (!file) return;
+        
+        setSending(true);
+        
+        // Convert file to base64
+        const toBase64 = (file) => new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.onerror = error => reject(error);
+        });
+
+        try {
+          const fileContent = await toBase64(file);
+          
+          const emailData = {
+            fromName: "Your Company",
+            fromEmail: "hello@yourdomain.com",
+            to: "recipient@email.com",
+            subject: "Email with attachment",
+            html: `<h1>File Attached: ${file.name}</h1>`,
+            text: `File attached: ${file.name}`,
+            attachments: [
+              {
+                filename: file.name,
+                content: fileContent,
+                contentType: file.type
+              }
+            ]
+          };
+
+          const response = await fetch("/api/send-email", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer YOUR_API_KEY",
+            },
+            body: JSON.stringify(emailData),
+          });
+
+          const result = await response.json();
+          console.log("Email sent:", result);
+        } catch (error) {
+          console.error("Error:", error);
+        } finally {
+          setSending(false);
+        }
+      };
+
+      return (
+        <div>
+          <input type="file" onChange={handleFileChange} />
+          <button onClick={sendEmail} disabled={!file || sending}>
+            {sending ? "Sending..." : "Send Email"}
+          </button>
+        </div>
+      );
+    };
     ```
   </CodeTabs.Tab>
   <CodeTabs.Tab label="Python">
     ```python
     import requests
+    import base64
 
-    url = "https://freesend.metafog.io/api/send-email"
-    headers = {
-        "Authorization": "Bearer YOUR_API_KEY",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "from": "hello@yourdomain.com",
-        "to": "recipient@email.com",
-        "subject": "Email sent from Freesend!",
-        "html": "<h1>Yay! You got the email.</h1>",
-        "text": "Yay! You got the email."
-    }
-    response = requests.post(url, headers=headers, json=data)
-    print(response.json())
-    ```
-  </CodeTabs.Tab>
-  <CodeTabs.Tab label="TypeScript">
-    ```ts
-    const sendEmail = async () => {
-      const url = "https://freesend.metafog.io/api/send-email";
-      const apiKey = "YOUR_API_KEY";
-      const emailData = {
-        from: "hello@yourdomain.com",
-        to: "recipient@email.com",
-        subject: "Email sent from Freesend!",
-        html: "<h1>Yay! You got the email.</h1>",
-        text: "Yay! You got the email."
-      };
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify(emailData),
-      });
-      const result = await response.json();
-      console.log(result);
-    };
+    def send_email_with_attachment(file_path):
+        url = "https://freesend.metafog.io/api/send-email"
+        headers = {
+            "Authorization": "Bearer YOUR_API_KEY",
+            "Content-Type": "application/json"
+        }
+        
+        # Read and encode file
+        with open(file_path, "rb") as file:
+            file_content = base64.b64encode(file.read()).decode('utf-8')
+        
+        # Get filename and content type
+        import os
+        import mimetypes
+        filename = os.path.basename(file_path)
+        content_type = mimetypes.guess_type(file_path)[0] or 'application/octet-stream'
+        
+        data = {
+            "fromName": "Your Company",
+            "fromEmail": "hello@yourdomain.com",
+            "to": "recipient@email.com",
+            "subject": "Email with attachment",
+            "html": f"<h1>File attached: {filename}</h1>",
+            "text": f"File attached: {filename}",
+            "attachments": [
+                {
+                    "filename": filename,
+                    "content": file_content,
+                    "contentType": content_type
+                }
+            ]
+        }
+        
+        response = requests.post(url, headers=headers, json=data)
+        return response.json()
+
+    # Usage
+    result = send_email_with_attachment("invoice.pdf")
+    print(result)
     ```
   </CodeTabs.Tab>
   <CodeTabs.Tab label="Node.js">
     ```js
     const axios = require('axios');
+    const fs = require('fs');
+    const path = require('path');
 
-    const url = "https://freesend.metafog.io/api/send-email";
-    const apiKey = "YOUR_API_KEY";
-    const emailData = {
-      from: "hello@yourdomain.com",
-      to: "recipient@email.com",
-      subject: "Email sent from Freesend!",
-      html: "<h1>Yay! You got the email.</h1>",
-      text: "Yay! You got the email."
+    const sendEmailWithAttachment = async (filePath) => {
+      const url = "https://freesend.metafog.io/api/send-email";
+      const apiKey = "YOUR_API_KEY";
+      
+      // Read and encode file
+      const fileContent = fs.readFileSync(filePath, { encoding: 'base64' });
+      const filename = path.basename(filePath);
+      
+      // Determine content type
+      const getContentType = (filename) => {
+        const ext = path.extname(filename).toLowerCase();
+        const types = {
+          '.pdf': 'application/pdf',
+          '.jpg': 'image/jpeg',
+          '.jpeg': 'image/jpeg',
+          '.png': 'image/png',
+          '.txt': 'text/plain',
+          '.json': 'application/json',
+          '.csv': 'text/csv',
+          '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        };
+        return types[ext] || 'application/octet-stream';
+      };
+      
+      const emailData = {
+        fromName: "Your Company",
+        fromEmail: "hello@yourdomain.com",
+        to: "recipient@email.com",
+        subject: "Email with attachment",
+        html: `<h1>File attached: ${filename}</h1>`,
+        text: `File attached: ${filename}`,
+        attachments: [
+          {
+            filename: filename,
+            content: fileContent,
+            contentType: getContentType(filename)
+          }
+        ]
+      };
+
+      try {
+        const response = await axios.post(url, emailData, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`,
+          }
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error sending email:', error.response?.data || error.message);
+        throw error;
+      }
     };
 
-    axios.post(url, emailData, {
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
-      }
-    })
-    .then(response => {
-      console.log(response.data);
-    })
-    .catch(error => {
-      console.error(error);
-    });
+    // Usage
+    sendEmailWithAttachment('./invoice.pdf')
+      .then(result => console.log('Email sent:', result))
+      .catch(error => console.error('Failed to send email:', error));
     ```
   </CodeTabs.Tab>
 </CodeTabs>
+
+## Field Reference
+
+### Main Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `fromName` | string | No | Display name for the sender (e.g., "Your Company") |
+| `fromEmail` | string | Yes | Sender email address |
+| `to` | string | Yes | Recipient email address |
+| `subject` | string | Yes | Email subject line |
+| `html` | string | No* | HTML content of the email |
+| `text` | string | No* | Plain text content of the email |
+| `attachments` | array | No | Array of attachment objects (see below) |
+
+*At least one of `html` or `text` is required.
+
+### Attachment Object Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `filename` | string | Yes | Name of the attachment file |
+| `content` | string | Yes** | Base64 encoded file content |
+| `path` | string | Yes** | File path (for server-side files only) |
+| `contentType` | string | No | MIME type (e.g., "application/pdf", "image/png") |
+
+**Either `content` or `path` is required, but not both.
+
+### Attachment Examples
+
+```json
+// Base64 content (recommended for API usage)
+{
+  "filename": "invoice.pdf",
+  "content": "JVBERi0xLjQKJcOkw7zDtsOmCjUgMCBvYmoKPDwK...",
+  "contentType": "application/pdf"
+}
+
+// Text attachment
+{
+  "filename": "notes.txt", 
+  "content": "SGVsbG8gV29ybGQh",  // "Hello World!" in base64
+  "contentType": "text/plain"
+}
+
+// Image attachment
+{
+  "filename": "logo.png",
+  "content": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+  "contentType": "image/png"
+}
+
+// Server file path (for server-side usage only)
+{
+  "filename": "report.xlsx",
+  "path": "/path/to/report.xlsx",
+  "contentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+}
+```
+
+## Response
+
+### Success Response (200)
+```json
+{
+  "message": "Email sent successfully"
+}
+```
+
+### Error Responses
+
+#### 400 Bad Request - Missing Authorization Header
+```json
+{
+  "error": "Authorization header not found."
+}
+```
+
+#### 400 Bad Request - Invalid Authorization Format
+```json
+{
+  "error": "Invalid authorization header. Create a Bearer Token."
+}
+```
+
+#### 400 Bad Request - Missing API Key
+```json
+{
+  "error": "Invalid or missing API Key."
+}
+```
+
+#### 400 Bad Request - Missing Required Fields
+```json
+{
+  "error": "Missing required field 'fromEmail'."
+}
+```
+
+```json
+{
+  "error": "Missing required field 'to'."
+}
+```
+
+```json
+{
+  "error": "Missing required field 'subject'."
+}
+```
+
+```json
+{
+  "error": "Missing required field 'text' or 'html'."
+}
+```
+
+#### 400 Bad Request - Inactive API Key
+```json
+{
+  "error": "This API key is currently inactive."
+}
+```
+
+#### 403 Forbidden - Invalid API Key
+```json
+{
+  "error": "Invalid API Key or no SMTP configuration found."
+}
+```
+
+#### 500 Internal Server Error - Email Sending Failed
+```json
+{
+  "error": "Error sending email: [specific error message]"
+}
+```
+
+#### 502 Bad Gateway - Transport Error
+```json
+{
+  "error": "Could not create the transporter object."
+}
+```
+
+## Common MIME Types
+
+| File Extension | MIME Type |
+|----------------|-----------|
+| `.pdf` | `application/pdf` |
+| `.jpg`, `.jpeg` | `image/jpeg` |
+| `.png` | `image/png` |
+| `.gif` | `image/gif` |
+| `.txt` | `text/plain` |
+| `.html` | `text/html` |
+| `.css` | `text/css` |
+| `.js` | `application/javascript` |
+| `.json` | `application/json` |
+| `.xml` | `application/xml` |
+| `.csv` | `text/csv` |
+| `.zip` | `application/zip` |
+| `.xlsx` | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` |
+| `.docx` | `application/vnd.openxmlformats-officedocument.wordprocessingml.document` |
+| `.pptx` | `application/vnd.openxmlformats-officedocument.presentationml.presentation` |
+
+## Best Practices
+
+### File Size Limits
+- Keep attachments under 25MB for best performance
+- For larger files, consider using cloud storage links instead
+
+### Base64 Encoding
+- Always encode binary files as base64
+- Remove any data URL prefixes (e.g., `data:application/pdf;base64,`)
+- Use proper content type headers for better email client compatibility
+
+### Multiple Attachments
+```json
+{
+  "attachments": [
+    {
+      "filename": "invoice.pdf",
+      "content": "base64EncodedPDF...",
+      "contentType": "application/pdf"
+    },
+    {
+      "filename": "receipt.jpg",
+      "content": "base64EncodedImage...",
+      "contentType": "image/jpeg"
+    }
+  ]
+}
+```
