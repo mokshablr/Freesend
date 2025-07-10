@@ -87,6 +87,14 @@ export default async function DashboardPage() {
     };
   });
 
+  // Calculate emails sent in the last hour
+  const nowTime = new Date();
+  const oneHourAgo = new Date(nowTime.getTime() - 60 * 60 * 1000);
+  const emailsLastHour = emails.filter(email => {
+    const emailDate = new Date(email.createdAt);
+    return emailDate >= oneHourAgo && emailDate <= nowTime;
+  }).length;
+
   // API Key status distribution
   const apiKeyStatusData = [
     { name: 'Active', value: activeApiKeys, color: 'hsl(var(--chart-1))' },
@@ -132,6 +140,7 @@ export default async function DashboardPage() {
           hoursData={hoursData}
           monthlyData={monthlyData}
           recentEmails={recentEmails}
+          emailsLastHour={emailsLastHour}
         />
       </div>
     </div>

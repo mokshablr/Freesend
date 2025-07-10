@@ -54,7 +54,7 @@ const EmailTable: React.FC<EmailTableProps> = ({
 
   // Pagination state
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10); // Default page size changed to 10
+  const [pageSize, setPageSize] = useState(10); // Default page size
 
   useEffect(() => {
     setEmails(initialEmailList);

@@ -17,7 +17,7 @@ interface DashboardData {
 }
 
 interface DashboardClientProps extends DashboardData {
-  // Initial server-side data
+  emailsLastHour: number;
 }
 
 export function DashboardClient({
@@ -28,6 +28,7 @@ export function DashboardClient({
   hoursData: initialHoursData,
   monthlyData: initialMonthlyData,
   recentEmails: initialRecentEmails,
+  emailsLastHour,
 }: DashboardClientProps) {
   const { containerRef, handlePointerMove, handlePointerLeave, getCardStyle } = useNeonEffects();
   
@@ -79,6 +80,7 @@ export function DashboardClient({
     <div ref={containerRef} className="space-y-6">
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Total Emails Card */}
         <Card 
           style={getCardStyle(0)} 
           onPointerMove={e => handlePointerMove(e, 0)} 
@@ -96,7 +98,7 @@ export function DashboardClient({
             </p>
           </CardContent>
         </Card>
-        
+        {/* Activity Card (moved to second position) */}
         <Card 
           style={getCardStyle(1)} 
           onPointerMove={e => handlePointerMove(e, 1)} 
@@ -104,17 +106,19 @@ export function DashboardClient({
           className="relative overflow-hidden"
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active API Keys</CardTitle>
-            <KeyRound className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Activity</CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{activeApiKeys}</div>
+            <div className="text-2xl font-bold">
+              {hoursData.reduce((sum, hour) => sum + hour.emails, 0)}
+            </div>
             <p className="text-xs text-muted-foreground">
-              {totalApiKeys} total keys
+              {emailsLastHour} sent last hour
             </p>
           </CardContent>
         </Card>
-        
+        {/* This Week Card */}
         <Card 
           style={getCardStyle(2)} 
           onPointerMove={e => handlePointerMove(e, 2)} 
@@ -134,7 +138,7 @@ export function DashboardClient({
             </p>
           </CardContent>
         </Card>
-        
+        {/* Active API Keys Card (moved to last position) */}
         <Card 
           style={getCardStyle(3)} 
           onPointerMove={e => handlePointerMove(e, 3)} 
@@ -142,15 +146,13 @@ export function DashboardClient({
           className="relative overflow-hidden"
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Activity</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Active API Keys</CardTitle>
+            <KeyRound className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {hoursData.reduce((sum, hour) => sum + hour.emails, 0)}
-            </div>
+            <div className="text-2xl font-bold">{activeApiKeys}</div>
             <p className="text-xs text-muted-foreground">
-              emails sent today
+              {totalApiKeys} total keys
             </p>
           </CardContent>
         </Card>

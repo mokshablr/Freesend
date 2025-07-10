@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { toast } from "sonner";
+import { Plus } from "lucide-react";
 
 import { createServer } from "@/lib/smtp-config";
 import { Button } from "@/components/ui/button";
@@ -102,7 +103,10 @@ export default function CreateMailServerDialog({
     <div>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button onClick={() => setIsOpen(true)}>Add Mail Server</Button>
+          <Button onClick={() => setIsOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Mail Server
+          </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
