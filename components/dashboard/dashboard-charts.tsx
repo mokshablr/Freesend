@@ -7,16 +7,11 @@ import {
   YAxis,
   CartesianGrid,
   ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
   AreaChart,
-  Area
+  Area,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import {
   Table,
   TableHeader,
@@ -25,330 +20,201 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import React, { useRef, useState } from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { formatDistanceToNow } from "date-fns";
+import React, { useMemo, useRef, useState } from "react";
+
+// --- Data Type Definitions ---
+interface DataPoint {
+  emails?: number;
+  total?: number;
+  [key: string]: any;
+}
+interface DailyData extends DataPoint {
+  date: string;
+}
+interface HourlyData extends DataPoint {
+  time: string;
+}
+interface MonthlyData extends DataPoint {
+  month: string;
+}
+
+interface RecentEmail {
+  id: string;
+  to: string;
+  createdAt: string | Date;
+}
 
 interface DashboardChartsProps {
-  emailsByDay: Array<{
-    date: string;
-    emails: number;
-    fullDate: string;
-  }>;
-  hoursData: Array<{
-    hour: number;
-    time: string;
-    emails: number;
-  }>;
-  monthlyData: Array<{
-    month: string;
-    emails: number;
-    apiKeys: number;
-  }>;
-  apiKeyStatusData: Array<{
-    name: string;
-    value: number;
-    color: string;
-  }>;
-  totalApiKeys: number;
-  activeApiKeys: number;
+  emailsByDay: DailyData[];
+  hoursData: HourlyData[];
+  monthlyData: MonthlyData[];
+  recentEmails: RecentEmail[];
 }
 
 export function DashboardCharts({
   emailsByDay,
   hoursData,
   monthlyData,
-  apiKeyStatusData,
-  totalApiKeys,
-  activeApiKeys
+  recentEmails,
 }: DashboardChartsProps) {
-  // Chart configurations
-  const chartConfig = {
-    emails: {
-      label: "Emails Sent",
-      color: "#00f0ff", // Neon cyan
-    },
-    apiKeys: {
-      label: "API Keys",
-      color: "#ff00ea", // Neon magenta
-    },
+  // --- State and Config ---
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [pointer, setPointer] = useState<{ x: number; y: number; active: boolean; idx: number }>({ x: 0, y: 0, active: false, idx: -1 });
+  const NEON_COLOR = "#ffffff"; // Monochrome white for all effects
+
+  // --- Data Key Logic ---
+  // Consistently use 'total' with a fallback to 'emails'
+  const getDataKey = (data: DataPoint[]) => {
+    if (data && data.length > 0 && 'total' in data[0]) {
+      return 'total';
+    }
+    return 'emails';
   };
 
-  // Unified pointer tracking for all elements
-  const [pointer, setPointer] = useState<{ x: number; y: number; active: boolean; idx: number }>({ x: 0, y: 0, active: false, idx: -1 });
-  const pageRef = useRef<HTMLDivElement>(null);
+  const dailyDataKey = getDataKey(emailsByDay);
+  const hourlyDataKey = getDataKey(hoursData);
+  const monthlyDataKey = getDataKey(monthlyData);
+  
+  // Memoized sorted data for "Top" tables
+  const getTopData = (data: any[], key: string) => {
+    return [...data].sort((a, b) => (b[key] ?? 0) - (a[key] ?? 0)).slice(0, 3);
+  };
+  
+  const topDays = useMemo(() => getTopData(emailsByDay, dailyDataKey), [emailsByDay, dailyDataKey]);
+  const topHours = useMemo(() => getTopData(hoursData, hourlyDataKey), [hoursData, hourlyDataKey]);
+  const topMonths = useMemo(() => getTopData(monthlyData, monthlyDataKey), [monthlyData, monthlyDataKey]);
 
-  // Minimal table data (example: top 5 days, top 5 hours)
-  const topDays = [...emailsByDay].sort((a, b) => b.emails - a.emails).slice(0, 5);
-  const topHours = [...hoursData].sort((a, b) => b.emails - a.emails).slice(0, 5);
+  // --- UI Interaction Handlers ---
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>, idx: number) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setPointer({ x, y, active: true, idx });
+  };
+  const handlePointerLeave = () => setPointer({ ...pointer, active: false, idx: -1 });
 
-  // Subtle neon glow style for all elements
-  const getSubtleNeonStyle = (idx: number) => {
-    if (pointer.active && pointer.idx === idx) {
+  const getCardStyle = (idx: number) => {
+    const isHovered = pointer.active && pointer.idx === idx;
+    if (isHovered) {
       return {
-        boxShadow: `0 0 2px 0.5px #00f0ff22`,
-        border: `1px solid #00f0ff44`,
-        background: `radial-gradient(180px at ${pointer.x}px ${pointer.y}px, #00f0ff08, transparent 90%)`,
+        boxShadow: `0 0 10px 1.5px ${NEON_COLOR}22`,
+        border: `1px solid ${NEON_COLOR}44`,
+        background: `radial-gradient(180px at ${pointer.x}px ${pointer.y}px, ${NEON_COLOR}0C, transparent 80%), #0a0a0a`,
         transition: 'box-shadow 0.2s, border 0.2s, background 0.2s',
       };
     }
     return {
       transition: 'box-shadow 0.2s, border 0.2s, background 0.2s',
+      border: '1px solid #ffffff1a',
+      background: '#0a0a0a',
     };
   };
 
-  // Add chart metric selector state
-  const [selectedMetric, setSelectedMetric] = useState<'successful' | 'failed' | 'total'>('successful');
-
-  // Example: extend emailsByDay, hoursData, monthlyData to support all metrics (assume data shape is updated)
-  // If not, you will need to update your data fetching to include these fields.
-
-  // Table headers for all tables
-  const renderTableHeader = () => (
-    <TableHeader>
-      <TableRow>
-        <TableHead>Date</TableHead>
-        <TableHead>Total Hit</TableHead>
-        <TableHead>Successful</TableHead>
-        <TableHead>Failed</TableHead>
-      </TableRow>
-    </TableHeader>
+  const renderAreaChart = (data: any[], xAxisKey: string, dataKey: string) => (
+      <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <defs>
+            <linearGradient id="gradient-area" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={NEON_COLOR} stopOpacity={0.4}/>
+                <stop offset="95%" stopColor={NEON_COLOR} stopOpacity={0.05}/>
+            </linearGradient>
+        </defs>
+        <XAxis dataKey={xAxisKey} stroke="#888" tick={{ fill: '#bbb', fontSize: 10 }} axisLine={false} tickLine={false} />
+        <YAxis stroke="#888" tick={{ fill: '#bbb', fontSize: 10 }} axisLine={false} tickLine={false} />
+        <CartesianGrid stroke="#333" strokeDasharray="3 3" vertical={false} />
+        <ChartTooltip cursor={{ stroke: NEON_COLOR }} content={<ChartTooltipContent indicator="line" labelClassName="text-white" className="bg-black/80 border-white/20" />} />
+        <Area type="monotone" dataKey={dataKey} stroke={NEON_COLOR} fill="url(#gradient-area)" strokeWidth={2} />
+      </AreaChart>
   );
 
-  // Table row renderer for daily, hourly, monthly
-  const renderTableRows = (data: any[], dateKey: string) => (
-    <TableBody>
-      {data.map(row => (
-        <TableRow key={row[dateKey]}>
-          <TableCell>{row[dateKey]}</TableCell>
-          <TableCell>{(row.total ?? row.emails) === 0 ? '-' : (row.total ?? row.emails ?? '-')}</TableCell>
-          <TableCell>{(row.successful ?? row.emails) === 0 ? '-' : (row.successful ?? row.emails ?? '-')}</TableCell>
-          <TableCell>{(row.failed ?? 0) === 0 ? '-' : (row.failed ?? 0)}</TableCell>
-        </TableRow>
-      ))}
-    </TableBody>
+  const renderBarChart = (data: any[], xAxisKey: string, dataKey: string) => (
+      <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <XAxis dataKey={xAxisKey} stroke="#888" tick={{ fill: '#bbb', fontSize: 10 }} axisLine={false} tickLine={false} />
+        <YAxis stroke="#888" tick={{ fill: '#bbb', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false}/>
+        <CartesianGrid stroke="#333" strokeDasharray="3 3" vertical={false} />
+        <ChartTooltip cursor={{ fill: 'rgba(255,255,255,0.08)' }} content={<ChartTooltipContent labelClassName="text-white" className="bg-black/80 border-white/20"/>} />
+        <Bar dataKey={dataKey} fill={NEON_COLOR} opacity={0.8} radius={[4, 4, 0, 0]} />
+      </BarChart>
   );
 
   return (
-    <div 
-      ref={pageRef}
-      className="w-full flex flex-col gap-8 relative"
-      onPointerMove={e => {
-        if (!pageRef.current) return;
-        const container = pageRef.current.getBoundingClientRect();
-        const globalX = e.clientX - container.left;
-        const globalY = e.clientY - container.top;
-        setPointer({ x: globalX, y: globalY, active: true, idx: pointer.idx });
-      }}
-      onPointerLeave={() => setPointer({ ...pointer, active: false, idx: -1 })}
-    >
-      {/* Page-wide subtle pointer-following neon glow */}
-      <div
-        className="pointer-events-none fixed inset-0 z-0"
-        style={pointer.active ? {
-          background: `radial-gradient(250px at ${pointer.x}px ${pointer.y}px, #00f0ff08, transparent 90%)`,
-          transition: 'background 0.2s',
-        } : { transition: 'background 0.2s' }}
-      />
-      <Tabs defaultValue="daily" className="w-full relative z-10">
-        <div className="rounded-xl border border-border bg-background/60 mb-6 relative overflow-hidden">
-          <TabsList className="flex w-full justify-between gap-2 bg-transparent p-0">
-            <TabsTrigger value="daily" className="flex-1 text-base font-medium data-[state=active]:bg-[#0a0a0a] data-[state=active]:text-white data-[state=active]:shadow-[0_0_4px_#00f0ff33] transition-all">Daily</TabsTrigger>
-            <TabsTrigger value="hourly" className="flex-1 text-base font-medium data-[state=active]:bg-[#0a0a0a] data-[state=active]:text-white data-[state=active]:shadow-[0_0_4px_#00f0ff33] transition-all">Hourly</TabsTrigger>
-            <TabsTrigger value="monthly" className="flex-1 text-base font-medium data-[state=active]:bg-[#0a0a0a] data-[state=active]:text-white data-[state=active]:shadow-[0_0_4px_#00f0ff33] transition-all">Monthly</TabsTrigger>
-          </TabsList>
-          {/* Subtle pointer-following border glow */}
-          <div
-            className="pointer-events-none absolute inset-0 z-10"
-            style={pointer.active ? {
-              background: `radial-gradient(60px at ${pointer.x}px ${pointer.y}px, #00f0ff22, transparent 90%)`,
-              transition: 'background 0.2s',
-            } : { transition: 'background 0.2s' }}
-          />
+    <div ref={containerRef} className="max-w-7xl mx-auto w-full flex flex-col gap-6 relative text-white px-0 sm:px-0 bg-transparent">
+      <div className="w-full flex flex-col gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* --- ROW 1: CHARTS --- */}
+          <Card style={getCardStyle(0)} onPointerMove={e => handlePointerMove(e, 0)} onPointerLeave={handlePointerLeave} className="relative overflow-hidden">
+            <CardHeader><CardTitle className="text-base font-medium text-gray-300">Hourly Distribution</CardTitle></CardHeader>
+            <CardContent className="h-[200px]">
+              <ChartContainer config={{ default: { color: NEON_COLOR } }}>
+                <ResponsiveContainer width="100%" height="100%">{renderBarChart(hoursData, 'time', hourlyDataKey)}</ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+          
+          <Card style={getCardStyle(1)} onPointerMove={e => handlePointerMove(e, 1)} onPointerLeave={handlePointerLeave} className="relative overflow-hidden">
+            <CardHeader><CardTitle className="text-base font-medium text-gray-300">Daily Activity</CardTitle></CardHeader>
+            <CardContent className="h-[200px]">
+              <ChartContainer config={{ default: { color: NEON_COLOR } }}>
+                <ResponsiveContainer width="100%" height="100%">{renderAreaChart(emailsByDay, 'date', dailyDataKey)}</ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+
+          <Card style={getCardStyle(2)} onPointerMove={e => handlePointerMove(e, 2)} onPointerLeave={handlePointerLeave} className="relative overflow-hidden">
+            <CardHeader><CardTitle className="text-base font-medium text-gray-300">Monthly Trends</CardTitle></CardHeader>
+            <CardContent className="h-[200px]">
+              <ChartContainer config={{ default: { color: NEON_COLOR } }}>
+                <ResponsiveContainer width="100%" height="100%">{renderAreaChart(monthlyData, 'month', monthlyDataKey)}</ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+
+          {/* --- ROW 2: TABLES & SUMMARY --- */}
+          <Card style={getCardStyle(3)} onPointerMove={e => handlePointerMove(e, 3)} onPointerLeave={handlePointerLeave} className="relative overflow-hidden">
+            <CardHeader><CardTitle className="text-base font-medium text-gray-300">Top Days</CardTitle></CardHeader>
+            <CardContent><Table><TableHeader><TableRow><TableHead className="text-gray-400">Date</TableHead><TableHead className="text-right text-gray-400">Hits</TableHead></TableRow></TableHeader><TableBody>{topDays.map((d) => (<TableRow key={d.date} className="border-white/10"><TableCell className="font-medium">{d.date}</TableCell><TableCell className="text-right">{d[dailyDataKey] ?? 0}</TableCell></TableRow>))}</TableBody></Table></CardContent>
+          </Card>
+
+          <Card style={getCardStyle(4)} onPointerMove={e => handlePointerMove(e, 4)} onPointerLeave={handlePointerLeave} className="relative overflow-hidden">
+            <CardHeader><CardTitle className="text-base font-medium text-gray-300">Top Hours</CardTitle></CardHeader>
+            <CardContent><Table><TableHeader><TableRow><TableHead className="text-gray-400">Time</TableHead><TableHead className="text-right text-gray-400">Hits</TableHead></TableRow></TableHeader><TableBody>{topHours.map((h) => (<TableRow key={h.time} className="border-white/10"><TableCell className="font-medium">{h.time}</TableCell><TableCell className="text-right">{h[hourlyDataKey] ?? 0}</TableCell></TableRow>))}</TableBody></Table></CardContent>
+          </Card>
+          
+          <Card style={getCardStyle(5)} onPointerMove={e => handlePointerMove(e, 5)} onPointerLeave={handlePointerLeave} className="relative overflow-hidden">
+            <CardHeader><CardTitle className="text-base font-medium text-gray-300">Recent Emails</CardTitle></CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-gray-400">To</TableHead>
+                    <TableHead className="text-right text-gray-400">Sent</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recentEmails.length === 0 ? (
+                    <TableRow className="border-white/10">
+                      <TableCell colSpan={2} className="text-center text-gray-400">
+                        No emails sent yet
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    recentEmails.slice(0, 3).map((email) => (
+                      <TableRow key={email.id} className="border-white/10">
+                        <TableCell className="font-medium text-gray-300 max-w-[200px] truncate">
+                          {email.to}
+                        </TableCell>
+                        <TableCell className="text-right text-gray-400 text-xs">
+                          {formatDistanceToNow(new Date(email.createdAt), { addSuffix: true })}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </div>
-        <TabsContent value="daily">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Area Chart: Daily Emails */}
-            <div
-              className="rounded-2xl bg-[#0a0a0a] p-6 shadow-xl border border-[#e5e7eb]/10 relative overflow-hidden transition-all"
-              style={getSubtleNeonStyle(0)}
-              onPointerMove={e => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const localX = e.clientX - rect.left;
-                const localY = e.clientY - rect.top;
-                setPointer({ x: localX, y: localY, active: true, idx: 0 });
-              }}
-              onPointerLeave={() => setPointer({ ...pointer, active: false, idx: -1 })}
-            >
-              <ChartContainer config={chartConfig}>
-                <ResponsiveContainer width="100%" height={220}>
-                  <AreaChart data={emailsByDay}>
-                    <defs>
-                      <linearGradient id="neonCyan" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#00f0ff" stopOpacity={0.3} />
-                        <stop offset="100%" stopColor="#00f0ff" stopOpacity={0.05} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="date" stroke="#fff" tick={{ fill: '#fff', fontSize: 12 }} axisLine={false} tickLine={false} />
-                    <YAxis stroke="#fff" tick={{ fill: '#fff', fontSize: 12 }} axisLine={false} tickLine={false} />
-                    <CartesianGrid stroke="#222" strokeDasharray="3 3" />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Area 
-                      type="monotone" 
-                      dataKey={emailsByDay[0] && 'total' in emailsByDay[0] ? 'total' : 'emails'}
-                      stroke="#00f0ff"
-                      fill="url(#neonCyan)"
-                      strokeWidth={2}
-                      dot={{ r: 4, fill: '#00f0ff', stroke: '#fff', strokeWidth: 1 }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
-            {/* Table: Top Days */}
-            <div 
-              className="rounded-2xl bg-[#0a0a0a] p-6 shadow-xl border border-[#e5e7eb]/10 flex flex-col justify-between relative transition-all"
-              style={getSubtleNeonStyle(1)}
-              onPointerMove={e => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const localX = e.clientX - rect.left;
-                const localY = e.clientY - rect.top;
-                setPointer({ x: localX, y: localY, active: true, idx: 1 });
-              }}
-              onPointerLeave={() => setPointer({ ...pointer, active: false, idx: -1 })}
-            >
-              <h3 className="text-lg font-semibold mb-4 text-white relative z-10">Top Days</h3>
-              <div className="relative z-10">
-                <Table>
-                  {renderTableHeader()}
-                  {renderTableRows(topDays, 'date')}
-                </Table>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-        <TabsContent value="hourly">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Bar Chart: Hourly Distribution */}
-            <div
-              className="rounded-2xl bg-[#0a0a0a] p-6 shadow-xl border border-[#e5e7eb]/10 relative overflow-hidden transition-all"
-              style={getSubtleNeonStyle(2)}
-              onPointerMove={e => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const localX = e.clientX - rect.left;
-                const localY = e.clientY - rect.top;
-                setPointer({ x: localX, y: localY, active: true, idx: 2 });
-              }}
-              onPointerLeave={() => setPointer({ ...pointer, active: false, idx: -1 })}
-            >
-              <ChartContainer config={chartConfig}>
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={hoursData}>
-                    <XAxis dataKey="time" stroke="#fff" tick={{ fill: '#fff', fontSize: 12 }} axisLine={false} tickLine={false} />
-                    <YAxis stroke="#fff" tick={{ fill: '#fff', fontSize: 12 }} axisLine={false} tickLine={false} />
-                    <CartesianGrid stroke="#222" strokeDasharray="3 3" />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey={hoursData[0] && 'total' in hoursData[0] ? 'total' : 'emails'} fill="#ff00ea" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
-            {/* Table: Top Hours */}
-            <div 
-              className="rounded-2xl bg-[#0a0a0a] p-6 shadow-xl border border-[#e5e7eb]/10 flex flex-col justify-between relative transition-all"
-              style={getSubtleNeonStyle(3)}
-              onPointerMove={e => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const localX = e.clientX - rect.left;
-                const localY = e.clientY - rect.top;
-                setPointer({ x: localX, y: localY, active: true, idx: 3 });
-              }}
-              onPointerLeave={() => setPointer({ ...pointer, active: false, idx: -1 })}
-            >
-              <h3 className="text-lg font-semibold mb-4 text-white relative z-10">Top Hours</h3>
-              <div className="relative z-10">
-                <Table>
-                  {renderTableHeader()}
-                  {renderTableRows(topHours, 'time')}
-                </Table>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-        <TabsContent value="monthly">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Area Chart: Emails Sent (Monthly) */}
-            <div
-              className="rounded-2xl bg-[#0a0a0a] p-6 shadow-xl border border-[#e5e7eb]/10 relative overflow-hidden transition-all"
-              style={getSubtleNeonStyle(4)}
-              onPointerMove={e => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const localX = e.clientX - rect.left;
-                const localY = e.clientY - rect.top;
-                setPointer({ x: localX, y: localY, active: true, idx: 4 });
-              }}
-              onPointerLeave={() => setPointer({ ...pointer, active: false, idx: -1 })}
-            >
-              <ChartContainer config={chartConfig}>
-                <ResponsiveContainer width="100%" height={220}>
-                  <AreaChart data={monthlyData}>
-                    <defs>
-                      <linearGradient id="neonCyanMonthly" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#00f0ff" stopOpacity={0.3} />
-                        <stop offset="100%" stopColor="#00f0ff" stopOpacity={0.05} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="month" stroke="#fff" tick={{ fill: '#fff', fontSize: 12 }} axisLine={false} tickLine={false} />
-                    <YAxis stroke="#fff" tick={{ fill: '#fff', fontSize: 12 }} axisLine={false} tickLine={false} />
-                    <CartesianGrid stroke="#222" strokeDasharray="3 3" />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Area 
-                      type="monotone" 
-                      dataKey={monthlyData[0] && 'total' in monthlyData[0] ? 'total' : 'emails'}
-                      stroke="#00f0ff"
-                      fill="url(#neonCyanMonthly)"
-                      strokeWidth={2}
-                      dot={{ r: 4, fill: '#00f0ff', stroke: '#fff', strokeWidth: 1 }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </div>
-            {/* Table: Top Months by Emails */}
-            <div 
-              className="rounded-2xl bg-[#0a0a0a] p-6 shadow-xl border border-[#e5e7eb]/10 flex flex-col justify-between relative transition-all"
-              style={getSubtleNeonStyle(5)}
-              onPointerMove={e => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const localX = e.clientX - rect.left;
-                const localY = e.clientY - rect.top;
-                setPointer({ x: localX, y: localY, active: true, idx: 5 });
-              }}
-              onPointerLeave={() => setPointer({ ...pointer, active: false, idx: -1 })}
-            >
-              <h3 className="text-lg font-semibold mb-4 text-white relative z-10">Top Months</h3>
-              <div className="relative z-10">
-                <Table>
-                  {renderTableHeader()}
-                  {monthlyData && monthlyData.length > 0
-                    ? renderTableRows([...monthlyData]
-                        .filter(row => row && row.month)
-                        .sort((a, b) => {
-                          // Parse month string to Date for correct sorting
-                          const parseMonth = (m) => {
-                            // Try to parse 'Jul 2025' as Date
-                            const d = Date.parse('01 ' + m);
-                            return isNaN(d) ? 0 : d;
-                          };
-                          return parseMonth(b.month) - parseMonth(a.month);
-                        })
-                        .slice(0, 5), 'month')
-                    : null}
-                </Table>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+      </div>
     </div>
   );
 }

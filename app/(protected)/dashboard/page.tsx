@@ -32,6 +32,16 @@ export default async function DashboardPage() {
   const activeApiKeys = apiKeys.filter(key => key.status === "active").length;
   const totalApiKeys = apiKeys.length;
 
+  // Get recent emails (last 10)
+  const recentEmails = emails
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 10)
+    .map(email => ({
+      id: email.id,
+      to: email.to,
+      createdAt: email.createdAt,
+    }));
+
   // Prepare chart data: emails sent per day (last 7 days)
   const now = new Date();
   const days = Array.from({ length: 7 }, (_, i) => {
@@ -180,9 +190,7 @@ export default async function DashboardPage() {
           emailsByDay={emailsByDay}
           hoursData={hoursData}
           monthlyData={monthlyData}
-          apiKeyStatusData={apiKeyStatusData}
-          totalApiKeys={totalApiKeys}
-          activeApiKeys={activeApiKeys}
+          recentEmails={recentEmails}
         />
       </div>
     </div>
