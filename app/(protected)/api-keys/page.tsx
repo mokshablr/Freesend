@@ -8,6 +8,7 @@ import { getApiKeysByTenant } from "@/lib/api-key";
 
 import CreateApiKeyDialog from "./add-key-dialog";
 import ApiKeyTable from "./api-key-table";
+import { ApiKeysWrapper } from "./api-keys-wrapper";
 
 type ApiKeys = {
   id: string;
@@ -59,9 +60,9 @@ export default function ApiKeys() {
             <CreateApiKeyDialog onApiKeyCreated={fetchApiKeys} />
           </div>
         </div>
-        <div className="mx-auto max-w-7xl px-6">
+        <ApiKeysWrapper>
           <ApiKeyTable initialApiKeys={apiKeys} initialIsLoading={isLoading} />
-        </div>
+        </ApiKeysWrapper>
       </div>
     </>
   );

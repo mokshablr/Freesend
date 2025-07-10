@@ -1,13 +1,11 @@
 import { redirect } from "next/navigation";
 import { UserRole } from "@prisma/client";
-import { Mail, KeyRound, TrendingUp, Activity } from "lucide-react";
 
 import { getCurrentUser } from "@/lib/session";
 import { constructMetadata } from "@/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getEmailsByTenant } from "@/lib/emails";
 import { getApiKeysByTenant } from "@/lib/api-key";
-import { DashboardCharts } from "@/components/dashboard/dashboard-charts";
+import { DashboardClient } from "./dashboard-client";
 
 export const metadata = constructMetadata({
   title: "Dashboard",
@@ -125,68 +123,11 @@ export default async function DashboardPage() {
           Overview
         </h1>
       </div>
-      <div className="space-y-6">
-        {/* Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Emails</CardTitle>
-              <Mail className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalEmails}</div>
-              <p className="text-xs text-muted-foreground">
-                {emailsByDay[emailsByDay.length - 1]?.emails || 0} sent today
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active API Keys</CardTitle>
-              <KeyRound className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{activeApiKeys}</div>
-              <p className="text-xs text-muted-foreground">
-                {totalApiKeys} total keys
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">This Week</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {emailsByDay.reduce((sum, day) => sum + day.emails, 0)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                emails sent this week
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Activity</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {hoursData.reduce((sum, hour) => sum + hour.emails, 0)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                emails sent today
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Charts Section */}
-        <DashboardCharts 
+      <div className="mx-auto max-w-7xl px-6">
+        <DashboardClient
+          totalEmails={totalEmails}
+          activeApiKeys={activeApiKeys}
+          totalApiKeys={totalApiKeys}
           emailsByDay={emailsByDay}
           hoursData={hoursData}
           monthlyData={monthlyData}

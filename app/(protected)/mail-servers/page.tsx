@@ -6,6 +6,7 @@ import { getServersByTenant } from "@/lib/smtp-config";
 
 import CreateMailServerDialog from "./add-server-dialog";
 import MailServerTable from "./mail-server-table";
+import { MailServersWrapper } from "./mail-servers-wrapper";
 
 type SmtpConfig = {
   id: string;
@@ -48,12 +49,12 @@ export default function MailServers() {
             <CreateMailServerDialog onMailServerCreated={fetchMailServers} />
           </div>
         </div>
-        <div className="mx-auto max-w-7xl px-6">
+        <MailServersWrapper>
           <MailServerTable
             initialMailServers={data}
             initialIsLoading={isLoading}
           />
-        </div>
+        </MailServersWrapper>
       </div>
     </>
   );
