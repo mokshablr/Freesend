@@ -51,7 +51,7 @@ export default function Component() {
               </div>
               <div className="w-full max-w-sm space-y-2">
                 <Button size="lg" className="text-md w-full font-semibold">
-                  <Link href="/emails">Get Started</Link>
+                  <Link href="/dashboard">Get Started</Link>
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
