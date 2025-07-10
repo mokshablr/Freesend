@@ -126,7 +126,7 @@ export function NavBar({ scroll = false }: NavBarProps) {
           )}
 
           {session ? (
-            <Link href="/emails" className="hidden md:block">
+            <Link href="/dashboard" className="hidden md:block">
               <Button
                 className="gap-2 rounded-md px-4"
                 variant="default"
