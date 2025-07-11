@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import EmailTable from "./email-table";
+import { EmailsWrapper } from "./emails-wrapper";
 
 export default function Emails() {
   const [data, setData] = useState<any[]>([]);
@@ -383,7 +384,7 @@ export default function Emails() {
             )}
           </div>
         </div>
-        <div className="mx-auto max-w-7xl px-6">
+        <EmailsWrapper>
           <EmailTable
             initialEmailList={filteredData.map(email => ({
               ...email,
@@ -397,7 +398,7 @@ export default function Emails() {
             activeFilterApiKey={filterMode === "dropdown" && selectedApiKey !== "all" ? selectedApiKey : undefined}
             onClearFilter={handleClearFilterFromTable}
           />
-        </div>
+        </EmailsWrapper>
       </div>
     </>
   );
