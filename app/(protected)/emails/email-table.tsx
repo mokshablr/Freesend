@@ -7,6 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 import { deleteServer, updateMailServer } from "@/lib/smtp-config";
 import { DataTable } from "@/components/ui/data-table";
 import { Icons } from "@/components/shared/icons";
+import EmailContentModal from "@/components/modals/email-content-modal";
 
 type Emails = {
   id: string;
@@ -18,6 +19,7 @@ type Emails = {
   html_body?: string;
   text_body?: string;
   createdAt: string | Date;
+  reply_to?: string; // Added reply_to field
 };
 
 interface EmailTableProps {
@@ -51,6 +53,8 @@ const EmailTable: React.FC<EmailTableProps> = ({
 
   const [emails, setEmails] = useState<Emails[]>(initialEmailList);
   const [isLoading, setIsLoading] = useState<boolean>(initialIsLoading);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState<Emails | null>(null);
 
   // Pagination state
   const [pageIndex, setPageIndex] = useState(0);
@@ -93,6 +97,11 @@ const EmailTable: React.FC<EmailTableProps> = ({
     }
   };
 
+  const handleEmailClick = (email: Emails) => {
+    setSelectedEmail(email);
+    setIsModalOpen(true);
+  };
+
   const columns = [
     { 
       id: "from", 
@@ -114,8 +123,13 @@ const EmailTable: React.FC<EmailTableProps> = ({
       id: "subject", 
       header: "Subject", 
       accessorKey: "subject",
-      cell: ({ getValue }) => (
-        <span className="text-xs text-foreground font-medium">{getValue()}</span>
+      cell: ({ row }) => (
+        <button
+          onClick={() => handleEmailClick(row.original)}
+          className="text-xs text-foreground font-medium hover:underline cursor-pointer"
+        >
+          {row.original.subject}
+        </button>
       )
     },
     {
@@ -123,7 +137,7 @@ const EmailTable: React.FC<EmailTableProps> = ({
       header: "API Key",
       accessorKey: "apiKeyId",
       cell: ({ getValue }) => {
-        const apiKeyId = getValue();
+        const apiKeyId = getValue() as string;
         if (!apiKeyId) return <span className="text-xs text-muted-foreground">-</span>;
         if (apiKeyMap[apiKeyId]) {
           const isActiveFilter = activeFilterApiKey === apiKeyId;
@@ -249,6 +263,11 @@ const EmailTable: React.FC<EmailTableProps> = ({
           </button>
         </div>
       </div>
+      <EmailContentModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        email={selectedEmail}
+      />
     </>
   );
 };

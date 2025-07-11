@@ -6,6 +6,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  Code,
   Copy,
   CreditCard,
   File,
@@ -23,6 +24,7 @@ import {
   MessagesSquare,
   Moon,
   Mail,
+  MoreHorizontal,
   MoreVertical,
   Package,
   Plus,
@@ -59,6 +61,7 @@ export const Icons = {
   chevronRight: ChevronRight,
   check: Check,
   close: X,
+  code: Code,
   copy: Copy,
   dashboard: LayoutPanelLeft,
   ellipsis: MoreVertical,
@@ -162,4 +165,5 @@ export const Icons = {
   goal: Goal,
   telescope: Telescope,
   save: Save,
+  moreHorizontal: MoreHorizontal
 };
