@@ -138,6 +138,7 @@ export const POST = async (req: Request) => {
       user: smtpConfig.user,
       pass: decryptedPassword,
     },
+    pool: true, // Enable connection pooling
   });
 
   if (!transporter) {
