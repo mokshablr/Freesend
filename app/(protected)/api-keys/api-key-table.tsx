@@ -101,8 +101,8 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
   };
 
   const closeUpdateDialog = () => {
-    setSelectedApiKey(null);
     setUpdateDialogOpen(false);
+    setSelectedApiKey(null);
   };
 
   const columns = [

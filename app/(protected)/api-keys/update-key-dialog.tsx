@@ -34,7 +34,7 @@ export default function UpdateApiKeyDialog({
   useEffect(() => {
     setName(initialName);
     setIsOpen(initialIsOpen);
-  }, [initialName]);
+  }, [initialName, initialIsOpen]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -46,7 +46,6 @@ export default function UpdateApiKeyDialog({
         toast.error("Could not find required API Key");
       } else {
         await onUpdate(selectedApiKeyId, newName);
-        setIsOpen(false);
         onClose();
         setName("");
       }
@@ -56,7 +55,12 @@ export default function UpdateApiKeyDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      setIsOpen(open);
+      if (!open) {
+        onClose();
+      }
+    }}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Update API Key</DialogTitle>

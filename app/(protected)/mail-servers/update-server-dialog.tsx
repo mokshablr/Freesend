@@ -59,7 +59,7 @@ export default function UpdateMailServerDialog({
     setPort(initialData.port);
     setSecurity(initialData.security);
     setIsOpen(initialIsOpen);
-  }, [initialData]);
+  }, [initialData, initialIsOpen]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -75,7 +75,6 @@ export default function UpdateMailServerDialog({
           security: security,
         };
         await onUpdate(selectedMailServerId, updateData);
-        setIsOpen(false);
         onClose();
       }
     } catch (error) {
@@ -84,7 +83,12 @@ export default function UpdateMailServerDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      setIsOpen(open);
+      if (!open) {
+        onClose();
+      }
+    }}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Enter mail server details</DialogTitle>

@@ -112,6 +112,7 @@ const MailServerTable: React.FC<MailServerTableProps> = ({
   };
 
   const closeUpdateDialog = () => {
+    setUpdateDialogOpen(false);
     setSelectedMailServer({
       id: "",
       name: "",
@@ -120,7 +121,6 @@ const MailServerTable: React.FC<MailServerTableProps> = ({
       user: "",
       security: "",
     });
-    setUpdateDialogOpen(false);
   };
 
   const columns = [
