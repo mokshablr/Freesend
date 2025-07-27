@@ -334,11 +334,8 @@ Send a `POST` Request to `https://freesend.metafog.io/api/send-email`
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `filename` | string | Yes | Name of the attachment file |
-| `content` | string | Yes** | Base64 encoded file content |
-| `path` | string | Yes** | File path (for server-side files only) |
+| `content` | string | Yes | Base64 encoded file content |
 | `contentType` | string | No | MIME type (e.g., "application/pdf", "image/png") |
-
-**Either `content` or `path` is required, but not both.
 
 ### Attachment Examples
 
@@ -364,12 +361,7 @@ Send a `POST` Request to `https://freesend.metafog.io/api/send-email`
   "contentType": "image/png"
 }
 
-// Server file path (for server-side usage only)
-{
-  "filename": "report.xlsx",
-  "path": "/path/to/report.xlsx",
-  "contentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-}
+
 ```
 
 ## Response
@@ -476,6 +468,10 @@ Send a `POST` Request to `https://freesend.metafog.io/api/send-email`
 | `.xlsx` | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` |
 | `.docx` | `application/vnd.openxmlformats-officedocument.wordprocessingml.document` |
 | `.pptx` | `application/vnd.openxmlformats-officedocument.presentationml.presentation` |
+
+## Security Note
+
+> **Important**: For security reasons, Freesend only accepts attachments as base64-encoded content. Server-side file paths are no longer supported to prevent potential file system access vulnerabilities.
 
 ## Best Practices
 

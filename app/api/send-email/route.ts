@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-import { getApiKeyStatus, getSmtpConfigByApiKey } from "@/lib/api-key"; // Ensure this import is correct
+import { getApiKeyStatus, getSmtpConfigByApiKey } from "@/lib/api-key";
 import { createEmail } from "@/lib/emails";
 import { decrypt } from "@/lib/pwd";
 
@@ -13,8 +13,7 @@ type emailContent = {
   html?: string;
   attachments?: Array<{
     filename: string;
-    content?: string;  // base64 encoded content
-    path?: string;     // file path (for server-side files)
+    content: string;  // base64 encoded content (required)
     contentType?: string;
   }>;
 };
@@ -128,6 +127,58 @@ export const POST = async (req: Request) => {
     );
   }
 
+  // Validate attachments if provided
+  if (message.attachments) {
+    if (!Array.isArray(message.attachments)) {
+      return new Response(
+        JSON.stringify({ error: "Attachments must be an array." }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    for (let i = 0; i < message.attachments.length; i++) {
+      const attachment = message.attachments[i];
+      
+      if (!attachment.filename) {
+        return new Response(
+          JSON.stringify({ error: `Attachment at index ${i} is missing required field 'filename'.` }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      if (!attachment.content) {
+        return new Response(
+          JSON.stringify({ error: `Attachment '${attachment.filename}' must have 'content' field with base64 encoded data.` }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      // Validate base64 content if provided
+      if (attachment.content) {
+        // Check if content is a valid base64 string
+        const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
+        if (!base64Regex.test(attachment.content)) {
+          return new Response(
+            JSON.stringify({ error: `Attachment '${attachment.filename}' has invalid base64 content.` }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+        }
+      }
+    }
+  }
+
   const decryptedPassword = decrypt(smtpConfig.pass);
   // Create a transporter object using the SMTP server details
   const transporter = nodemailer.createTransport({
@@ -151,13 +202,27 @@ export const POST = async (req: Request) => {
   }
 
   try {
+    // Process attachments to decode base64 content
+    const processedAttachments = message.attachments?.map(attachment => {
+      try {
+        // Decode base64 content to Buffer
+        return {
+          filename: attachment.filename,
+          content: Buffer.from(attachment.content, 'base64'),
+          contentType: attachment.contentType,
+        };
+      } catch (error) {
+        throw new Error(`Invalid base64 content for attachment '${attachment.filename}': ${error.message}`);
+      }
+    });
+
     await transporter.sendMail({
       from: fromField,
       to: message.to,
       subject: message.subject,
       text: message.text,
       html: message.html,
-      attachments: message.attachments,
+      attachments: processedAttachments,
     });
     const attachmentString = JSON.stringify(message.attachments);
     await createEmail(
@@ -178,6 +243,7 @@ export const POST = async (req: Request) => {
       },
     );
   } catch (error) {
+    console.error("Error sending email:", error);
     return new Response(
       JSON.stringify({ error: `Error sending email: ${error.message}` }),
       {
