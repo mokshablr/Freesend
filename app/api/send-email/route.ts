@@ -363,6 +363,10 @@ export const POST = async (req: Request) => {
       text: message.text,
       html: message.html,
       attachments: processedAttachments,
+      headers: {
+        'X-Mailer': 'Freesend',
+        'X-Sent-By': 'Freesend Email API - https://freesend.metafog.io'
+      }
     });
     const attachmentString = JSON.stringify(message.attachments);
     await createEmail(
