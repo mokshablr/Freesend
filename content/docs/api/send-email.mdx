@@ -36,7 +36,8 @@ Ensure you put your API Key as a Bearer token in the Authorization header of the
     "attachments": [  // (optional) Array of attachments
         {
             "filename": "invoice.pdf",  // Name of the file
-            "content": "base64EncodedContent",  // Base64 encoded file content
+            "content": "base64EncodedContent",  // Base64 encoded file content (optional if url is provided)
+            "url": "https://example.com/file.pdf",  // URL to external file (optional if content is provided)
             "contentType": "application/pdf"  // (optional) MIME type
         }
     ]
@@ -50,6 +51,287 @@ Send a `POST` Request to `https://freesend.metafog.io/api/send-email`
 </Steps>
 
 ## Example Usage
+
+### Send attachments from a remote file
+
+Include the `url` parameter to send attachments from a remote file. This parameter accepts a URL to the file you want to attach. Define the file name that will be attached using the `filename` parameter.
+
+<CodeTabs>
+  <CodeTabs.Tab label="cURL">
+    ```bash
+    curl -X POST https://freesend.metafog.io/api/send-email \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "fromName": "Your Company",
+        "fromEmail": "hello@yourdomain.com",
+        "to": "recipient@email.com",
+        "subject": "Email with external attachments!",
+        "html": "<h1>Please find the files attached.</h1>",
+        "text": "Please find the files attached.",
+        "attachments": [
+          {
+            "filename": "monthly-report.pdf",
+            "url": "https://example.com/reports/monthly-report.pdf",
+            "contentType": "application/pdf"
+          },
+          {
+            "filename": "company-logo.png",
+            "url": "https://example.com/images/logo.png",
+            "contentType": "image/png"
+          }
+        ]
+      }'
+    ```
+  </CodeTabs.Tab>
+  <CodeTabs.Tab label="JavaScript">
+    ```js
+    const sendEmailWithUrlAttachments = async () => {
+      const emailData = {
+        fromName: "Your Company",
+        fromEmail: "hello@yourdomain.com",
+        to: "recipient@email.com",
+        subject: "Email with external attachments",
+        html: "<h1>Check out these files!</h1>",
+        text: "Check out these files!",
+        attachments: [
+          {
+            filename: "monthly-report.pdf",
+            url: "https://example.com/reports/monthly-report.pdf",
+            contentType: "application/pdf"
+          },
+          {
+            filename: "company-logo.png",
+            url: "https://example.com/images/logo.png",
+            contentType: "image/png"
+          },
+          {
+            filename: "data.csv",
+            url: "https://api.example.com/export/data.csv",
+            contentType: "text/csv"
+          }
+        ]
+      };
+
+      const response = await fetch("https://freesend.metafog.io/api/send-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer YOUR_API_KEY",
+        },
+        body: JSON.stringify(emailData),
+      });
+
+      return response.json();
+    };
+
+    // Usage
+    sendEmailWithUrlAttachments()
+      .then(result => console.log('Email sent:', result))
+      .catch(error => console.error('Failed to send email:', error));
+    ```
+  </CodeTabs.Tab>
+  <CodeTabs.Tab label="React">
+    ```jsx
+    import React, { useState } from 'react';
+
+    const EmailSenderWithUrls = () => {
+      const [sending, setSending] = useState(false);
+      const [urls, setUrls] = useState([
+        { filename: '', url: '', contentType: '' }
+      ]);
+
+      const addUrl = () => {
+        setUrls([...urls, { filename: '', url: '', contentType: '' }]);
+      };
+
+      const updateUrl = (index, field, value) => {
+        const newUrls = [...urls];
+        newUrls[index][field] = value;
+        setUrls(newUrls);
+      };
+
+      const removeUrl = (index) => {
+        setUrls(urls.filter((_, i) => i !== index));
+      };
+
+      const sendEmail = async () => {
+        const validUrls = urls.filter(u => u.filename && u.url);
+        if (validUrls.length === 0) return;
+        
+        setSending(true);
+
+        try {
+          const emailData = {
+            fromName: "Your Company",
+            fromEmail: "hello@yourdomain.com",
+            to: "recipient@email.com",
+            subject: "Email with external attachments",
+            html: "<h1>Check out these files!</h1>",
+            text: "Check out these files!",
+            attachments: validUrls
+          };
+
+          const response = await fetch("/api/send-email", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer YOUR_API_KEY",
+            },
+            body: JSON.stringify(emailData),
+          });
+
+          const result = await response.json();
+          console.log("Email sent:", result);
+        } catch (error) {
+          console.error("Error:", error);
+        } finally {
+          setSending(false);
+        }
+      };
+
+      return (
+        <div>
+          <h3>Add External File URLs</h3>
+          {urls.map((url, index) => (
+            <div key={index} style={{ marginBottom: '10px' }}>
+              <input
+                type="text"
+                placeholder="Filename (e.g., report.pdf)"
+                value={url.filename}
+                onChange={(e) => updateUrl(index, 'filename', e.target.value)}
+                style={{ marginRight: '10px' }}
+              />
+              <input
+                type="text"
+                placeholder="URL (e.g., https://example.com/file.pdf)"
+                value={url.url}
+                onChange={(e) => updateUrl(index, 'url', e.target.value)}
+                style={{ marginRight: '10px' }}
+              />
+              <input
+                type="text"
+                placeholder="Content Type (e.g., application/pdf)"
+                value={url.contentType}
+                onChange={(e) => updateUrl(index, 'contentType', e.target.value)}
+                style={{ marginRight: '10px' }}
+              />
+              <button onClick={() => removeUrl(index)}>Remove</button>
+            </div>
+          ))}
+          <button onClick={addUrl}>Add URL</button>
+          <button onClick={sendEmail} disabled={sending}>
+            {sending ? "Sending..." : "Send Email"}
+          </button>
+        </div>
+      );
+    };
+    ```
+  </CodeTabs.Tab>
+  <CodeTabs.Tab label="Python">
+    ```python
+    import requests
+
+    def send_email_with_url_attachments():
+        url = "https://freesend.metafog.io/api/send-email"
+        headers = {
+            "Authorization": "Bearer YOUR_API_KEY",
+            "Content-Type": "application/json"
+        }
+        
+        data = {
+            "fromName": "Your Company",
+            "fromEmail": "hello@yourdomain.com",
+            "to": "recipient@email.com",
+            "subject": "Email with external attachments",
+            "html": "<h1>Check out these files!</h1>",
+            "text": "Check out these files!",
+            "attachments": [
+                {
+                    "filename": "monthly-report.pdf",
+                    "url": "https://example.com/reports/monthly-report.pdf",
+                    "contentType": "application/pdf"
+                },
+                {
+                    "filename": "company-logo.png",
+                    "url": "https://example.com/images/logo.png",
+                    "contentType": "image/png"
+                },
+                {
+                    "filename": "data.csv",
+                    "url": "https://api.example.com/export/data.csv",
+                    "contentType": "text/csv"
+                }
+            ]
+        }
+        
+        response = requests.post(url, headers=headers, json=data)
+        return response.json()
+
+    # Usage
+    result = send_email_with_url_attachments()
+    print(result)
+    ```
+  </CodeTabs.Tab>
+  <CodeTabs.Tab label="Node.js">
+    ```js
+    const axios = require('axios');
+
+    const sendEmailWithUrlAttachments = async () => {
+      const url = "https://freesend.metafog.io/api/send-email";
+      const apiKey = "YOUR_API_KEY";
+      
+      const emailData = {
+        fromName: "Your Company",
+        fromEmail: "hello@yourdomain.com",
+        to: "recipient@email.com",
+        subject: "Email with external attachments",
+        html: "<h1>Check out these files!</h1>",
+        text: "Check out these files!",
+        attachments: [
+          {
+            filename: "monthly-report.pdf",
+            url: "https://example.com/reports/monthly-report.pdf",
+            contentType: "application/pdf"
+          },
+          {
+            filename: "company-logo.png",
+            url: "https://example.com/images/logo.png",
+            contentType: "image/png"
+          },
+          {
+            filename: "data.csv",
+            url: "https://api.example.com/export/data.csv",
+            contentType: "text/csv"
+          }
+        ]
+      };
+
+      try {
+        const response = await axios.post(url, emailData, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`,
+          }
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error sending email:', error.response?.data || error.message);
+        throw error;
+      }
+    };
+
+    // Usage
+    sendEmailWithUrlAttachments()
+      .then(result => console.log('Email sent:', result))
+      .catch(error => console.error('Failed to send email:', error));
+    ```
+  </CodeTabs.Tab>
+</CodeTabs>
+
+### Send attachments from a local file
+
+Include the `content` parameter to send attachments from a local file. This parameter accepts the Base64 encoded content of the file you want to attach. Define the file name that will be attached using the `filename` parameter.
 
 <CodeTabs>
   <CodeTabs.Tab label="cURL">
@@ -74,9 +356,8 @@ Send a `POST` Request to `https://freesend.metafog.io/api/send-email`
       }'
     ```
   </CodeTabs.Tab>
-  <CodeTabs.Tab label="JavaScript (Client-Side)">
+  <CodeTabs.Tab label="JavaScript">
     ```js
-    // Client-side file upload with attachment
     const sendEmailWithFile = async (file) => {
       // Convert file to base64
       const toBase64 = (file) => new Promise((resolve, reject) => {
@@ -334,8 +615,11 @@ Send a `POST` Request to `https://freesend.metafog.io/api/send-email`
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `filename` | string | Yes | Name of the attachment file |
-| `content` | string | Yes | Base64 encoded file content |
+| `content` | string | No* | Base64 encoded file content |
+| `url` | string | No* | URL to external file (HTTP/HTTPS only) |
 | `contentType` | string | No | MIME type (e.g., "application/pdf", "image/png") |
+
+*Either `content` or `url` is required, but not both.
 
 ### Attachment Examples
 
@@ -347,21 +631,42 @@ Send a `POST` Request to `https://freesend.metafog.io/api/send-email`
   "contentType": "application/pdf"
 }
 
-// Text attachment
+// URL-based attachment (external file)
+{
+  "filename": "report.pdf",
+  "url": "https://example.com/reports/monthly-report.pdf",
+  "contentType": "application/pdf"
+}
+
+// Text attachment with base64
 {
   "filename": "notes.txt", 
   "content": "SGVsbG8gV29ybGQh",  // "Hello World!" in base64
   "contentType": "text/plain"
 }
 
-// Image attachment
+// Image attachment from URL
 {
   "filename": "logo.png",
-  "content": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+  "url": "https://example.com/images/company-logo.png",
   "contentType": "image/png"
 }
 
-
+// Mixed attachments (base64 + URL)
+{
+  "attachments": [
+    {
+      "filename": "invoice.pdf",
+      "content": "base64EncodedPDF...",
+      "contentType": "application/pdf"
+    },
+    {
+      "filename": "receipt.jpg",
+      "url": "https://example.com/receipts/12345.jpg",
+      "contentType": "image/jpeg"
+    }
+  ]
+}
 ```
 
 ## Response
@@ -435,10 +740,72 @@ Send a `POST` Request to `https://freesend.metafog.io/api/send-email`
 }
 ```
 
+#### 400 Bad Request - Invalid Attachment Configuration
+```json
+{
+  "error": "Attachment 'filename.pdf' must have either 'content' or 'url' field."
+}
+```
+
+```json
+{
+  "error": "Attachment 'filename.pdf' cannot have both 'content' and 'url' fields. Use either one."
+}
+```
+
+```json
+{
+  "error": "Attachment 'filename.pdf' has invalid URL protocol. Only HTTP and HTTPS are allowed."
+}
+```
+
+```json
+{
+  "error": "Attachment 'filename.pdf' has invalid URL format."
+}
+```
+
+```json
+{
+  "error": "Attachment 'filename.pdf' URL is not allowed. Internal/local URLs are blocked for security."
+}
+```
+
+```json
+{
+  "error": "Attachment 'filename.pdf' URL port is not allowed. Internal service ports are blocked for security."
+}
+```
+
+```json
+{
+  "error": "Attachment 'filename.pdf' URL is not allowed. Access to the hosting server is blocked for security."
+}
+```
+
 #### 500 Internal Server Error - Email Sending Failed
 ```json
 {
   "error": "Error sending email: [specific error message]"
+}
+```
+
+#### 500 Internal Server Error - URL Fetch Failed
+```json
+{
+  "error": "Error processing attachment 'filename.pdf': Failed to fetch attachment from URL: 404 Not Found"
+}
+```
+
+```json
+{
+  "error": "Error processing attachment 'filename.pdf': Timeout fetching attachment from URL (30s limit)"
+}
+```
+
+```json
+{
+  "error": "Error processing attachment 'filename.pdf': Attachment file too large: 30MB (max 25MB)"
 }
 ```
 
@@ -471,18 +838,37 @@ Send a `POST` Request to `https://freesend.metafog.io/api/send-email`
 
 ## Security Note
 
-> **Important**: For security reasons, Freesend only accepts attachments as base64-encoded content. Server-side file paths are no longer supported to prevent potential file system access vulnerabilities.
+> **Important**: Freesend supports two types of attachments:
+> - **Base64-encoded content**: For direct file uploads (recommended for smaller files)
+> - **URL-based attachments**: For external files accessible via HTTP/HTTPS URLs
+> 
+> **Security Protections**:
+> - Server-side file paths are not supported
+> - Internal/local URLs are blocked (localhost, private IPs, .local domains)
+> - Access to the hosting server is blocked
+> - Common internal service ports are blocked
+> - Only public, external URLs are allowed
 
 ## Best Practices
 
 ### File Size Limits
-- Keep attachments under 25MB for best performance
-- For larger files, consider using cloud storage links instead
+- Keep base64 attachments under 25MB for best performance
+- For larger files, consider using URL-based attachments instead
+- URL-based attachments can handle larger files since they're downloaded on-demand
 
 ### Base64 Encoding
 - Always encode binary files as base64
 - Remove any data URL prefixes (e.g., `data:application/pdf;base64,`)
 - Use proper content type headers for better email client compatibility
+
+### URL-based Attachments
+- Ensure URLs are publicly accessible and return proper HTTP status codes
+- Use HTTPS URLs for security
+- URLs should return the actual file content, not redirects
+- **File size limit**: 25MB per attachment
+- **Timeout limit**: 30 seconds per URL fetch
+- URLs must be accessible from Freesend's servers
+- **Security**: Only external, public URLs are allowed (internal/local URLs are blocked)
 
 ### Multiple Attachments
 ```json
@@ -495,8 +881,13 @@ Send a `POST` Request to `https://freesend.metafog.io/api/send-email`
     },
     {
       "filename": "receipt.jpg",
-      "content": "base64EncodedImage...",
+      "url": "https://example.com/receipts/12345.jpg",
       "contentType": "image/jpeg"
+    },
+    {
+      "filename": "report.pdf",
+      "url": "https://api.example.com/reports/monthly.pdf",
+      "contentType": "application/pdf"
     }
   ]
 }

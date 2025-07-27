@@ -13,7 +13,8 @@ type emailContent = {
   html?: string;
   attachments?: Array<{
     filename: string;
-    content: string;  // base64 encoded content (required)
+    content?: string;  // base64 encoded content (optional if url is provided)
+    url?: string;      // URL to external file (optional if content is provided)
     contentType?: string;
   }>;
 };
@@ -152,9 +153,9 @@ export const POST = async (req: Request) => {
         );
       }
 
-      if (!attachment.content) {
+      if (!attachment.content && !attachment.url) {
         return new Response(
-          JSON.stringify({ error: `Attachment '${attachment.filename}' must have 'content' field with base64 encoded data.` }),
+          JSON.stringify({ error: `Attachment '${attachment.filename}' must have either 'content' or 'url' field.` }),
           {
             status: 400,
             headers: { "Content-Type": "application/json" },
@@ -162,13 +163,110 @@ export const POST = async (req: Request) => {
         );
       }
 
-      // Validate base64 content if provided
+      // Validate that both content and url are not provided simultaneously
+      if (attachment.content && attachment.url) {
+        return new Response(
+          JSON.stringify({ error: `Attachment '${attachment.filename}' cannot have both 'content' and 'url' fields. Use either one.` }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
+      }
+
       if (attachment.content) {
         // Check if content is a valid base64 string
         const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
         if (!base64Regex.test(attachment.content)) {
           return new Response(
             JSON.stringify({ error: `Attachment '${attachment.filename}' has invalid base64 content.` }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            },
+          );
+        }
+      }
+
+      if (attachment.url) {
+        // Validate URL format
+        try {
+          const url = new URL(attachment.url);
+          if (!['http:', 'https:'].includes(url.protocol)) {
+            return new Response(
+              JSON.stringify({ error: `Attachment '${attachment.filename}' has invalid URL protocol. Only HTTP and HTTPS are allowed.` }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
+          }
+
+          // Block internal/local URLs to prevent server file access
+          const hostname = url.hostname.toLowerCase();
+          const port = url.port;
+          
+          // Block localhost and internal IPs
+          if (
+            hostname === 'localhost' ||
+            hostname === '127.0.0.1' ||
+            hostname === '::1' ||
+            hostname === '0.0.0.0' ||
+            hostname.startsWith('192.168.') ||
+            hostname.startsWith('10.') ||
+            hostname.startsWith('172.') ||
+            hostname.startsWith('169.254.') ||
+            hostname.endsWith('.local') ||
+            hostname.endsWith('.internal') ||
+            hostname.endsWith('.home') ||
+            hostname.endsWith('.lan')
+          ) {
+            return new Response(
+              JSON.stringify({ error: `Attachment '${attachment.filename}' URL is not allowed. Internal/local URLs are blocked for security.` }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
+          }
+
+          // Block common internal ports
+          if (port && ['21', '22', '23', '25', '53', '80', '110', '143', '443', '993', '995', '3306', '5432', '6379', '8080', '8443'].includes(port)) {
+            return new Response(
+              JSON.stringify({ error: `Attachment '${attachment.filename}' URL port is not allowed. Internal service ports are blocked for security.` }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
+          }
+
+          // Block file:// protocol attempts (should be caught by protocol check, but extra safety)
+          if (url.protocol === 'file:') {
+            return new Response(
+              JSON.stringify({ error: `Attachment '${attachment.filename}' URL protocol is not allowed. File system access is blocked for security.` }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
+          }
+
+          // Block access to the same server where Freesend is hosted
+          const currentHost = req.headers.get('host')?.split(':')[0]?.toLowerCase();
+          if (currentHost && (hostname === currentHost || hostname.endsWith(`.${currentHost}`))) {
+            return new Response(
+              JSON.stringify({ error: `Attachment '${attachment.filename}' URL is not allowed. Access to the hosting server is blocked for security.` }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              },
+            );
+          }
+
+        } catch (error) {
+          return new Response(
+            JSON.stringify({ error: `Attachment '${attachment.filename}' has invalid URL format.` }),
             {
               status: 400,
               headers: { "Content-Type": "application/json" },
@@ -202,19 +300,61 @@ export const POST = async (req: Request) => {
   }
 
   try {
-    // Process attachments to decode base64 content
-    const processedAttachments = message.attachments?.map(attachment => {
-      try {
-        // Decode base64 content to Buffer
-        return {
-          filename: attachment.filename,
-          content: Buffer.from(attachment.content, 'base64'),
-          contentType: attachment.contentType,
-        };
-      } catch (error) {
-        throw new Error(`Invalid base64 content for attachment '${attachment.filename}': ${error.message}`);
-      }
-    });
+    // Process attachments to decode base64 content or fetch from URLs
+    const processedAttachments = await Promise.all(
+      message.attachments?.map(async (attachment) => {
+        try {
+          let content: Buffer;
+          if (attachment.content) {
+            // Decode base64 content to Buffer
+            content = Buffer.from(attachment.content, 'base64');
+          } else if (attachment.url) {
+            // Download content from URL and convert to Buffer
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+            
+            try {
+              const response = await fetch(attachment.url, {
+                signal: controller.signal,
+                headers: {
+                  'User-Agent': 'Freesend/1.0'
+                }
+              });
+              clearTimeout(timeoutId);
+              
+              if (!response.ok) {
+                throw new Error(`Failed to fetch attachment from URL: ${response.statusText}`);
+              }
+              
+              // Check content length to prevent large file downloads
+              const contentLength = response.headers.get('content-length');
+              if (contentLength && parseInt(contentLength) > 25 * 1024 * 1024) { // 25MB limit
+                throw new Error(`Attachment file too large: ${Math.round(parseInt(contentLength) / 1024 / 1024)}MB (max 25MB)`);
+              }
+              
+              content = Buffer.from(await response.arrayBuffer());
+            } catch (error) {
+              clearTimeout(timeoutId);
+              if (error.name === 'AbortError') {
+                throw new Error(`Timeout fetching attachment from URL (30s limit)`);
+              }
+              throw error;
+            }
+          } else {
+            // This case should ideally be caught by the validation above, but as a fallback
+            throw new Error(`Attachment '${attachment.filename}' has no content or URL.`);
+          }
+
+          return {
+            filename: attachment.filename,
+            content: content,
+            contentType: attachment.contentType,
+          };
+        } catch (error) {
+          throw new Error(`Error processing attachment '${attachment.filename}': ${error.message}`);
+        }
+      }) || []
+    );
 
     await transporter.sendMail({
       from: fromField,
