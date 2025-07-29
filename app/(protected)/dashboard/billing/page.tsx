@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { BillingInfo } from "@/components/pricing/billing-info";
 import { Icons } from "@/components/shared/icons";
+import { BillingWrapper } from "./billing-wrapper";
 
 export const metadata = constructMetadata({
   title: "Billing – SaaS Starter",
@@ -24,12 +25,12 @@ export default async function BillingPage() {
   }
 
   return (
-    <>
+    <BillingWrapper>
       <DashboardHeader
         heading="Billing"
         text="Manage billing and your subscription plan."
       />
-      <div className="grid gap-8">
+      <div className="grid gap-8 mt-6">
         <Alert className="!pl-14">
           <Icons.warning />
           <AlertTitle>This is a demo app.</AlertTitle>
@@ -49,6 +50,6 @@ export default async function BillingPage() {
         </Alert>
         <BillingInfo userSubscriptionPlan={userSubscriptionPlan} />
       </div>
-    </>
+    </BillingWrapper>
   );
 }
