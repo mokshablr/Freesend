@@ -6,6 +6,7 @@ import("./env.mjs");
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  // ...existing code...
   images: {
     remotePatterns: [
       {
@@ -24,6 +25,9 @@ const nextConfig = {
   },
   experimental: {
     serverComponentsExternalPackages: ["@prisma/client"],
+    turbo: {
+      enabled: true,
+    },
   },
 };
 
