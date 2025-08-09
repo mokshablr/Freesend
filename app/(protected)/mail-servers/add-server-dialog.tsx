@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Icons } from "@/components/shared/icons";
 
 type CreateMailServerDialogProps = {
   onMailServerCreated: () => void; // Add a prop to handle refreshing the keys
@@ -37,6 +38,7 @@ export default function CreateMailServerDialog({
   const [security, setSecurity] = useState("None");
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
 
   const canTest = host && port && security && user && pass;
@@ -200,15 +202,30 @@ export default function CreateMailServerDialog({
                   <Label htmlFor="pass" className="text-left">
                     Password
                   </Label>
-                  <Input
-                    id="pass"
-                    placeholder=""
-                    type="password"
-                    className="mt-1"
-                    required
-                    value={pass}
-                    onChange={(e) => setPass(e.target.value)}
-                  />
+                  <div className="relative mt-1">
+                    <Input
+                      id="pass"
+                      placeholder=""
+                      type={showPassword ? "text" : "password"}
+                      className="pr-10"
+                      required
+                      value={pass}
+                      onChange={(e) => setPass(e.target.value)}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <Icons.eyeOff className="h-4 w-4" />
+                      ) : (
+                        <Icons.eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
