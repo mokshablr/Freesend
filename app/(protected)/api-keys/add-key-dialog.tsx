@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { toast } from "sonner";
+import { Plus } from "lucide-react";
 
 import { createApiKey } from "@/lib/api-key";
 import { getServersByTenant } from "@/lib/smtp-config";
@@ -85,7 +86,10 @@ export default function CreateApiKeyDialog({
     <div>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button onClick={() => setIsOpen(true)}>Create API Key</Button>
+          <Button onClick={() => setIsOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create API Key
+          </Button>
         </DialogTrigger>
         <DialogContent className="w-[95vw] max-w-[95vw] sm:max-w-[425px]">
           <DialogHeader>

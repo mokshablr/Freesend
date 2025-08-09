@@ -8,6 +8,7 @@ import { DashboardHeader } from "@/components/dashboard/header";
 import { TenantNameForm } from "@/components/forms/tenant-name-form";
 import { UserNameForm } from "@/components/forms/user-name-form";
 import { UserRoleForm } from "@/components/forms/user-role-form";
+import { SettingsWrapper } from "./settings-wrapper";
 
 export const metadata = constructMetadata({
   title: "Settings – SaaS Starter",
@@ -26,12 +27,12 @@ export default async function SettingsPage() {
   }
 
   return (
-    <>
+    <SettingsWrapper>
       <DashboardHeader
         heading="Settings"
         text="Manage account and website settings."
       />
-      <div className="divide-y divide-muted pb-10">
+      <div className="divide-y divide-muted pb-10 mt-6">
         <UserNameForm user={{ id: user.id, name: user.name || "" }} />
         {user.role === "ADMIN" && (
           <TenantNameForm
@@ -40,6 +41,6 @@ export default async function SettingsPage() {
         )}
         <DeleteAccountSection />
       </div>
-    </>
+    </SettingsWrapper>
   );
 }
