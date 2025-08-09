@@ -274,9 +274,17 @@ export const updateMailServer = async (
   },
 ) => {
   try {
+    const dataToUpdate: typeof updateData = { ...updateData };
+    if (dataToUpdate.pass && dataToUpdate.pass.length > 0) {
+      dataToUpdate.pass = await encrypt(dataToUpdate.pass);
+    } else if (dataToUpdate.pass === "") {
+      // Avoid setting empty string password; remove the field entirely
+      delete (dataToUpdate as any).pass;
+    }
+
     const updatedMailServer = await prisma.smtpConfig.update({
       where: { id: mailServerId },
-      data: updateData,
+      data: dataToUpdate,
     });
     return updatedMailServer;
   } catch (error) {

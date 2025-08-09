@@ -91,6 +91,8 @@ const MailServerTable: React.FC<MailServerTableProps> = ({
       host: string;
       port: number;
       security: string;
+      user?: string;
+      pass?: string;
     },
   ) => {
     try {
