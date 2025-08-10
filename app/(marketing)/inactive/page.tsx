@@ -5,7 +5,7 @@ import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
 
 export const metadata = constructMetadata({
   title: "Inactive",
-  description: "Your Grovv.app account is made inactive by admin.",
+  description: "Your Freesend account is made inactive by admin.",
 });
 
 export default async function PricingPage() {

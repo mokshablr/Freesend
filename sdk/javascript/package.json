@@ -1,0 +1,42 @@
+{
+  "name": "@freesend/sdk",
+  "version": "1.0.0",
+  "description": "Official Freesend SDK for JavaScript and TypeScript",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "freesend",
+    "email",
+    "api",
+    "smtp",
+    "typescript",
+    "javascript"
+  ],
+  "author": "Freesend Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mokshablr/Freesend.git",
+    "directory": "sdk/javascript"
+  },
+  "bugs": {
+    "url": "https://github.com/mokshablr/Freesend/issues"
+  },
+  "homepage": "https://freesend.metafog.io",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+} 

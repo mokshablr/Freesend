@@ -1,0 +1,12 @@
+src/
+examples/
+*.test.js
+*.test.ts
+jest.config.js
+tsconfig.json
+.github/
+.vscode/
+*.log
+node_modules/
+coverage/
+*.map

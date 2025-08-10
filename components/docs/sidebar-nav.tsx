@@ -66,14 +66,28 @@ export function DocsSidebarNavItems({
             target={item.external ? "_blank" : ""}
             rel={item.external ? "noreferrer" : ""}
           >
-            {item.title}
+            <div className="flex flex-col">
+              <span>{item.title}</span>
+              {item.description && (
+                <span className="text-xs text-muted-foreground/70">
+                  {item.description}
+                </span>
+              )}
+            </div>
           </Link>
         ) : (
           <span
             key={item.title + item.href}
             className="flex w-full cursor-not-allowed items-center rounded-md px-2 py-1.5 opacity-60"
           >
-            {item.title}
+            <div className="flex flex-col">
+              <span>{item.title}</span>
+              {item.description && (
+                <span className="text-xs text-muted-foreground/70">
+                  {item.description}
+                </span>
+              )}
+            </div>
           </span>
         ),
       )}

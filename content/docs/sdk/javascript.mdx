@@ -1,0 +1,361 @@
+---
+title: JavaScript/TypeScript SDK
+description: Official JavaScript and TypeScript SDK for the Freesend email API.
+---
+
+## Overview
+
+The Freesend JavaScript/TypeScript SDK provides a modern, type-safe way to integrate with the Freesend email API. Built with TypeScript and designed for both Node.js and browser environments, it offers a clean, intuitive interface for sending emails.
+
+## Installation
+
+```bash
+npm install @freesend/sdk
+```
+
+## Quick Start
+
+```typescript
+import { Freesend } from '@freesend/sdk';
+
+const freesend = new Freesend({
+  apiKey: 'your-api-key-here'
+});
+
+// Send a simple email
+const { message } = await freesend.sendEmail({
+  fromName: 'Your Company',
+  fromEmail: 'hello@yourdomain.com',
+  to: 'recipient@example.com',
+  subject: 'Hello from Freesend!',
+  html: '<h1>Welcome!</h1><p>This email was sent using Freesend.</p>',
+  text: 'Welcome! This email was sent using Freesend.'
+});
+
+console.log(message); // "Email sent successfully"
+```
+
+## Configuration
+
+### Constructor Options
+
+```typescript
+new Freesend(config: FreesendConfig)
+```
+
+| Option | Type | Required | Description |
+|--------|------|----------|-------------|
+| `apiKey` | string | Yes | Your Freesend API key |
+| `baseUrl` | string | No | Custom base URL (defaults to `https://freesend.metafog.io`) |
+
+### Example with Custom Base URL
+
+```typescript
+import { Freesend } from '@freesend/sdk';
+
+const freesend = new Freesend({
+  apiKey: 'your-api-key-here',
+  baseUrl: 'https://your-custom-freesend-instance.com'
+});
+```
+
+## API Reference
+
+### sendEmail
+
+```typescript
+sendEmail(data: SendEmailRequest): Promise<SendEmailResponse>
+```
+
+Sends an email using the Freesend API.
+
+#### Request Parameters
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `fromName` | string | No | Display name for the sender |
+| `fromEmail` | string | Yes | Sender email address |
+| `to` | string | Yes | Recipient email address |
+| `subject` | string | Yes | Email subject line |
+| `html` | string | No* | HTML content of the email |
+| `text` | string | No* | Plain text content of the email |
+| `attachments` | Attachment[] | No | Array of attachment objects |
+
+*At least one of `html` or `text` is required.
+
+#### Attachment Object
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `filename` | string | Yes | Name of the attachment file |
+| `content` | string | Yes** | Base64 encoded file content |
+| `url` | string | Yes** | URL to external file |
+| `contentType` | string | No | MIME type of the file |
+
+**Either `content` or `url` is required, but not both.
+
+## Examples
+
+### Basic Email
+
+```typescript
+import { Freesend } from '@freesend/sdk';
+
+const freesend = new Freesend({
+  apiKey: 'your-api-key-here'
+});
+
+try {
+  const result = await freesend.sendEmail({
+    fromName: 'Your Company',
+    fromEmail: 'hello@yourdomain.com',
+    to: 'user@example.com',
+    subject: 'Welcome to our platform!',
+    html: '<h1>Welcome!</h1><p>Thank you for joining us.</p>',
+    text: 'Welcome! Thank you for joining us.'
+  });
+  
+  console.log('Email sent:', result.message);
+} catch (error) {
+  console.error('Failed to send email:', error.message);
+}
+```
+
+### Email with Base64 Attachment
+
+```typescript
+import { Freesend } from '@freesend/sdk';
+import { readFileSync } from 'fs';
+
+const freesend = new Freesend({
+  apiKey: 'your-api-key-here'
+});
+
+// Read and encode file
+const fileContent = readFileSync('./invoice.pdf', { encoding: 'base64' });
+
+try {
+  const result = await freesend.sendEmail({
+    fromName: 'Your Company',
+    fromEmail: 'billing@yourdomain.com',
+    to: 'customer@example.com',
+    subject: 'Your invoice is ready',
+    html: '<h1>Invoice Attached</h1><p>Please find your invoice attached.</p>',
+    text: 'Invoice attached. Please find your invoice attached.',
+    attachments: [
+      {
+        filename: 'invoice.pdf',
+        content: fileContent,
+        contentType: 'application/pdf'
+      }
+    ]
+  });
+  
+  console.log('Email sent:', result.message);
+} catch (error) {
+  console.error('Failed to send email:', error.message);
+}
+```
+
+### Email with URL-based Attachment
+
+```typescript
+import { Freesend } from '@freesend/sdk';
+
+const freesend = new Freesend({
+  apiKey: 'your-api-key-here'
+});
+
+try {
+  const result = await freesend.sendEmail({
+    fromName: 'Your Company',
+    fromEmail: 'reports@yourdomain.com',
+    to: 'team@example.com',
+    subject: 'Monthly Report',
+    html: '<h1>Monthly Report</h1><p>Please find the monthly report attached.</p>',
+    text: 'Monthly Report - Please find the monthly report attached.',
+    attachments: [
+      {
+        filename: 'monthly-report.pdf',
+        url: 'https://example.com/reports/monthly-report.pdf',
+        contentType: 'application/pdf'
+      }
+    ]
+  });
+  
+  console.log('Email sent:', result.message);
+} catch (error) {
+  console.error('Failed to send email:', error.message);
+}
+```
+
+### Multiple Attachments
+
+```typescript
+import { Freesend } from '@freesend/sdk';
+
+const freesend = new Freesend({
+  apiKey: 'your-api-key-here'
+});
+
+try {
+  const result = await freesend.sendEmail({
+    fromName: 'Your Company',
+    fromEmail: 'support@yourdomain.com',
+    to: 'customer@example.com',
+    subject: 'Your order details',
+    html: '<h1>Order Confirmation</h1><p>Please find your order details attached.</p>',
+    text: 'Order Confirmation - Please find your order details attached.',
+    attachments: [
+      {
+        filename: 'invoice.pdf',
+        url: 'https://example.com/invoices/12345.pdf',
+        contentType: 'application/pdf'
+      },
+      {
+        filename: 'receipt.jpg',
+        url: 'https://example.com/receipts/12345.jpg',
+        contentType: 'image/jpeg'
+      }
+    ]
+  });
+  
+  console.log('Email sent:', result.message);
+} catch (error) {
+  console.error('Failed to send email:', error.message);
+}
+```
+
+## Error Handling
+
+The SDK throws `FreesendError` instances for API errors:
+
+```typescript
+import { Freesend, FreesendError } from '@freesend/sdk';
+
+const freesend = new Freesend({
+  apiKey: 'your-api-key-here'
+});
+
+try {
+  await freesend.sendEmail({
+    fromEmail: 'hello@yourdomain.com',
+    to: 'user@example.com',
+    subject: 'Test email'
+    // Missing html/text content
+  });
+} catch (error) {
+  if (error instanceof FreesendError) {
+    console.error('Freesend error:', error.message);
+    console.error('Status code:', error.statusCode);
+  } else {
+    console.error('Unexpected error:', error);
+  }
+}
+```
+
+## Common Error Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 400 | Bad Request - Missing required fields or invalid data |
+| 401 | Unauthorized - Invalid or missing API key |
+| 403 | Forbidden - API key is inactive or invalid |
+| 500 | Internal Server Error - Email sending failed |
+
+## Browser Usage
+
+The SDK works in both Node.js and browser environments:
+
+```html
+<script type="module">
+  import { Freesend } from 'https://unpkg.com/@freesend/sdk@latest/dist/index.js';
+  
+  const freesend = new Freesend({
+    apiKey: 'your-api-key-here'
+  });
+  
+  // Use as normal...
+</script>
+```
+
+## TypeScript Support
+
+The SDK includes comprehensive TypeScript definitions:
+
+```typescript
+import { Freesend, SendEmailRequest, SendEmailResponse } from '@freesend/sdk';
+
+const freesend = new Freesend({
+  apiKey: 'your-api-key-here'
+});
+
+// Type-safe email request
+const emailRequest: SendEmailRequest = {
+  fromName: 'Your Company',
+  fromEmail: 'hello@yourdomain.com',
+  to: 'user@example.com',
+  subject: 'Test Email',
+  html: '<h1>Hello</h1>',
+  text: 'Hello'
+};
+
+// Type-safe response
+const response: SendEmailResponse = await freesend.sendEmail(emailRequest);
+```
+
+## Best Practices
+
+### Error Handling
+- Always wrap SDK calls in try-catch blocks
+- Check for specific error types using `instanceof FreesendError`
+- Log appropriate error messages for debugging
+
+### Attachments
+- Use base64 encoding for smaller files (< 25MB)
+- Use URL-based attachments for larger files
+- Always specify `contentType` for better email client compatibility
+- Ensure URLs are publicly accessible for URL-based attachments
+
+### API Keys
+- Store API keys in environment variables
+- Never commit API keys to version control
+- Rotate API keys regularly for security
+
+### Performance
+- Reuse SDK instances when possible
+- Use async/await for proper error handling
+- Consider implementing retry logic for failed requests
+
+## Migration from HTTP API
+
+If you're currently using the HTTP API directly, migrating to the SDK is straightforward:
+
+### Before (HTTP API)
+```typescript
+const response = await fetch('https://freesend.metafog.io/api/send-email', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${apiKey}`,
+  },
+  body: JSON.stringify(emailData),
+});
+
+const result = await response.json();
+```
+
+### After (SDK)
+```typescript
+import { Freesend } from '@freesend/sdk';
+
+const freesend = new Freesend({ apiKey });
+const result = await freesend.sendEmail(emailData);
+```
+
+## Support
+
+- **Documentation**: [SDK README](../../../sdk/javascript/README.md)
+- **NPM Package**: [@freesend/sdk](https://www.npmjs.com/package/@freesend/sdk)
+- **GitHub Issues**: [Report bugs or request features](https://github.com/mokshablr/Freesend/issues)
+- **Community**: [GitHub Discussions](https://github.com/mokshablr/Freesend/discussions)

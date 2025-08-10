@@ -52,6 +52,8 @@ Send a `POST` Request to `https://freesend.metafog.io/api/send-email`
 
 ## Example Usage
 
+> **💡 Pro Tip**: For a better developer experience, consider using our [Freesend SDK](/docs/sdk) which provides type safety, error handling, and a cleaner API.
+
 ### Send attachments from a remote file
 
 Include the `url` parameter to send attachments from a remote file. This parameter accepts a URL to the file you want to attach. Define the file name that will be attached using the `filename` parameter.
@@ -668,6 +670,29 @@ Include the `content` parameter to send attachments from a local file. This para
   ]
 }
 ```
+
+## Using the SDK Instead?
+
+If you prefer a more developer-friendly experience with type safety, error handling, and simplified API calls, we provide official SDKs for multiple programming languages.
+
+### Available SDKs
+
+- **[JavaScript/TypeScript](/docs/sdk/javascript)** - Full TypeScript support, Node.js & browser compatibility
+- **[Python](/docs/sdk/python)** - Python SDK (Coming Soon)
+- **[Go](/docs/sdk/go)** - Go SDK (Coming Soon)
+- **[PHP](/docs/sdk/php)** - PHP SDK (Coming Soon)
+- **[Ruby](/docs/sdk/ruby)** - Ruby SDK (Coming Soon)
+
+### Benefits of Using an SDK
+
+- ✨ **Type Safety** - Full type definitions and IntelliSense
+- 🛡️ **Error Handling** - Proper error types and status codes
+- 🔧 **Simplified API** - No need to handle HTTP requests manually
+- 📎 **Attachment Support** - Easy file handling with base64 encoding
+- 🌐 **Cross-Platform** - Works in Node.js and browsers
+- ⚙️ **Customizable** - Support for custom base URLs
+
+For complete SDK documentation, examples, and advanced usage, visit our [SDK documentation](/docs/sdk).
 
 ## Response
 

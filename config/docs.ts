@@ -43,5 +43,44 @@ export const docsConfig: DocsConfig = {
         },
       ],
     },
+    {
+      title: "SDKs",
+      items: [
+        {
+          title: "Overview",
+          href: "/docs/sdk",
+          description: "All available SDKs and language options",
+        },
+        {
+          title: "JavaScript/TypeScript",
+          href: "/docs/sdk/javascript",
+          description: "Official SDK for Node.js and browsers",
+        },
+        {
+          title: "Python",
+          href: "/docs/sdk/python",
+          description: "Python SDK (Coming Soon)",
+          disabled: true,
+        },
+        {
+          title: "Go",
+          href: "/docs/sdk/go",
+          description: "Go SDK (Coming Soon)",
+          disabled: true,
+        },
+        {
+          title: "PHP",
+          href: "/docs/sdk/php",
+          description: "PHP SDK (Coming Soon)",
+          disabled: true,
+        },
+        {
+          title: "Ruby",
+          href: "/docs/sdk/ruby",
+          description: "Ruby SDK (Coming Soon)",
+          disabled: true,
+        },
+      ],
+    },
   ],
 };
