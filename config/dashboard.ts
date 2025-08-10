@@ -13,16 +13,9 @@ export const sidebarLinks: SidebarNavItem[] = [
     ],
   },
   {
-    title: "SETUP",
+    title: "SUPPORT",
     items: [
-      // {
-      //   href: "/users",
-      //   icon: "user",
-      //   title: "Users",
-      //   authorizeOnly: UserRole.ADMIN,
-      // },
-      { href: "/docs", icon: "post", title: "Docs" },
-      { href: "/settings", icon: "settings", title: "Settings" },
+      { href: "/docs", icon: "post", title: "Documentation" },
     ],
   },
 ];

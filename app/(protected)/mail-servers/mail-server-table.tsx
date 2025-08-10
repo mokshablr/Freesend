@@ -1,19 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Edit, MoreHorizontal, Trash, Mail } from "lucide-react";
+import { Edit, Trash, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 import { deleteServer, updateMailServer } from "@/lib/smtp-config";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { TablePagination } from "@/components/ui/table-pagination";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 import UpdateMailServerDialog from "./update-server-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -140,39 +132,46 @@ const MailServerTable: React.FC<MailServerTableProps> = ({
         const mailServer = row.original;
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => openUpdateDialog(mailServer)}>
-                <Edit className="mr-2 h-4 w-4" />
-                Update
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => {
+          <div className="flex items-center gap-1">
+            {/* Update Button */}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400"
+              onClick={() => openUpdateDialog(mailServer)}
+              title="Update Mail Server"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+
+            {/* Test Email Button */}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-950 dark:hover:text-green-400"
+              onClick={() => {
                 setTestMailServer(mailServer);
                 setTestDialogOpen(true);
-              }}>
-                <Mail className="mr-2 h-4 w-4" />
-                Send Test Email
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-red-600 bg-red-600/10 font-medium rounded-md px-2 py-1.5 focus:text-red-600 focus:bg-red-600/20 hover:text-red-600 hover:bg-red-600/20 dark:text-red-500 dark:bg-red-500/10 dark:focus:text-red-500 dark:focus:bg-red-500/20 dark:hover:text-red-500 dark:hover:bg-red-500/20"
-                onClick={() => {
-                  setServerToDelete(mailServer);
-                  setDeleteDialogOpen(true);
-                }}
-              >
-                <Trash className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              }}
+              title="Send Test Email"
+            >
+              <Mail className="h-4 w-4" />
+            </Button>
+
+            {/* Delete Button */}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950 dark:hover:text-red-400"
+              onClick={() => {
+                setServerToDelete(mailServer);
+                setDeleteDialogOpen(true);
+              }}
+              title="Delete Mail Server"
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
         );
       },
     },

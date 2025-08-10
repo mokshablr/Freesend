@@ -19,6 +19,7 @@ import {
   LineChart,
   Loader2,
   LockKeyhole,
+  LogOut,
   LucideIcon,
   LucideProps,
   MessagesSquare,
@@ -165,5 +166,6 @@ export const Icons = {
   goal: Goal,
   telescope: Telescope,
   save: Save,
-  moreHorizontal: MoreHorizontal
+  moreHorizontal: MoreHorizontal,
+  logOut: LogOut
 };

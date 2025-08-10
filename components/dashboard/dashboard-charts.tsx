@@ -200,10 +200,12 @@ export function DashboardCharts({
                   ) : (
                     recentEmails.slice(0, 3).map((email) => (
                       <TableRow key={email.id} className="border-white/10">
-                        <TableCell className="font-medium text-gray-300 max-w-[200px] truncate">
-                          {email.to}
+                        <TableCell className="font-medium text-gray-300 max-w-[180px] truncate pr-2">
+                          <div className="truncate" title={email.to}>
+                            {email.to}
+                          </div>
                         </TableCell>
-                        <TableCell className="text-right text-gray-400 text-xs">
+                        <TableCell className="text-right text-gray-400 text-xs whitespace-nowrap">
                           {formatDistanceToNow(new Date(email.createdAt), { addSuffix: true })}
                         </TableCell>
                       </TableRow>

@@ -137,12 +137,14 @@ export function DashboardClient({
       </div>
 
       {/* Charts Section */}
-      <DashboardCharts 
-        emailsByDay={emailsByDay}
-        hoursData={hoursData}
-        monthlyData={monthlyData}
-        recentEmails={recentEmails}
-      />
+      <div className="mt-8">
+        <DashboardCharts 
+          emailsByDay={emailsByDay}
+          hoursData={hoursData}
+          monthlyData={monthlyData}
+          recentEmails={recentEmails}
+        />
+      </div>
     </SharedNeonWrapper>
   );
 }

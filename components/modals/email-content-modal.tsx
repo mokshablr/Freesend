@@ -54,61 +54,71 @@ const EmailContentModal: React.FC<EmailContentModalProps> = ({ isOpen, onClose, 
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         ref={contentRef}
-        className="sm:max-w-[800px] h-[80vh] flex flex-col"
+        className="sm:max-w-[800px] h-[80vh] flex flex-col overflow-hidden"
         onPointerMove={handlePointerMove}
         onPointerLeave={handlePointerLeave}
         style={glowStyle}
       >
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start flex-shrink-0">
           <DialogHeader className="pb-4 flex-grow">
-            <DialogTitle className="text-2xl font-bold">Email details</DialogTitle>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-muted-foreground">FROM</p>
-                <p className="font-medium text-foreground">{email.from}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">SUBJECT</p>
-                <p className="font-medium text-foreground">{email.subject}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">TO</p>
-                <p className="font-medium text-foreground">{email.to}</p>
-              </div>
-              {email.reply_to && (
-                <div>
-                  <p className="text-muted-foreground">REPLY-TO</p>
-                  <p className="font-medium text-foreground">{email.reply_to}</p>
+            <DialogTitle className="text-2xl font-bold text-white">Email details</DialogTitle>
+            <div className="grid grid-cols-1 gap-4 text-sm overflow-hidden">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="overflow-hidden">
+                  <p className="text-muted-foreground uppercase text-xs">FROM</p>
+                  <p className="font-medium text-foreground break-all overflow-hidden">{email.from}</p>
                 </div>
-              )}
+                <div className="overflow-hidden">
+                  <p className="text-muted-foreground uppercase text-xs">SUBJECT</p>
+                  <p className="font-medium text-foreground break-words overflow-hidden">{email.subject}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="overflow-hidden">
+                  <p className="text-muted-foreground uppercase text-xs">TO</p>
+                  <p className="font-medium text-foreground break-all overflow-hidden">{email.to}</p>
+                </div>
+                {email.reply_to && (
+                  <div className="overflow-hidden">
+                    <p className="text-muted-foreground uppercase text-xs">REPLY-TO</p>
+                    <p className="font-medium text-foreground break-all overflow-hidden">{email.reply_to}</p>
+                  </div>
+                )}
+              </div>
             </div>
           </DialogHeader>
           {/* Removed API and More options buttons */}
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-grow">
-          <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="preview">Preview</TabsTrigger>
-            <TabsTrigger value="plain-text">Plain Text</TabsTrigger>
-            <TabsTrigger value="html">HTML</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-grow min-h-0">
+          <TabsList className="grid w-full grid-cols-3 mb-4 bg-muted/20 border-white/10 flex-shrink-0">
+            <TabsTrigger value="preview" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">Preview</TabsTrigger>
+            <TabsTrigger value="plain-text" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">Plain Text</TabsTrigger>
+            <TabsTrigger value="html" className="data-[state=active]:bg-white/10 data-[state=active]:text-white">HTML</TabsTrigger>
           </TabsList>
-          <TabsContent value="preview" className="flex-grow mt-0 data-[state=inactive]:hidden">
-            <ScrollArea className="h-full w-full p-4 border rounded-md overflow-auto">
-              {email.html_body ? (
-                <div dangerouslySetInnerHTML={{ __html: email.html_body }} />
-              ) : (
+          <TabsContent value="preview" className="flex-grow min-h-0 mt-0 data-[state=inactive]:hidden">
+            <ScrollArea className="h-full w-full border rounded-md">
+              <div className="p-4">
+                {email.html_body ? (
+                  <div dangerouslySetInnerHTML={{ __html: email.html_body }} />
+                ) : (
+                  <p className="whitespace-pre-wrap">{email.text_body}</p>
+                )}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+          <TabsContent value="plain-text" className="flex-grow min-h-0 mt-0 data-[state=inactive]:hidden">
+            <ScrollArea className="h-full w-full border rounded-md">
+              <div className="p-4">
                 <p className="whitespace-pre-wrap">{email.text_body}</p>
-              )}
+              </div>
             </ScrollArea>
           </TabsContent>
-          <TabsContent value="plain-text" className="flex-grow mt-0 data-[state=inactive]:hidden">
-            <ScrollArea className="h-full w-full p-4 border rounded-md overflow-auto">
-              <p className="whitespace-pre-wrap">{email.text_body}</p>
-            </ScrollArea>
-          </TabsContent>
-          <TabsContent value="html" className="flex-grow mt-0 data-[state=inactive]:hidden">
-            <ScrollArea className="h-full w-full p-4 border rounded-md overflow-auto">
-              <pre className="whitespace-pre-wrap text-xs bg-muted p-2 rounded-md">{email.html_body}</pre>
+          <TabsContent value="html" className="flex-grow min-h-0 mt-0 data-[state=inactive]:hidden">
+            <ScrollArea className="h-full w-full border rounded-md">
+              <div className="p-4">
+                <pre className="whitespace-pre-wrap text-xs bg-muted p-2 rounded-md">{email.html_body}</pre>
+              </div>
             </ScrollArea>
           </TabsContent>
         </Tabs>

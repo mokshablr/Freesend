@@ -201,9 +201,13 @@ export default function Emails() {
       <title>Emails</title>
       <div>
         <div className="mx-auto max-w-7xl items-center justify-between px-6 py-8">
-          <h1 className="text-slate-12 pb-5 text-2xl font-semibold leading-tight tracking-tight">
-            Emails
-          </h1>
+          <div className="flex items-center gap-3 pb-5">
+            <Icons.mail className="h-6 w-6 text-muted-foreground" />
+            <h1 className="text-slate-12 text-2xl font-semibold leading-tight tracking-tight">
+              Emails
+            </h1>
+          </div>
+          <div className="h-px bg-border mb-4"></div>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
             <div className="relative flex items-center">
               <Icons.search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform" />

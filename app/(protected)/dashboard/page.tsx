@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/session";
 import { constructMetadata } from "@/lib/utils";
 import { getDashboardData } from "@/lib/dashboard-utils";
 import { DashboardClient } from "./dashboard-client";
+import { Icons } from "@/components/shared/icons";
 
 export const metadata = constructMetadata({
   title: "Dashboard",
@@ -24,11 +25,14 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      {/* Page Header - match Emails page style and position exactly */}
-      <div className="mx-auto max-w-7xl items-center justify-between px-6 pt-8 pb-5">
-        <h1 className="text-slate-12 text-2xl font-semibold leading-tight tracking-tight">
-          Overview
-        </h1>
+      <div className="mx-auto max-w-7xl items-center justify-between px-6 py-8">
+        <div className="flex items-center gap-3">
+          <Icons.dashboard className="h-6 w-6 text-muted-foreground" />
+          <h1 className="text-slate-12 text-2xl font-semibold leading-tight tracking-tight">
+            Overview
+          </h1>
+        </div>
+        <div className="mt-2 h-px bg-border"></div>
       </div>
       <div className="mx-auto max-w-7xl px-6">
         <DashboardClient

@@ -107,9 +107,13 @@ export default function MailServers() {
       <title>Mail Servers</title>
       <div>
         <div className="mx-auto max-w-7xl items-center justify-between px-6 py-8">
-          <h1 className="text-slate-12 pb-5 text-2xl font-semibold leading-tight tracking-tight">
-            Mail Servers
-          </h1>
+          <div className="flex items-center gap-3 pb-5">
+            <Icons.server className="h-6 w-6 text-muted-foreground" />
+            <h1 className="text-slate-12 text-2xl font-semibold leading-tight tracking-tight">
+              Mail Servers
+            </h1>
+          </div>
+          <div className="h-px bg-border mb-4"></div>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
               <div className="relative flex items-center">

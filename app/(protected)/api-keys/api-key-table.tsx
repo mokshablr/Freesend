@@ -248,42 +248,48 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
         const apiKey = row.original;
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => openUpdateDialog(apiKey)}>
-                <Edit className="mr-2 h-4 w-4" />
-                Update
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleToggleStatus(apiKey.id)}>
-                {apiKey.status === "active" ? (
-                  <>
-                    <Pause className="mr-2 h-4 w-4" />
-                    Pause
-                  </>
-                ) : (
-                  <>
-                    <Play className="mr-2 h-4 w-4" />
-                    Resume
-                  </>
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-red-600 bg-red-600/10 font-medium rounded-md px-2 py-1.5 focus:text-red-600 focus:bg-red-600/20 hover:text-red-600 hover:bg-red-600/20 dark:text-red-500 dark:bg-red-500/10 dark:focus:text-red-500 dark:focus:bg-red-500/20 dark:hover:text-red-500 dark:hover:bg-red-500/20"
-                onClick={() => handleDelete(apiKey.id)}
-              >
-                <Trash className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-1">
+            {/* Update Button */}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950 dark:hover:text-blue-400"
+              onClick={() => openUpdateDialog(apiKey)}
+              title="Update API Key"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+
+            {/* Toggle Status Button */}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className={`h-8 w-8 p-0 ${
+                apiKey.status === "active" 
+                  ? "hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-950 dark:hover:text-orange-400"
+                  : "hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-950 dark:hover:text-green-400"
+              }`}
+              onClick={() => handleToggleStatus(apiKey.id)}
+              title={apiKey.status === "active" ? "Pause API Key" : "Resume API Key"}
+            >
+              {apiKey.status === "active" ? (
+                <Pause className="h-4 w-4" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
+            </Button>
+
+            {/* Delete Button */}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950 dark:hover:text-red-400"
+              onClick={() => handleDelete(apiKey.id)}
+              title="Delete API Key"
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          </div>
         );
       },
     },

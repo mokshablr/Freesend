@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/tooltip";
 import ProjectSwitcher from "@/components/dashboard/project-switcher";
 import { Icons } from "@/components/shared/icons";
+import { UserProfileSection } from "./user-profile-section";
 
 interface DashboardSidebarProps {
   links: SidebarNavItem[];
@@ -167,8 +168,10 @@ export function DashboardSidebar({ links }: DashboardSidebarProps) {
                 ))}
               </nav>
 
-              <div className="mt-auto xl:p-4">
-                {isSidebarExpanded ? /*<UpgradeCard />*/ "" : null}
+              <div className="mt-auto p-4">
+                {isSidebarExpanded && (
+                  <UserProfileSection />
+                )}
               </div>
             </div>
           </aside>
