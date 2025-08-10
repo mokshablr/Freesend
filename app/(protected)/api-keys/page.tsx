@@ -14,7 +14,10 @@ type ApiKeys = {
   name: string;
   token: string;
   createdAt: string;
-  smtpConfig: string;
+  status: "active" | "inactive";
+  smtpConfig: {
+    name: string;
+  } | null;
 };
 
 export default function ApiKeys() {
@@ -27,14 +30,17 @@ export default function ApiKeys() {
 
       const formattedData = result
         .filter((item: any) => item.status !== "deleted")
-        .map((item: any) => ({
-          ...item,
-          status: !item.smtpConfig ? "inactive" : item.status,
-          mailServer: item.smtpConfig?.name,
-          createdAt: formatDistanceToNow(new Date(item.createdAt), {
-            addSuffix: true,
-          }),
-        }));
+        .map((item: any) => {
+          const formattedItem = {
+            ...item,
+            status: !item.smtpConfig ? "inactive" : (item.status === "active" ? "active" : "inactive"),
+            smtpConfig: item.smtpConfig ? { name: item.smtpConfig.name } : null,
+            createdAt: formatDistanceToNow(new Date(item.createdAt), {
+              addSuffix: true,
+            }),
+          };
+          return formattedItem;
+        });
       setApiKeys(formattedData);
     } catch (error) {
       toast.error("Error fetching servers:" + error);

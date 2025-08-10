@@ -67,8 +67,12 @@ export const getApiKeysByTenant = async () => {
         token: true,
         status: true,
         createdAt: true,
-        smtpConfig: true,
-        // status: true,
+        smtpConfig: {
+          select: {
+            id: true,
+            name: true,
+          }
+        },
       },
       where: {
         tenant_id: user.tenant_id,

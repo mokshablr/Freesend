@@ -28,6 +28,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import { Callout } from "@/components/shared/callout";
 
 import UpdateApiKeyDialog from "./update-key-dialog";
 
@@ -36,6 +48,10 @@ interface ApiKey {
   name: string;
   token: string;
   createdAt: string;
+  status: "active" | "inactive";
+  smtpConfig: {
+    name: string;
+  } | null;
 }
 
 interface ApiKeyTableProps {
@@ -51,6 +67,8 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(initialIsLoading);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [selectedApiKey, setSelectedApiKey] = useState<ApiKey | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
+  const [keyToDelete, setKeyToDelete] = useState<ApiKey | null>(null);
 
   useEffect(() => {
     setApiKeys(initialApiKeys);
@@ -86,7 +104,7 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
       const updatedStatus = await toggleApiKeyStatus(id);
       setApiKeys((prevKeys) =>
         prevKeys.map((key) =>
-          key.id === id ? { ...key, status: updatedStatus } : key,
+          key.id === id ? { ...key, status: updatedStatus as "active" | "inactive" } : key,
         ),
       );
       toast.success(`API Key status is now ${updatedStatus}.`);
@@ -103,6 +121,16 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
   const closeUpdateDialog = () => {
     setUpdateDialogOpen(false);
     setSelectedApiKey(null);
+  };
+
+  const openDeleteDialog = (apiKey: ApiKey) => {
+    setKeyToDelete(apiKey);
+    setDeleteDialogOpen(true);
+  };
+
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setKeyToDelete(null);
   };
 
   const columns = [
@@ -190,14 +218,19 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
       },
     },
     {
-      id: "mailServer",
+      id: "smtpConfig",
       header: "Server",
       accessorKey: "smtpConfig",
       cell: ({ row }) => {
-        const mailServer = row.getValue("mailServer");
-        const serverName = mailServer && mailServer.name ? mailServer.name : "Deleted";
+        const mailServer = row.getValue("smtpConfig");
+        
+        let serverName = "Deleted";
+        if (mailServer && typeof mailServer === 'object' && mailServer.name) {
+          serverName = mailServer.name;
+        }
+        
         return (
-          <span className="text-xs text-muted-foreground">
+          <span className={`text-xs text-muted-foreground ${serverName === "Deleted" ? "italic" : ""}`}>
             {serverName}
           </span>
         );
@@ -209,8 +242,8 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
       accessorKey: "status",
       cell: ({ row }) => {
         const status = row.getValue("status");
-        const getStatusClass = (status: string) => {
-          switch (status) {
+        const getStatusClass = (statusValue: string) => {
+          switch (statusValue) {
             case "active":
               return "bg-green-50/80 text-green-700 border-green-200 shadow-sm hover:shadow-lg hover:shadow-green-500/30 hover:border-green-400/60 dark:bg-green-950/80 dark:text-green-300 dark:border-green-800 dark:hover:shadow-green-400/20 dark:hover:border-green-600/60";
             case "inactive":
@@ -274,7 +307,7 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-red-600 bg-red-600/10 font-medium rounded-md px-2 py-1.5 focus:text-red-600 focus:bg-red-600/20 hover:text-red-600 hover:bg-red-600/20 dark:text-red-500 dark:bg-red-500/10 dark:focus:text-red-500 dark:focus:bg-red-500/20 dark:hover:text-red-500 dark:hover:bg-red-500/20"
-                onClick={() => handleDelete(apiKey.id)}
+                onClick={() => openDeleteDialog(apiKey)}
               >
                 <Trash className="mr-2 h-4 w-4" />
                 Delete
@@ -296,6 +329,37 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
         initialName={selectedApiKey?.name || ""}
         onUpdate={handleUpdate}
       />
+      <AlertDialog open={deleteDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          closeDeleteDialog();
+        }
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete API Key</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the API key <b>{keyToDelete?.name}</b>? This action cannot be undone.
+              <Callout type="warning" twClass="mt-4 text-sm [&>div:first-child]:mt-0.5">
+                Once deleted, this key can no longer be used to send emails.
+              </Callout>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={closeDeleteDialog}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="text-red-600 bg-red-600/10 font-medium rounded-md px-4 py-2 focus:text-red-600 focus:bg-red-600/20 hover:text-red-600 hover:bg-red-600/20 dark:text-red-500 dark:bg-red-500/10 dark:focus:text-red-500 dark:focus:bg-red-500/20 dark:hover:text-red-500 dark:hover:bg-red-500/20"
+              onClick={async () => {
+                if (keyToDelete) {
+                  await handleDelete(keyToDelete.id);
+                  closeDeleteDialog();
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

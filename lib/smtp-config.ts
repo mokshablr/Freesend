@@ -245,9 +245,13 @@ export const getServerNameFromId = async (id: string | null) => {
 export const deleteServer = async (id: string) => {
   try {
     // First, remove or nullify the foreign key references in the api_keys table
+    // and set their status to inactive since they no longer have a mail server
     await prisma.apiKey.updateMany({
       where: { smtpConfigId: id },
-      data: { smtpConfigId: null }, // Or use deleteMany to delete the api_keys
+      data: { 
+        smtpConfigId: null,
+        status: "inactive" // Set status to inactive when mail server is deleted
+      },
     });
 
     // Now delete the smtpConfig record
