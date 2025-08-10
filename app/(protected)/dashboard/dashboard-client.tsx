@@ -3,7 +3,7 @@
 import { Mail, KeyRound, TrendingUp, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardCharts } from "@/components/dashboard/dashboard-charts";
-import { useNeonEffects } from "@/hooks/use-neon-effects";
+import { SharedNeonWrapper } from "@/components/shared/neon-wrapper";
 import { useState, useEffect, useCallback } from "react";
 
 interface DashboardData {
@@ -30,8 +30,6 @@ export function DashboardClient({
   recentEmails: initialRecentEmails,
   emailsLastHour,
 }: DashboardClientProps) {
-  const { containerRef, handlePointerMove, handlePointerLeave, getCardStyle } = useNeonEffects();
-  
   // State for dashboard data
   const [data, setData] = useState<DashboardData>({
     totalEmails: initialTotalEmails,
@@ -77,16 +75,11 @@ export function DashboardClient({
   } = data;
 
   return (
-    <div ref={containerRef} className="space-y-6">
+    <SharedNeonWrapper className="space-y-6">
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Total Emails Card */}
-        <Card 
-          style={getCardStyle(0)} 
-          onPointerMove={e => handlePointerMove(e, 0)} 
-          onPointerLeave={handlePointerLeave} 
-          className="relative overflow-hidden"
-        >
+        <Card className="relative overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Emails</CardTitle>
             <Mail className="h-4 w-4 text-muted-foreground" />
@@ -99,12 +92,7 @@ export function DashboardClient({
           </CardContent>
         </Card>
         {/* Activity Card (moved to second position) */}
-        <Card 
-          style={getCardStyle(1)} 
-          onPointerMove={e => handlePointerMove(e, 1)} 
-          onPointerLeave={handlePointerLeave} 
-          className="relative overflow-hidden"
-        >
+        <Card className="relative overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Activity</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
@@ -119,12 +107,7 @@ export function DashboardClient({
           </CardContent>
         </Card>
         {/* This Week Card */}
-        <Card 
-          style={getCardStyle(2)} 
-          onPointerMove={e => handlePointerMove(e, 2)} 
-          onPointerLeave={handlePointerLeave} 
-          className="relative overflow-hidden"
-        >
+        <Card className="relative overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">This Week</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -139,12 +122,7 @@ export function DashboardClient({
           </CardContent>
         </Card>
         {/* Active API Keys Card (moved to last position) */}
-        <Card 
-          style={getCardStyle(3)} 
-          onPointerMove={e => handlePointerMove(e, 3)} 
-          onPointerLeave={handlePointerLeave} 
-          className="relative overflow-hidden"
-        >
+        <Card className="relative overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active API Keys</CardTitle>
             <KeyRound className="h-4 w-4 text-muted-foreground" />
@@ -165,6 +143,6 @@ export function DashboardClient({
         monthlyData={monthlyData}
         recentEmails={recentEmails}
       />
-    </div>
+    </SharedNeonWrapper>
   );
 }

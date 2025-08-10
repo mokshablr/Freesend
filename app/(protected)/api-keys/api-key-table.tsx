@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import {
   CopyCheck,
@@ -20,7 +18,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { Icons } from "@/components/shared/icons";
+import { TablePagination } from "@/components/ui/table-pagination";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -117,7 +115,7 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
       accessorKey: "name",
       cell: ({ getValue }) => (
         <div className="flex items-center">
-          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-background text-foreground border border-border text-xs font-medium shadow-sm hover:shadow-md transition-all duration-200 hover:shadow-green-500/20 hover:border-green-300/50">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-background text-foreground border border-border text-xs font-medium shadow-sm max-w-[200px] truncate">
             {getValue()}
           </span>
         </div>
@@ -300,51 +298,13 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
   return (
     <>
       <DataTable columns={columns} data={paginatedApiKeys} isLoading={isLoading} />
-      {/* Pagination Controls */}
-      <div className="mt-4 flex items-center justify-between text-sm text-zinc-400">
-        <div>
-          <label>
-            Rows per page:
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPageIndex(0); // Reset to first page on page size change
-              }}
-              className="ml-2 rounded border p-1"
-            >
-              {[5, 10, 25, 50].map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <div>
-          <button
-            onClick={() => setPageIndex((old) => Math.max(old - 1, 0))}
-            disabled={pageIndex === 0}
-            className="rounded border p-2"
-          >
-            <Icons.chevronLeft className="size-3 text-white" />
-          </button>
-          <span className="mx-2">
-            Page {pageIndex + 1} of {Math.ceil(apiKeys.length / pageSize)}
-          </span>
-          <button
-            onClick={() =>
-              setPageIndex((old) =>
-                Math.min(old + 1, Math.ceil(apiKeys.length / pageSize) - 1),
-              )
-            }
-            disabled={pageIndex >= Math.ceil(apiKeys.length / pageSize) - 1}
-            className="rounded border p-2"
-          >
-            <Icons.chevronRight className="size-3 text-white" />
-          </button>
-        </div>
-      </div>
+      <TablePagination
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        totalItems={apiKeys.length}
+        onPageChange={setPageIndex}
+        onPageSizeChange={setPageSize}
+      />
       <UpdateApiKeyDialog
         initialIsOpen={updateDialogOpen}
         onClose={closeUpdateDialog}

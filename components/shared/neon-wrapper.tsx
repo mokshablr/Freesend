@@ -3,22 +3,21 @@
 import { useNeonEffects } from "@/hooks/use-neon-effects";
 import { Card } from "@/components/ui/card";
 
-interface NeonCardProps {
+interface SharedNeonWrapperProps {
   children: React.ReactNode;
   className?: string;
-  cardIndex?: number;
 }
 
-export function NeonCard({ children, className = "", cardIndex = 0 }: NeonCardProps) {
+export function SharedNeonWrapper({ children, className = "mx-auto max-w-7xl px-6" }: SharedNeonWrapperProps) {
   const { containerRef, handlePointerMove, handlePointerLeave, getCardStyle } = useNeonEffects();
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className={className}>
       <Card 
-        style={getCardStyle(cardIndex)} 
-        onPointerMove={e => handlePointerMove(e, cardIndex)} 
+        style={getCardStyle(0)} 
+        onPointerMove={e => handlePointerMove(e, 0)} 
         onPointerLeave={handlePointerLeave} 
-        className={`relative overflow-hidden ${className}`}
+        className="relative overflow-hidden p-6"
       >
         {children}
       </Card>

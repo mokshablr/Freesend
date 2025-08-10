@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { deleteServer, updateMailServer } from "@/lib/smtp-config";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { Icons } from "@/components/shared/icons";
+import { TablePagination } from "@/components/ui/table-pagination";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -187,51 +187,16 @@ const MailServerTable: React.FC<MailServerTableProps> = ({
   return (
     <>
       <DataTable columns={columns} data={paginatedMailServers} isLoading={isLoading} />
-      {/* Pagination Controls */}
-      <div className="mt-4 flex items-center justify-between text-sm text-zinc-400">
-        <div>
-          <label>
-            Rows per page:
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPageIndex(0); // Reset to first page on page size change
-              }}
-              className="ml-2 rounded border p-1"
-            >
-              {[5, 10, 25, 50].map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <div>
-          <button
-            onClick={() => setPageIndex((old) => Math.max(old - 1, 0))}
-            disabled={pageIndex === 0}
-            className="rounded border p-2"
-          >
-            <Icons.chevronLeft className="size-3 text-white" />
-          </button>
-          <span className="mx-2">
-            Page {pageIndex + 1} of {Math.ceil(mailServers.length / pageSize)}
-          </span>
-          <button
-            onClick={() =>
-              setPageIndex((old) =>
-                Math.min(old + 1, Math.ceil(mailServers.length / pageSize) - 1),
-              )
-            }
-            disabled={pageIndex >= Math.ceil(mailServers.length / pageSize) - 1}
-            className="rounded border p-2"
-          >
-            <Icons.chevronRight className="size-3 text-white" />
-          </button>
-        </div>
-      </div>
+      <TablePagination
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        totalItems={mailServers.length}
+        onPageChange={setPageIndex}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPageIndex(0); // Reset to first page on page size change
+        }}
+      />
       <UpdateMailServerDialog
         initialIsOpen={updateDialogOpen}
         onClose={closeUpdateDialog}

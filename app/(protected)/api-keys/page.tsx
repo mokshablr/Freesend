@@ -51,8 +51,6 @@ export default function ApiKeys() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedMailServers, setSelectedMailServers] = useState<string[]>([]);
-  const [filterMode, setFilterMode] = useState<"dropdown" | "multi">("dropdown");
-  const [selectedMailServer, setSelectedMailServer] = useState<string>("all");
 
   // Map of mailServerId to mailServer name for display
   const mailServerMap = mailServers.reduce((acc, server) => {
@@ -81,7 +79,6 @@ export default function ApiKeys() {
   // Clear all mail server filters
   const clearMailServerFilters = () => {
     setSelectedMailServers([]);
-    setSelectedMailServer("all");
   };
 
   const fetchApiKeys = async () => {
@@ -170,14 +167,8 @@ export default function ApiKeys() {
     
     const statusMatch = statusFilter === "all" ? true : apiKey.status === statusFilter;
 
-    // Mail Server filter logic
-    let serverMatch = true;
-    if (filterMode === "dropdown") {
-      serverMatch = selectedMailServer === "all" ? true : apiKey.smtpConfig === selectedMailServer;
-    } else {
-      // Multi-select mode
-      serverMatch = selectedMailServers.length === 0 ? true : selectedMailServers.includes(apiKey.smtpConfig);
-    }
+    // Mail Server filter logic - use multi-select only
+    const serverMatch = selectedMailServers.length === 0 ? true : selectedMailServers.includes(apiKey.smtpConfig);
 
     return nameMatch && tokenMatch && statusMatch && serverMatch;
   });
@@ -219,35 +210,32 @@ export default function ApiKeys() {
                 </SelectContent>
               </Select>
 
-              {/* Mail Server Filter with Integrated Mode Selection */}
+              {/* Mail Server Filter - Multi-select only */}
               <div className="relative flex items-center">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button 
                       variant="outline" 
                       className={`relative h-10 bg-muted/50 text-xs font-medium border border-input focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200 ${
-                        selectedMailServer !== "all" || selectedMailServers.length > 0
+                        selectedMailServers.length > 0
                           ? 'text-blue-700 bg-blue-50/80 border-blue-200 shadow-md shadow-blue-500/20 dark:text-blue-300 dark:bg-blue-950/50 dark:border-blue-800'
                           : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
                       <Icons.server className="mr-2 h-4 w-4" />
-                      {(selectedMailServer !== "all" || selectedMailServers.length > 0) && (
+                      {selectedMailServers.length > 0 && (
                         <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
                       )}
-                      {filterMode === "dropdown" 
-                        ? `Server: ${selectedMailServer === "all" ? "All" : mailServerMap[selectedMailServer] || "Select"}` 
-                        : `Servers ${selectedMailServers.length > 0 ? `(${selectedMailServers.length})` : ""}`
-                      }
+                      Servers {selectedMailServers.length > 0 ? `(${selectedMailServers.length})` : ""}
                       <Icons.chevronRight className="ml-2 h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-64 max-h-80 overflow-y-auto" align="start">
-                    {/* Filter Mode Selection Header */}
+                    {/* Header */}
                     <div className="p-3 border-b bg-muted/30">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-medium">Filter by Mail Servers</span>
-                        {(selectedMailServers.length > 0 || selectedMailServer !== "all") && (
+                        {selectedMailServers.length > 0 && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -258,86 +246,29 @@ export default function ApiKeys() {
                           </Button>
                         )}
                       </div>
-                      <div className="flex gap-1">
-                        <Button
-                          variant={filterMode === "dropdown" ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => {
-                            setFilterMode("dropdown");
-                            setSelectedMailServers([]);
-                          }}
-                          className="text-xs flex-1 h-8"
-                        >
-                          Single Select
-                        </Button>
-                        <Button
-                          variant={filterMode === "multi" ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => {
-                            setFilterMode("multi");
-                            setSelectedMailServer("all");
-                          }}
-                          className="text-xs flex-1 h-8"
-                        >
-                          Multi Select
-                        </Button>
-                      </div>
                     </div>
 
-                    {/* Single Select Mode */}
-                    {filterMode === "dropdown" && (
-                      <div className="p-1">
-                        <div 
-                          className={`flex items-center justify-between px-3 py-2 text-xs rounded cursor-pointer hover:bg-muted/50 ${
-                            selectedMailServer === "all" ? "bg-muted text-foreground" : "text-muted-foreground"
-                          }`}
-                          onClick={() => setSelectedMailServer("all")}
+                    {/* Multi Select Options */}
+                    <div className="p-1">
+                      {mailServers.map((server) => (
+                        <DropdownMenuCheckboxItem
+                          key={server.id}
+                          checked={selectedMailServers.includes(server.id)}
+                          onCheckedChange={(checked) => handleMailServerToggle(server.id, checked)}
+                          className="flex items-center justify-between"
                         >
-                          <span>All Mail Servers</span>
-                          <Badge variant="secondary" className="text-xs">
-                            {apiKeys.length}
+                          <span className="flex-1">{server.name}</span>
+                          <Badge variant="secondary" className="text-xs ml-2">
+                            {apiKeyCountsByServer[server.id] || 0}
                           </Badge>
-                        </div>
-                        {mailServers.map((server) => (
-                          <div 
-                            key={server.id}
-                            className={`flex items-center justify-between px-3 py-2 text-xs rounded cursor-pointer hover:bg-muted/50 ${
-                              selectedMailServer === server.id ? "bg-muted text-foreground" : "text-muted-foreground"
-                            }`}
-                            onClick={() => setSelectedMailServer(server.id)}
-                          >
-                            <span>{server.name}</span>
-                            <Badge variant="secondary" className="text-xs">
-                              {apiKeyCountsByServer[server.id] || 0}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Multi Select Mode */}
-                    {filterMode === "multi" && (
-                      <div className="p-1">
-                        {mailServers.map((server) => (
-                          <DropdownMenuCheckboxItem
-                            key={server.id}
-                            checked={selectedMailServers.includes(server.id)}
-                            onCheckedChange={(checked) => handleMailServerToggle(server.id, checked)}
-                            className="flex items-center justify-between"
-                          >
-                            <span className="flex-1">{server.name}</span>
-                            <Badge variant="secondary" className="text-xs ml-2">
-                              {apiKeyCountsByServer[server.id] || 0}
-                            </Badge>
-                          </DropdownMenuCheckboxItem>
-                        ))}
-                      </div>
-                    )}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 
-                {/* Selected Mail Servers Display for Multi Mode */}
-                {filterMode === "multi" && selectedMailServers.length > 0 && (
+                {/* Selected Mail Servers Display */}
+                {selectedMailServers.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 ml-2 max-w-xs">
                     {selectedMailServers.slice(0, 3).map((serverId) => (
                       <Badge 
@@ -367,12 +298,11 @@ export default function ApiKeys() {
               </div>
 
               {/* Clear Filters Button */}
-              {(selectedMailServer !== "all" || selectedMailServers.length > 0 || searchQuery || statusFilter !== "all") && (
+              {(selectedMailServers.length > 0 || searchQuery || statusFilter !== "all") && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    setSelectedMailServer("all");
                     setSelectedMailServers([]);
                     setSearchQuery("");
                     setStatusFilter("all");

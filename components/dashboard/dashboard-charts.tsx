@@ -120,7 +120,7 @@ export function DashboardCharts({
             </linearGradient>
         </defs>
         <XAxis dataKey={xAxisKey} stroke="#888" tick={{ fill: '#bbb', fontSize: 10 }} axisLine={false} tickLine={false} />
-        <YAxis stroke="#888" tick={{ fill: '#bbb', fontSize: 10 }} axisLine={false} tickLine={false} />
+        <YAxis stroke="#888" tick={{ fill: '#bbb', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
         <CartesianGrid stroke="#333" strokeDasharray="3 3" vertical={false} />
         <ChartTooltip cursor={{ stroke: NEON_COLOR }} content={<ChartTooltipContent indicator="line" labelClassName="text-white" className="bg-black/80 border-white/20" />} />
         <Area type="monotone" dataKey={dataKey} stroke={NEON_COLOR} fill="url(#gradient-area)" strokeWidth={2} />
