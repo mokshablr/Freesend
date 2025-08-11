@@ -1,6 +1,9 @@
 import { getCurrentUser } from "@/lib/session";
 import { getDashboardData } from "@/lib/dashboard-utils";
 
+// Force dynamic rendering since this route uses authentication
+export const dynamic = 'force-dynamic';
+
 export const GET = async (req: Request) => {
   try {
     const user = await getCurrentUser();

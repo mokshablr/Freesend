@@ -4,6 +4,9 @@ import { getSmtpConfigById } from "@/lib/smtp-config";
 import { decrypt } from "@/lib/pwd";
 import { getCurrentUser } from "@/lib/session";
 
+// Force dynamic rendering since this route uses authentication
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentUser();

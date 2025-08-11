@@ -2,6 +2,9 @@ import { auth } from "@/auth";
 
 import { prisma } from "@/lib/db";
 
+// Force dynamic rendering since this route uses authentication
+export const dynamic = 'force-dynamic';
+
 export const DELETE = auth(async (req) => {
   if (!req.auth) {
     return new Response("Not authenticated", { status: 401 });
