@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuCheckboxItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -113,29 +112,32 @@ export default function MailServers() {
   }, {} as Record<string, number>);
 
   return (
-    <>
-      <title>Mail Servers</title>
       <div>
         <div className="mx-auto max-w-7xl items-center justify-between px-6 py-8">
-          <h1 className="text-slate-12 pb-5 text-2xl font-semibold leading-tight tracking-tight">
-            Mail Servers
-          </h1>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <Icons.server className="h-6 w-6 text-muted-foreground" />
+            <h1 className="text-slate-12 text-2xl font-semibold leading-tight tracking-tight">
+              Mail Servers
+            </h1>
+          </div>
+          <div className="mt-2 h-px bg-border"></div>
+        </div>
+        <div className="mx-auto max-w-7xl px-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-            {/* Search Bar */}
-            <div className="relative flex items-center">
-              <Icons.search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
-              <Input
-                type="text"
-                placeholder="Search by name:, host:, user:, port: ..."
-                className="relative bg-muted/50 pl-8 text-xs font-normal text-muted-foreground sm:pr-12 md:w-72"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+              {/* Search Bar */}
+              <div className="relative flex items-center">
+                <Icons.search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+                <Input
+                  type="text"
+                  placeholder="Search by name:, host:, user:, port: ..."
+                  className="relative bg-muted/50 pl-8 text-xs font-normal text-muted-foreground sm:pr-12 md:w-72"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
 
-            {/* Security Filter */}
-            <div className="relative flex items-center">
+              {/* Security Filter */}
+              <div className="relative flex items-center">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button 
@@ -201,8 +203,8 @@ export default function MailServers() {
               </DropdownMenu>
             </div>
 
-            {/* Clear Filters Button */}
-            {(selectedSecurity !== "all" || searchQuery) && (
+              {/* Clear Filters Button */}
+              {(selectedSecurity !== "all" || searchQuery) && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -216,21 +218,23 @@ export default function MailServers() {
                 Clear filters
               </Button>
             )}
-          </div>
-
+          
           {/* Create Mail Server Button - Right Aligned */}
           <div className="flex justify-end">
             <CreateMailServerDialog onMailServerCreated={fetchMailServers} />
           </div>
+          </div>
         </div>
-        </div>
-        <div className="mx-auto max-w-7xl px-6">
-          <MailServerTable
-            initialMailServers={filteredData}
-            initialIsLoading={isLoading}
-          />
+          
+          {/* Mail Servers Table */}
+          <div className="mx-auto max-w-7xl px-6">
+          <div className="mt-8">
+            <MailServerTable
+              initialMailServers={filteredData}
+              initialIsLoading={isLoading}
+            />
+          </div>
         </div>
       </div>
-    </>
   );
 }
