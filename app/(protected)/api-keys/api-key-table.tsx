@@ -50,6 +50,7 @@ interface ApiKey {
   createdAt: string;
   status: "active" | "inactive";
   smtpConfig: {
+    id: string;
     name: string;
   } | null;
 }
