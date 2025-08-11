@@ -76,7 +76,7 @@ export function NavMobile() {
             <>
               <li className="py-3">
                 <Link
-                  href="/emails"
+                  href="/dashboard"
                   onClick={() => setOpen(false)}
                   className="flex w-full font-medium capitalize"
                 >
