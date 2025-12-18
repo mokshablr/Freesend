@@ -40,46 +40,44 @@ export function NavBar({ scroll = false }: NavBarProps) {
 
   return (
     <header
-      className={`sticky top-0 z-40 flex w-full justify-center bg-background/60 backdrop-blur-xl transition-all ${
-        scroll ? (scrolled ? "border-b" : "bg-transparent") : "border-b"
+      className={`sticky top-0 z-40 flex w-full justify-center backdrop-blur-xl transition-all ${
+        scroll ? (scrolled ? "border-b border-slate-900/85 bg-gradient-to-b from-slate-950/95 to-transparent" : "bg-transparent border-b border-slate-900/85") : "border-b border-slate-900/85 bg-gradient-to-b from-slate-950/95 to-transparent"
       }`}
     >
       <MaxWidthWrapper
-        className="flex h-14 items-center justify-between py-4"
+        className="flex h-14 items-center justify-between gap-6 py-4"
         large={documentation}
       >
-        <div className="flex gap-6 md:gap-10">
+        <div className="flex items-center gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-1.5">
-            <span className="font-urban text-xl font-bold">
-              <Image
-                alt="Freesend"
-                src="/freesend-logo-black.png"
-                width={90}
-                height={31}
-                className="block dark:hidden"
-              />
-              <Image
-                alt="Freesend"
-                src="/freesend-logo-white.png"
-                width={90}
-                height={31}
-                className="hidden dark:block"
-              />
-            </span>
+            <Image
+              alt="Freesend"
+              src="/freesend-logo-black.png"
+              width={110}
+              height={38}
+              className="block dark:hidden"
+            />
+            <Image
+              alt="Freesend"
+              src="/freesend-logo-white.png"
+              width={110}
+              height={38}
+              className="hidden dark:block"
+            />
           </Link>
 
           {links && links.length > 0 ? (
-            <nav className="hidden gap-6 md:flex">
+            <nav className="hidden gap-5 md:flex">
               {links.map((item, index) => (
                 <Link
                   key={index}
                   href={item.disabled ? "#" : item.href}
                   prefetch={true}
                   className={cn(
-                    "flex items-center text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm",
+                    "flex items-center rounded-full px-1 py-1 text-sm font-medium transition-colors hover:text-foreground sm:text-sm",
                     item.href.startsWith(`/${selectedLayout}`)
                       ? "text-foreground"
-                      : "text-foreground/60",
+                      : "text-muted-foreground",
                     item.disabled && "cursor-not-allowed opacity-80",
                   )}
                 >
@@ -87,10 +85,22 @@ export function NavBar({ scroll = false }: NavBarProps) {
                 </Link>
               ))}
             </nav>
-          ) : null}
+          ) : (
+            <nav className="hidden gap-5 text-sm text-muted-foreground md:flex">
+              <Link href="#features" className="transition-colors hover:text-foreground">
+                Features
+              </Link>
+              <Link href="#pricing" className="transition-colors hover:text-foreground">
+                Pricing
+              </Link>
+              <Link href="/docs" className="transition-colors hover:text-foreground">
+                Docs
+              </Link>
+            </nav>
+          )}
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3">
           {/* right header for docs */}
           {documentation ? (
             <div className="hidden flex-1 items-center space-x-4 sm:justify-end lg:flex">
@@ -111,43 +121,38 @@ export function NavBar({ scroll = false }: NavBarProps) {
                 </Link>
               </div>
             </div>
-          ) : null}
-
-          {/* Only show Documentation link if not on docs layout */}
-          {selectedLayout !== "docs" && (
-            <Link
-              href="/docs"
-              className={cn(
-                "hidden md:block text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm text-foreground/60 mr-4"
-              )}
-            >
-              Documentation
-            </Link>
-          )}
-
-          {session ? (
-            <Link href="/dashboard" className="hidden md:block">
-              <Button
-                className="gap-2 rounded-md px-4"
-                variant="default"
-                size="sm"
-              >
-                <span>Dashboard</span>
-              </Button>
-            </Link>
-          ) : status === "unauthenticated" ? (
-            <Link href="/login" className="hidden md:block">
-              <Button
-                className="roudned-md hidden gap-2 pl-4 pr-2 md:flex"
-                variant="default"
-                size="sm"
-              >
-                <span className="font-semibold">Get Started</span>
-                <Icons.chevronRight className="size-4" />
-              </Button>
-            </Link>
           ) : (
-            <Skeleton className="hidden h-9 w-28 rounded-full lg:flex" />
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden gap-2 rounded-full border-gray-700 bg-black px-4 text-xs font-medium md:inline-flex"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_0_4px_rgba(34,197,94,0.25)]"></span>
+                Live status
+              </Button>
+              {session ? (
+                <Link href="/dashboard">
+                  <Button
+                    size="sm"
+                    className="gap-2 rounded-full px-5 text-xs font-semibold shadow-lg shadow-white/20 hover:shadow-xl hover:shadow-white/30 transition-shadow"
+                  >
+                    Dashboard
+                  </Button>
+                </Link>
+              ) : status === "unauthenticated" ? (
+                <Link href="/login">
+                  <Button
+                    size="sm"
+                    className="gap-2 rounded-full px-5 text-xs font-semibold shadow-lg shadow-white/20 hover:shadow-xl hover:shadow-white/30 transition-shadow"
+                  >
+                    Get started
+                  </Button>
+                </Link>
+              ) : (
+                <Skeleton className="h-9 w-28 rounded-full" />
+              )}
+            </>
           )}
         </div>
       </MaxWidthWrapper>
