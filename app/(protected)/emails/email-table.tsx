@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 // import { Emails } from "@prisma/client";
-import { Edit, MoreHorizontal, Trash } from "lucide-react";
+import { Edit, MoreHorizontal, Trash, X } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
 import { deleteServer, updateMailServer } from "@/lib/smtp-config";
 import { DataTable } from "@/components/ui/data-table";
-import { Icons } from "@/components/shared/icons";
+import { TablePagination } from "@/components/ui/table-pagination";
+import EmailContentModal from "@/components/modals/email-content-modal";
 
 type Emails = {
   id: string;
@@ -18,6 +19,7 @@ type Emails = {
   html_body?: string;
   text_body?: string;
   createdAt: string | Date;
+  reply_to?: string; // Added reply_to field
 };
 
 interface EmailTableProps {
@@ -51,10 +53,12 @@ const EmailTable: React.FC<EmailTableProps> = ({
 
   const [emails, setEmails] = useState<Emails[]>(initialEmailList);
   const [isLoading, setIsLoading] = useState<boolean>(initialIsLoading);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState<Emails | null>(null);
 
   // Pagination state
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(5); // Default page size
+  const [pageSize, setPageSize] = useState(10); // Default page size
 
   useEffect(() => {
     setEmails(initialEmailList);
@@ -93,6 +97,11 @@ const EmailTable: React.FC<EmailTableProps> = ({
     }
   };
 
+  const handleEmailClick = (email: Emails) => {
+    setSelectedEmail(email);
+    setIsModalOpen(true);
+  };
+
   const columns = [
     { 
       id: "from", 
@@ -114,8 +123,13 @@ const EmailTable: React.FC<EmailTableProps> = ({
       id: "subject", 
       header: "Subject", 
       accessorKey: "subject",
-      cell: ({ getValue }) => (
-        <span className="text-xs text-foreground font-medium">{getValue()}</span>
+      cell: ({ row }) => (
+        <button
+          onClick={() => handleEmailClick(row.original)}
+          className="text-xs text-foreground font-medium hover:underline cursor-pointer"
+        >
+          {row.original.subject}
+        </button>
       )
     },
     {
@@ -123,7 +137,7 @@ const EmailTable: React.FC<EmailTableProps> = ({
       header: "API Key",
       accessorKey: "apiKeyId",
       cell: ({ getValue }) => {
-        const apiKeyId = getValue();
+        const apiKeyId = getValue() as string;
         if (!apiKeyId) return <span className="text-xs text-muted-foreground">-</span>;
         if (apiKeyMap[apiKeyId]) {
           const isActiveFilter = activeFilterApiKey === apiKeyId;
@@ -144,7 +158,7 @@ const EmailTable: React.FC<EmailTableProps> = ({
                     className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-100 text-red-600 border border-red-200 hover:bg-red-200 hover:border-red-300 hover:text-red-700 transition-all duration-200 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-red-500/30 dark:bg-red-900/50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-800/60 dark:hover:text-red-300"
                     title="Clear filter"
                   >
-                    <Icons.close className="h-3 w-3" />
+                    <X className="h-3 w-3" />
                   </button>
                 </div>
               ) : (
@@ -204,51 +218,21 @@ const EmailTable: React.FC<EmailTableProps> = ({
         data={paginatedEmails} // Use sliced data for the table
         isLoading={isLoading}
       />
-      {/* Pagination Controls */}
-      <div className="mt-4 flex items-center justify-between text-sm text-zinc-400">
-        <div>
-          <label>
-            Rows per page:
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPageIndex(0); // Reset to first page on page size change
-              }}
-              className="ml-2 rounded border p-1"
-            >
-              {[5, 10, 25, 50].map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <div>
-          <button
-            onClick={() => setPageIndex((old) => Math.max(old - 1, 0))}
-            disabled={pageIndex === 0}
-            className="rounded border p-2"
-          >
-            <Icons.chevronLeft className="size-3 text-white" />
-          </button>
-          <span className="mx-2">
-            Page {pageIndex + 1} of {Math.ceil(emails.length / pageSize)}
-          </span>
-          <button
-            onClick={() =>
-              setPageIndex((old) =>
-                Math.min(old + 1, Math.ceil(emails.length / pageSize) - 1),
-              )
-            }
-            disabled={pageIndex >= Math.ceil(emails.length / pageSize) - 1}
-            className="rounded border p-2"
-          >
-            <Icons.chevronRight className="size-3 text-white" />
-          </button>
-        </div>
-      </div>
+      <TablePagination
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        totalItems={emails.length}
+        onPageChange={setPageIndex}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPageIndex(0); // Reset to first page on page size change
+        }}
+      />
+      <EmailContentModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        email={selectedEmail}
+      />
     </>
   );
 };
