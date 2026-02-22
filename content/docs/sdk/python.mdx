@@ -1,6 +1,377 @@
 ---
 title: Python SDK
-description: Official Python SDK for the Freesend email API (Coming Soon).
+description: Official Python SDK for the Freesend email API.
 ---
 
-## Python SDK - Coming Soon
+## Overview
+
+The Freesend Python SDK provides a simple, reliable way to integrate with the Freesend email API from Python. It supports Python 3.7+ and offers a clean, dataclass-based interface for sending emails with optional attachments (base64 or URL). Use it in scripts, web apps, or background workers.
+
+## Installation
+
+```bash
+pip install freesend
+```
+
+## Quick Start
+
+```python
+from freesend import Freesend, SendEmailRequest, FreesendConfig
+
+config = FreesendConfig(api_key="your-api-key-here")
+freesend = Freesend(config)
+
+email_data = SendEmailRequest(
+    fromName="Your Company",
+    fromEmail="hello@yourdomain.com",
+    to="recipient@example.com",
+    subject="Hello from Freesend!",
+    html="<h1>Welcome!</h1><p>This email was sent using Freesend.</p>",
+    text="Welcome! This email was sent using Freesend."
+)
+
+response = freesend.send_email(email_data)
+print(response.message)  # "Email sent successfully"
+```
+
+## Configuration
+
+### FreesendConfig
+
+The client is configured via a `FreesendConfig` instance:
+
+```python
+from freesend import FreesendConfig
+
+config = FreesendConfig(
+    api_key="your-api-key-here",
+    base_url="https://freesend.metafog.io"  # Optional
+)
+```
+
+| Option | Type | Required | Description |
+|--------|------|----------|-------------|
+| `api_key` | str | Yes | Your Freesend API key |
+| `base_url` | str | No | Custom base URL (defaults to `https://freesend.metafog.io`) |
+
+### Example with Custom Base URL
+
+```python
+from freesend import Freesend, FreesendConfig
+
+config = FreesendConfig(
+    api_key="your-api-key-here",
+    base_url="https://your-custom-freesend-instance.com"
+)
+freesend = Freesend(config)
+```
+
+### Using Environment Variables
+
+Keep API keys out of source code by using environment variables:
+
+```python
+import os
+from freesend import Freesend, FreesendConfig
+
+config = FreesendConfig(api_key=os.getenv("FREESEND_API_KEY", "your-api-key-here"))
+freesend = Freesend(config)
+```
+
+## API Reference
+
+### send_email
+
+```python
+send_email(data: SendEmailRequest) -> SendEmailResponse
+```
+
+Sends an email using the Freesend API. Raises `FreesendValidationError` for invalid input, `FreesendAPIError` for API errors, and `FreesendNetworkError` for connection issues.
+
+#### Request: SendEmailRequest
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `fromName` | str | No | Display name for the sender |
+| `fromEmail` | str | Yes | Sender email address |
+| `to` | str | Yes | Recipient email address |
+| `subject` | str | Yes | Email subject line |
+| `html` | str | No* | HTML content of the email |
+| `text` | str | No* | Plain text content of the email |
+| `attachments` | list[Attachment] | No | List of attachment objects |
+
+*At least one of `html` or `text` is required.
+
+#### Response: SendEmailResponse
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `message` | str | Success message from the API (e.g. "Email sent successfully") |
+
+#### Attachment
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `filename` | str | Yes | Name of the attachment file |
+| `content` | str | Yes** | Base64-encoded file content |
+| `url` | str | Yes** | URL to an external file (HTTP/HTTPS) |
+| `contentType` | str | No | MIME type (e.g. `application/pdf`, `image/png`) |
+
+**Either `content` or `url` is required, but not both.
+
+## Examples
+
+### Basic Email
+
+```python
+from freesend import Freesend, SendEmailRequest, FreesendConfig
+
+freesend = Freesend(FreesendConfig(api_key="your-api-key-here"))
+
+try:
+    response = freesend.send_email(SendEmailRequest(
+        fromName="Your Company",
+        fromEmail="hello@yourdomain.com",
+        to="user@example.com",
+        subject="Welcome to our platform!",
+        html="<h1>Welcome!</h1><p>Thank you for joining us.</p>",
+        text="Welcome! Thank you for joining us."
+    ))
+    print("Email sent:", response.message)
+except Exception as e:
+    print("Failed to send email:", e)
+```
+
+### Email with Base64 Attachment
+
+```python
+import base64
+from freesend import Freesend, SendEmailRequest, FreesendConfig, Attachment
+
+freesend = Freesend(FreesendConfig(api_key="your-api-key-here"))
+
+with open("invoice.pdf", "rb") as f:
+    file_content = base64.b64encode(f.read()).decode("utf-8")
+
+attachment = Attachment(
+    filename="invoice.pdf",
+    content=file_content,
+    contentType="application/pdf"
+)
+
+try:
+    response = freesend.send_email(SendEmailRequest(
+        fromName="Your Company",
+        fromEmail="billing@yourdomain.com",
+        to="customer@example.com",
+        subject="Your invoice is ready",
+        html="<h1>Invoice Attached</h1><p>Please find your invoice attached.</p>",
+        text="Invoice attached. Please find your invoice attached.",
+        attachments=[attachment]
+    ))
+    print("Email sent:", response.message)
+except Exception as e:
+    print("Failed to send email:", e)
+```
+
+### Email with URL-based Attachment
+
+```python
+from freesend import Freesend, SendEmailRequest, FreesendConfig, Attachment
+
+freesend = Freesend(FreesendConfig(api_key="your-api-key-here"))
+
+try:
+    response = freesend.send_email(SendEmailRequest(
+        fromName="Your Company",
+        fromEmail="reports@yourdomain.com",
+        to="team@example.com",
+        subject="Monthly Report",
+        html="<h1>Monthly Report</h1><p>Please find the monthly report attached.</p>",
+        text="Monthly Report - Please find the monthly report attached.",
+        attachments=[
+            Attachment(
+                filename="monthly-report.pdf",
+                url="https://example.com/reports/monthly-report.pdf",
+                contentType="application/pdf"
+            )
+        ]
+    ))
+    print("Email sent:", response.message)
+except Exception as e:
+    print("Failed to send email:", e)
+```
+
+### Multiple Attachments
+
+```python
+from freesend import Freesend, SendEmailRequest, FreesendConfig, Attachment
+
+freesend = Freesend(FreesendConfig(api_key="your-api-key-here"))
+
+try:
+    response = freesend.send_email(SendEmailRequest(
+        fromName="Your Company",
+        fromEmail="support@yourdomain.com",
+        to="customer@example.com",
+        subject="Your order details",
+        html="<h1>Order Confirmation</h1><p>Please find your order details attached.</p>",
+        text="Order Confirmation - Please find your order details attached.",
+        attachments=[
+            Attachment(
+                filename="invoice.pdf",
+                url="https://example.com/invoices/12345.pdf",
+                contentType="application/pdf"
+            ),
+            Attachment(
+                filename="receipt.jpg",
+                url="https://example.com/receipts/12345.jpg",
+                contentType="image/jpeg"
+            )
+        ]
+    ))
+    print("Email sent:", response.message)
+except Exception as e:
+    print("Failed to send email:", e)
+```
+
+## Error Handling
+
+The SDK raises specific exception types for different failures. Catch them for precise handling:
+
+```python
+from freesend import Freesend, SendEmailRequest, FreesendConfig
+from freesend.exceptions import FreesendError, FreesendAPIError, FreesendValidationError, FreesendNetworkError
+
+freesend = Freesend(FreesendConfig(api_key="your-api-key-here"))
+
+try:
+    response = freesend.send_email(SendEmailRequest(
+        fromEmail="hello@yourdomain.com",
+        to="user@example.com",
+        subject="Test email"
+        # Missing html/text - will raise FreesendValidationError
+    ))
+except FreesendValidationError as e:
+    print("Validation error:", e.message)
+except FreesendAPIError as e:
+    print("API error:", e.message)
+    print("Status code:", e.status_code)
+except FreesendNetworkError as e:
+    print("Network error:", e.message)
+except FreesendError as e:
+    print("Freesend error:", e.message)
+```
+
+### Exception Hierarchy
+
+| Exception | When it's raised |
+|-----------|------------------|
+| `FreesendValidationError` | Invalid or missing request fields (client-side) |
+| `FreesendAPIError` | API returned an error (4xx/5xx, invalid JSON) |
+| `FreesendNetworkError` | Connection failed, timeout, or other request error |
+| `FreesendError` | Base class for all SDK errors; also used for unexpected errors |
+
+## Common Error Codes
+
+| Status Code | Description |
+|-------------|-------------|
+| 400 | Bad Request - Missing required fields or invalid data |
+| 401 | Unauthorized - Invalid or missing API key |
+| 403 | Forbidden - API key is inactive or invalid |
+| 500 | Internal Server Error - Email sending failed |
+
+## Python Version and Type Hints
+
+The SDK supports **Python 3.7+** and uses type hints throughout. All request and response types are dataclasses, so you get clear constructor signatures and optional IDE support:
+
+```python
+from freesend import Freesend, SendEmailRequest, SendEmailResponse, FreesendConfig
+
+config = FreesendConfig(api_key="your-api-key-here")
+freesend = Freesend(config)
+
+# Type-checked request
+email_data = SendEmailRequest(
+    fromEmail="hello@yourdomain.com",
+    to="user@example.com",
+    subject="Test",
+    html="<h1>Hello</h1>",
+    text="Hello"
+)
+
+# Response is SendEmailResponse
+response: SendEmailResponse = freesend.send_email(email_data)
+print(response.message)
+```
+
+## Best Practices
+
+### Error handling
+- Wrap `send_email` calls in try/except and handle `FreesendValidationError`, `FreesendAPIError`, and `FreesendNetworkError` explicitly where it matters.
+- Use `e.message` and `e.status_code` (on `FreesendAPIError`) for logging and user-facing messages.
+
+### Attachments
+- Use base64 `content` for smaller files (API limit is 25MB per attachment).
+- Use `url` for larger or already-hosted files; the URL must be publicly accessible (HTTP/HTTPS only).
+- Set `contentType` for better behavior in email clients.
+- Do not send both `content` and `url` for the same attachment; the SDK will raise `FreesendValidationError`.
+
+### API keys
+- Prefer environment variables (e.g. `FREESEND_API_KEY`) over hardcoding.
+- Do not commit API keys to version control.
+- Rotate keys periodically.
+
+### Client reuse
+- Create one `Freesend` instance per process (or per request in a web app) and reuse it; the client uses a single `requests.Session` under the hood.
+
+## Migration from HTTP API
+
+If you're calling the Freesend API with `requests` or `urllib` directly, you can switch to the SDK like this:
+
+### Before (raw HTTP)
+
+```python
+import requests
+
+response = requests.post(
+    "https://freesend.metafog.io/api/send-email",
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}",
+    },
+    json={
+        "fromEmail": "hello@yourdomain.com",
+        "to": "user@example.com",
+        "subject": "Test",
+        "html": "<p>Hello</p>",
+        "text": "Hello",
+    },
+)
+result = response.json()
+```
+
+### After (SDK)
+
+```python
+from freesend import Freesend, SendEmailRequest, FreesendConfig
+
+freesend = Freesend(FreesendConfig(api_key=api_key))
+result = freesend.send_email(SendEmailRequest(
+    fromEmail="hello@yourdomain.com",
+    to="user@example.com",
+    subject="Test",
+    html="<p>Hello</p>",
+    text="Hello",
+))
+# result is a SendEmailResponse with result.message
+```
+
+The SDK handles validation, headers, serialization, and error mapping for you.
+
+## Support
+
+- **SDK source**: <a href="https://github.com/mokshablr/Freesend/tree/main/sdk/python" target="_blank" rel="noopener noreferrer" className="font-medium underline underline-offset-4">sdk/python</a>
+- **PyPI**: <a href="https://pypi.org/project/freesend/" target="_blank" rel="noopener noreferrer" className="font-medium underline underline-offset-4">freesend</a>
+- **GitHub Issues**: <a href="https://github.com/mokshablr/Freesend/issues" target="_blank" rel="noopener noreferrer" className="font-medium underline underline-offset-4">Report bugs or request features</a>
+- **API reference**: <a href="/docs/api/send-email" target="_blank" rel="noopener noreferrer" className="font-medium underline underline-offset-4">Send Email API</a>

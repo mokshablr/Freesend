@@ -59,8 +59,7 @@ export const docsConfig: DocsConfig = {
         {
           title: "Python",
           href: "/docs/sdk/python",
-          description: "Python SDK (Coming Soon)",
-          disabled: true,
+          description: "Official SDK for Python",
         },
         {
           title: "Go",
