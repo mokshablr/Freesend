@@ -8,7 +8,7 @@ export const siteConfig: SiteConfig = {
   description:
     "Freesend empowers you to send emails your way by allowing seamless integration with your own mail servers. Experience personalized and efficient communication with Freesend.",
   url: site_url,
-  ogImage: `${site_url}/_static/og.jpg`,
+  ogImage: `${site_url}/freesend-og-image.png`,
   links: {
     twitter: "",
     github: "https://www.github.com/mokshablr/freesend",

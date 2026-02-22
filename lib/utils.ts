@@ -50,6 +50,7 @@ export function constructMetadata({
       title,
       description,
       siteName: title,
+      images: [image],
     },
     twitter: {
       card: "summary_large_image",
