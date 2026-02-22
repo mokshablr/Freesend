@@ -92,82 +92,14 @@ sendEmail();
 
 ---
 
-## 🚀 JavaScript/TypeScript SDK
+## 🚀 Official SDKs
 
-For a better developer experience, use our official **JavaScript/TypeScript SDK**:
+Use an official SDK for a better developer experience. Full docs, examples, and API reference are on the [documentation site](https://freesend.metafog.io/docs).
 
-### Installation
-
-```bash
-npm install @freesend/sdk
-```
-
-### Quick Start
-
-```typescript
-import { Freesend } from '@freesend/sdk';
-
-const freesend = new Freesend({
-  apiKey: 'your-api-key-here'
-});
-
-// Send a simple email
-const { message } = await freesend.sendEmail({
-  fromName: 'Your Company',
-  fromEmail: 'hello@yourdomain.com',
-  to: 'recipient@example.com',
-  subject: 'Hello from Freesend!',
-  html: '<h1>Welcome!</h1><p>This email was sent using Freesend.</p>',
-  text: 'Welcome! This email was sent using Freesend.'
-});
-
-console.log(message); // "Email sent successfully"
-```
-
-### Email with Attachment
-
-```typescript
-import { Freesend } from '@freesend/sdk';
-import { readFileSync } from 'fs';
-
-const freesend = new Freesend({
-  apiKey: 'your-api-key-here'
-});
-
-// Read and encode file
-const fileContent = readFileSync('./invoice.pdf', { encoding: 'base64' });
-
-const result = await freesend.sendEmail({
-  fromName: 'Your Company',
-  fromEmail: 'billing@yourdomain.com',
-  to: 'customer@example.com',
-  subject: 'Your invoice is ready',
-  html: '<h1>Invoice Attached</h1><p>Please find your invoice attached.</p>',
-  text: 'Invoice attached. Please find your invoice attached.',
-  attachments: [
-    {
-      filename: 'invoice.pdf',
-      content: fileContent,
-      contentType: 'application/pdf'
-    }
-  ]
-});
-```
-
-### Features
-
-- ✨ **TypeScript Support** - Full type definitions included
-- 🔧 **Simple API** - Clean, intuitive methods
-- 📎 **Attachment Support** - Send files via base64 encoding
-- 🌐 **Cross-Platform** - Works in Node.js and browsers
-- 🛡️ **Error Handling** - Comprehensive error types and messages
-- ⚙️ **Customizable** - Support for custom base URLs
-
-### SDK Documentation
-
-For complete SDK documentation, examples, and API reference, visit:
-- [JavaScript/TypeScript SDK README](https://freesend.metafog.io/docs/sdk/javascript)
-- [NPM Package](https://www.npmjs.com/package/@freesend/sdk)
+| Language       | Install | Documentation |
+|----------------|---------|----------------|
+| **JavaScript/TypeScript** | `npm install @freesend/sdk` | [JS/TS SDK docs](https://freesend.metafog.io/docs/sdk/javascript) |
+| **Python**     | `pip install freesend` | [Python SDK docs](https://freesend.metafog.io/docs/sdk/python) |
 
 ---
 
@@ -196,7 +128,7 @@ Freesend is growing because of awesome developers like [you](https://github.com/
 - [Documentation](https://freesend.metafog.io/docs)
 - [API Reference](https://freesend.metafog.io/docs/api/send-email)
 - [SMTP Setup Guide](https://freesend.metafog.io/docs/configuration/mail-server)
-- [JavaScript/TypeScript SDK](https://www.npmjs.com/package/@freesend/sdk) - Official SDK with examples
+- [JavaScript/TypeScript SDK](https://freesend.metafog.io/docs/sdk/javascript) · [Python SDK](https://freesend.metafog.io/docs/sdk/python)
 
 ---
 
