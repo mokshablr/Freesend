@@ -56,3 +56,43 @@ yarn.lock
 
 # formatter
 .prettierignore
+
+# SDK specific ignores
+# JavaScript/TypeScript SDK
+sdk/javascript/node_modules/
+sdk/javascript/dist/
+sdk/javascript/coverage/
+sdk/javascript/.nyc_output/
+sdk/javascript/*.log
+sdk/javascript/npm-debug.log*
+sdk/javascript/yarn-debug.log*
+sdk/javascript/yarn-error.log*
+
+# Python SDK
+sdk/python/__pycache__/
+sdk/python/*.pyc
+sdk/python/*.pyo
+sdk/python/*.pyd
+sdk/python/.Python
+sdk/python/build/
+sdk/python/develop-eggs/
+sdk/python/dist/
+sdk/python/downloads/
+sdk/python/eggs/
+sdk/python/.eggs/
+sdk/python/lib/
+sdk/python/lib64/
+sdk/python/parts/
+sdk/python/sdist/
+sdk/python/var/
+sdk/python/wheels/
+sdk/python/*.egg-info/
+sdk/python/.installed.cfg
+sdk/python/*.egg
+sdk/python/.pytest_cache/
+sdk/python/.coverage
+sdk/python/htmlcov/
+sdk/python/freesend/__pycache__/
+sdk/python/freesend/*.pyc
+sdk/python/freesend/*.pyo
+sdk/python/freesend/*.pyd

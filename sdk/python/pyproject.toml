@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "freesend"
+version = "1.0.0"
+description = "Official Python SDK for the Freesend email API"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+    { name = "Freesend Team", email = "team@freesend.metafog.io" }
+]
+keywords = ["freesend", "email", "api", "smtp", "python"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Communications :: Email",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.7"
+dependencies = [
+    "requests>=2.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0.0",
+    "pytest-asyncio>=0.18.0",
+    "black>=21.0.0",
+    "flake8>=3.8.0",
+    "mypy>=0.800",
+]
+
+[project.urls]
+"Bug Reports" = "https://github.com/mokshablr/Freesend/issues"
+Source = "https://github.com/mokshablr/Freesend"
+Documentation = "https://freesend.metafog.io/docs"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["freesend*"]
