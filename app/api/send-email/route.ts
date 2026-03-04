@@ -11,6 +11,7 @@ type emailContent = {
   subject: string;
   text?: string;
   html?: string;
+  replyTo?: string;
   attachments?: Array<{
     filename: string;
     content?: string;  // base64 encoded content (optional if url is provided)
@@ -126,6 +127,20 @@ export const POST = async (req: Request) => {
         headers: { "Content-Type": "application/json" },
       },
     );
+  }
+
+  // Validate replyTo if provided
+  if (message.replyTo) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(message.replyTo)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid 'replyTo' email format." }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
   }
 
   // Validate attachments if provided
@@ -362,6 +377,7 @@ export const POST = async (req: Request) => {
       subject: message.subject,
       text: message.text,
       html: message.html,
+      replyTo: message.replyTo,
       attachments: processedAttachments,
       headers: {
         'X-Mailer': 'Freesend',
