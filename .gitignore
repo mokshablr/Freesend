@@ -96,3 +96,4 @@ sdk/python/freesend/__pycache__/
 sdk/python/freesend/*.pyc
 sdk/python/freesend/*.pyo
 sdk/python/freesend/*.pyd
+.idea
