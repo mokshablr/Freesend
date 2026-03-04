@@ -5,7 +5,10 @@ description: Sending emails through Freesend.
 
 ## API Endpoint
 
-- <span className="method-pill rounded-lg font-bold px-1.5 py-0.5 text-sm leading-5 bg-blue-400/20 dark:bg-blue-400/20 text-blue-700 dark:text-blue-400">POST</span> <code>https://freesend.metafog.io/api/send-email</code>
+- <span className="method-pill rounded-lg bg-blue-400/20 px-1.5 py-0.5 text-sm font-bold leading-5 text-blue-700 dark:bg-blue-400/20 dark:text-blue-400">
+    POST
+  </span>
+  <code>https://freesend.metafog.io/api/send-email</code>
 
 ## Prerequisites
 
@@ -13,6 +16,7 @@ description: Sending emails through Freesend.
 - [Create an API Key](/docs/configuration/api-keys)
 
 ## Steps
+
 <Steps>
 
 ### Bearer Token
@@ -33,6 +37,7 @@ Ensure you put your API Key as a Bearer token in the Authorization header of the
     "subject": "Email sent from Freesend!",  // Subject for the email
     "html": "<h1>Yay! You got the email.</h1>",  // (optional) HTML format of the email body
     "text": "Yay! You got the email.",  // (optional) Text format of the email body
+    "replyTo": "reply@yourdomain.com",  // (optional) Reply-to email address
     "attachments": [  // (optional) Array of attachments
         {
             "filename": "invoice.pdf",  // Name of the file
@@ -132,6 +137,7 @@ Include the `url` parameter to send attachments from a remote file. This paramet
       .then(result => console.log('Email sent:', result))
       .catch(error => console.error('Failed to send email:', error));
     ```
+
   </CodeTabs.Tab>
   <CodeTabs.Tab label="React">
     ```jsx
@@ -160,7 +166,7 @@ Include the `url` parameter to send attachments from a remote file. This paramet
       const sendEmail = async () => {
         const validUrls = urls.filter(u => u.filename && u.url);
         if (validUrls.length === 0) return;
-        
+
         setSending(true);
 
         try {
@@ -229,6 +235,7 @@ Include the `url` parameter to send attachments from a remote file. This paramet
       );
     };
     ```
+
   </CodeTabs.Tab>
   <CodeTabs.Tab label="Python">
     ```python
@@ -240,7 +247,7 @@ Include the `url` parameter to send attachments from a remote file. This paramet
             "Authorization": "Bearer YOUR_API_KEY",
             "Content-Type": "application/json"
         }
-        
+
         data = {
             "fromName": "Your Company",
             "fromEmail": "hello@yourdomain.com",
@@ -266,7 +273,7 @@ Include the `url` parameter to send attachments from a remote file. This paramet
                 }
             ]
         }
-        
+
         response = requests.post(url, headers=headers, json=data)
         return response.json()
 
@@ -274,6 +281,7 @@ Include the `url` parameter to send attachments from a remote file. This paramet
     result = send_email_with_url_attachments()
     print(result)
     ```
+
   </CodeTabs.Tab>
   <CodeTabs.Tab label="Node.js">
     ```js
@@ -282,7 +290,7 @@ Include the `url` parameter to send attachments from a remote file. This paramet
     const sendEmailWithUrlAttachments = async () => {
       const url = "https://freesend.metafog.io/api/send-email";
       const apiKey = "YOUR_API_KEY";
-      
+
       const emailData = {
         fromName: "Your Company",
         fromEmail: "hello@yourdomain.com",
@@ -328,6 +336,7 @@ Include the `url` parameter to send attachments from a remote file. This paramet
       .then(result => console.log('Email sent:', result))
       .catch(error => console.error('Failed to send email:', error));
     ```
+
   </CodeTabs.Tab>
 </CodeTabs>
 
@@ -370,7 +379,7 @@ Include the `content` parameter to send attachments from a local file. This para
       });
 
       const fileContent = await toBase64(file);
-      
+
       const emailData = {
         fromName: "Your Company",
         fromEmail: "hello@yourdomain.com",
@@ -408,6 +417,7 @@ Include the `content` parameter to send attachments from a local file. This para
       }
     });
     ```
+
   </CodeTabs.Tab>
   <CodeTabs.Tab label="React">
     ```jsx
@@ -423,9 +433,9 @@ Include the `content` parameter to send attachments from a local file. This para
 
       const sendEmail = async () => {
         if (!file) return;
-        
+
         setSending(true);
-        
+
         // Convert file to base64
         const toBase64 = (file) => new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -436,7 +446,7 @@ Include the `content` parameter to send attachments from a local file. This para
 
         try {
           const fileContent = await toBase64(file);
-          
+
           const emailData = {
             fromName: "Your Company",
             fromEmail: "hello@yourdomain.com",
@@ -481,6 +491,7 @@ Include the `content` parameter to send attachments from a local file. This para
       );
     };
     ```
+
   </CodeTabs.Tab>
   <CodeTabs.Tab label="Python">
     ```python
@@ -493,17 +504,17 @@ Include the `content` parameter to send attachments from a local file. This para
             "Authorization": "Bearer YOUR_API_KEY",
             "Content-Type": "application/json"
         }
-        
+
         # Read and encode file
         with open(file_path, "rb") as file:
             file_content = base64.b64encode(file.read()).decode('utf-8')
-        
+
         # Get filename and content type
         import os
         import mimetypes
         filename = os.path.basename(file_path)
         content_type = mimetypes.guess_type(file_path)[0] or 'application/octet-stream'
-        
+
         data = {
             "fromName": "Your Company",
             "fromEmail": "hello@yourdomain.com",
@@ -519,7 +530,7 @@ Include the `content` parameter to send attachments from a local file. This para
                 }
             ]
         }
-        
+
         response = requests.post(url, headers=headers, json=data)
         return response.json()
 
@@ -527,6 +538,7 @@ Include the `content` parameter to send attachments from a local file. This para
     result = send_email_with_attachment("invoice.pdf")
     print(result)
     ```
+
   </CodeTabs.Tab>
   <CodeTabs.Tab label="Node.js">
     ```js
@@ -537,11 +549,11 @@ Include the `content` parameter to send attachments from a local file. This para
     const sendEmailWithAttachment = async (filePath) => {
       const url = "https://freesend.metafog.io/api/send-email";
       const apiKey = "YOUR_API_KEY";
-      
+
       // Read and encode file
       const fileContent = fs.readFileSync(filePath, { encoding: 'base64' });
       const filename = path.basename(filePath);
-      
+
       // Determine content type
       const getContentType = (filename) => {
         const ext = path.extname(filename).toLowerCase();
@@ -557,7 +569,7 @@ Include the `content` parameter to send attachments from a local file. This para
         };
         return types[ext] || 'application/octet-stream';
       };
-      
+
       const emailData = {
         fromName: "Your Company",
         fromEmail: "hello@yourdomain.com",
@@ -593,6 +605,7 @@ Include the `content` parameter to send attachments from a local file. This para
       .then(result => console.log('Email sent:', result))
       .catch(error => console.error('Failed to send email:', error));
     ```
+
   </CodeTabs.Tab>
 </CodeTabs>
 
@@ -600,28 +613,29 @@ Include the `content` parameter to send attachments from a local file. This para
 
 ### Main Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `fromName` | string | No | Display name for the sender (e.g., "Your Company") |
-| `fromEmail` | string | Yes | Sender email address |
-| `to` | string | Yes | Recipient email address |
-| `subject` | string | Yes | Email subject line |
-| `html` | string | No* | HTML content of the email |
-| `text` | string | No* | Plain text content of the email |
-| `attachments` | array | No | Array of attachment objects (see below) |
+| Field         | Type   | Required | Description                                        |
+| ------------- | ------ | -------- | -------------------------------------------------- |
+| `fromName`    | string | No       | Display name for the sender (e.g., "Your Company") |
+| `fromEmail`   | string | Yes      | Sender email address                               |
+| `to`          | string | Yes      | Recipient email address                            |
+| `subject`     | string | Yes      | Email subject line                                 |
+| `html`        | string | No\*     | HTML content of the email                          |
+| `text`        | string | No\*     | Plain text content of the email                    |
+| `replyTo`     | string | No       | Reply-to email address                             |
+| `attachments` | array  | No       | Array of attachment objects (see below)            |
 
-*At least one of `html` or `text` is required.
+\*At least one of `html` or `text` is required.
 
 ### Attachment Object Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `filename` | string | Yes | Name of the attachment file |
-| `content` | string | No* | Base64 encoded file content |
-| `url` | string | No* | URL to external file (HTTP/HTTPS only) |
-| `contentType` | string | No | MIME type (e.g., "application/pdf", "image/png") |
+| Field         | Type   | Required | Description                                      |
+| ------------- | ------ | -------- | ------------------------------------------------ |
+| `filename`    | string | Yes      | Name of the attachment file                      |
+| `content`     | string | No\*     | Base64 encoded file content                      |
+| `url`         | string | No\*     | URL to external file (HTTP/HTTPS only)           |
+| `contentType` | string | No       | MIME type (e.g., "application/pdf", "image/png") |
 
-*Either `content` or `url` is required, but not both.
+\*Either `content` or `url` is required, but not both.
 
 ### Attachment Examples
 
@@ -642,7 +656,7 @@ Include the `content` parameter to send attachments from a local file. This para
 
 // Text attachment with base64
 {
-  "filename": "notes.txt", 
+  "filename": "notes.txt",
   "content": "SGVsbG8gV29ybGQh",  // "Hello World!" in base64
   "contentType": "text/plain"
 }
@@ -697,6 +711,7 @@ For complete SDK documentation, examples, and advanced usage, visit our [SDK doc
 ## Response
 
 ### Success Response (200)
+
 ```json
 {
   "message": "Email sent successfully"
@@ -706,6 +721,7 @@ For complete SDK documentation, examples, and advanced usage, visit our [SDK doc
 ### Error Responses
 
 #### 400 Bad Request - Missing Authorization Header
+
 ```json
 {
   "error": "Authorization header not found."
@@ -713,6 +729,7 @@ For complete SDK documentation, examples, and advanced usage, visit our [SDK doc
 ```
 
 #### 400 Bad Request - Invalid Authorization Format
+
 ```json
 {
   "error": "Invalid authorization header. Create a Bearer Token."
@@ -720,6 +737,7 @@ For complete SDK documentation, examples, and advanced usage, visit our [SDK doc
 ```
 
 #### 400 Bad Request - Missing API Key
+
 ```json
 {
   "error": "Invalid or missing API Key."
@@ -727,6 +745,7 @@ For complete SDK documentation, examples, and advanced usage, visit our [SDK doc
 ```
 
 #### 400 Bad Request - Missing Required Fields
+
 ```json
 {
   "error": "Missing required field 'fromEmail'."
@@ -751,7 +770,16 @@ For complete SDK documentation, examples, and advanced usage, visit our [SDK doc
 }
 ```
 
+#### 400 Bad Request - Invalid replyTo Email Format
+
+```json
+{
+  "error": "Invalid 'replyTo' email format."
+}
+```
+
 #### 400 Bad Request - Inactive API Key
+
 ```json
 {
   "error": "This API key is currently inactive."
@@ -759,6 +787,7 @@ For complete SDK documentation, examples, and advanced usage, visit our [SDK doc
 ```
 
 #### 403 Forbidden - Invalid API Key
+
 ```json
 {
   "error": "Invalid API Key or no SMTP configuration found."
@@ -766,6 +795,7 @@ For complete SDK documentation, examples, and advanced usage, visit our [SDK doc
 ```
 
 #### 400 Bad Request - Invalid Attachment Configuration
+
 ```json
 {
   "error": "Attachment 'filename.pdf' must have either 'content' or 'url' field."
@@ -809,6 +839,7 @@ For complete SDK documentation, examples, and advanced usage, visit our [SDK doc
 ```
 
 #### 500 Internal Server Error - Email Sending Failed
+
 ```json
 {
   "error": "Error sending email: [specific error message]"
@@ -816,6 +847,7 @@ For complete SDK documentation, examples, and advanced usage, visit our [SDK doc
 ```
 
 #### 500 Internal Server Error - URL Fetch Failed
+
 ```json
 {
   "error": "Error processing attachment 'filename.pdf': Failed to fetch attachment from URL: 404 Not Found"
@@ -835,6 +867,7 @@ For complete SDK documentation, examples, and advanced usage, visit our [SDK doc
 ```
 
 #### 502 Bad Gateway - Transport Error
+
 ```json
 {
   "error": "Could not create the transporter object."
@@ -843,31 +876,33 @@ For complete SDK documentation, examples, and advanced usage, visit our [SDK doc
 
 ## Common MIME Types
 
-| File Extension | MIME Type |
-|----------------|-----------|
-| `.pdf` | `application/pdf` |
-| `.jpg`, `.jpeg` | `image/jpeg` |
-| `.png` | `image/png` |
-| `.gif` | `image/gif` |
-| `.txt` | `text/plain` |
-| `.html` | `text/html` |
-| `.css` | `text/css` |
-| `.js` | `application/javascript` |
-| `.json` | `application/json` |
-| `.xml` | `application/xml` |
-| `.csv` | `text/csv` |
-| `.zip` | `application/zip` |
-| `.xlsx` | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` |
-| `.docx` | `application/vnd.openxmlformats-officedocument.wordprocessingml.document` |
-| `.pptx` | `application/vnd.openxmlformats-officedocument.presentationml.presentation` |
+| File Extension  | MIME Type                                                                   |
+| --------------- | --------------------------------------------------------------------------- |
+| `.pdf`          | `application/pdf`                                                           |
+| `.jpg`, `.jpeg` | `image/jpeg`                                                                |
+| `.png`          | `image/png`                                                                 |
+| `.gif`          | `image/gif`                                                                 |
+| `.txt`          | `text/plain`                                                                |
+| `.html`         | `text/html`                                                                 |
+| `.css`          | `text/css`                                                                  |
+| `.js`           | `application/javascript`                                                    |
+| `.json`         | `application/json`                                                          |
+| `.xml`          | `application/xml`                                                           |
+| `.csv`          | `text/csv`                                                                  |
+| `.zip`          | `application/zip`                                                           |
+| `.xlsx`         | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`         |
+| `.docx`         | `application/vnd.openxmlformats-officedocument.wordprocessingml.document`   |
+| `.pptx`         | `application/vnd.openxmlformats-officedocument.presentationml.presentation` |
 
 ## Security Note
 
 > **Important**: Freesend supports two types of attachments:
+>
 > - **Base64-encoded content**: For direct file uploads (recommended for smaller files)
 > - **URL-based attachments**: For external files accessible via HTTP/HTTPS URLs
-> 
+>
 > **Security Protections**:
+>
 > - Server-side file paths are not supported
 > - Internal/local URLs are blocked (localhost, private IPs, .local domains)
 > - Access to the hosting server is blocked
@@ -877,16 +912,19 @@ For complete SDK documentation, examples, and advanced usage, visit our [SDK doc
 ## Best Practices
 
 ### File Size Limits
+
 - Keep base64 attachments under 25MB for best performance
 - For larger files, consider using URL-based attachments instead
 - URL-based attachments can handle larger files since they're downloaded on-demand
 
 ### Base64 Encoding
+
 - Always encode binary files as base64
 - Remove any data URL prefixes (e.g., `data:application/pdf;base64,`)
 - Use proper content type headers for better email client compatibility
 
 ### URL-based Attachments
+
 - Ensure URLs are publicly accessible and return proper HTTP status codes
 - Use HTTPS URLs for security
 - URLs should return the actual file content, not redirects
@@ -896,6 +934,7 @@ For complete SDK documentation, examples, and advanced usage, visit our [SDK doc
 - **Security**: Only external, public URLs are allowed (internal/local URLs are blocked)
 
 ### Multiple Attachments
+
 ```json
 {
   "attachments": [

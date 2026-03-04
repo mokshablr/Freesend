@@ -97,3 +97,4 @@ sdk/python/freesend/*.pyc
 sdk/python/freesend/*.pyo
 sdk/python/freesend/*.pyd
 .idea
+pnpm-lock.yaml

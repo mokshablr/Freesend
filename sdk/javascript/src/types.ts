@@ -12,6 +12,7 @@ export interface SendEmailRequest {
   subject: string;
   text?: string;
   html?: string;
+  replyTo?: string;
   attachments?: Attachment[];
 }
 
@@ -32,9 +33,9 @@ export class FreesendError extends Error {
   constructor(
     message: string,
     public statusCode?: number,
-    public code?: string
+    public code?: string,
   ) {
     super(message);
-    this.name = 'FreesendError';
+    this.name = "FreesendError";
   }
-} 
+}
