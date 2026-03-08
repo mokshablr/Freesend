@@ -13,6 +13,8 @@ export interface SendEmailRequest {
   text?: string;
   html?: string;
   replyTo?: string;
+  cc?: string;
+  bcc?: string;
   attachments?: Attachment[];
 }
 

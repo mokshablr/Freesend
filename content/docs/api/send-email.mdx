@@ -35,6 +35,8 @@ Ensure you put your API Key as a Bearer token in the Authorization header of the
     "html": "<h1>Yay! You got the email.</h1>",  // (optional) HTML format of the email body
     "text": "Yay! You got the email.",  // (optional) Text format of the email body
     "replyTo": "reply@yourdomain.com",  // (optional) Reply-to email address
+    "cc": "cc@example.com",  // (optional) CC recipient(s), comma-separated
+    "bcc": "bcc@example.com",  // (optional) BCC recipient(s), comma-separated
     "attachments": [  // (optional) Array of attachments
         {
             "filename": "invoice.pdf",  // Name of the file
@@ -619,6 +621,8 @@ Include the `content` parameter to send attachments from a local file. This para
 | `html`        | string | No\*     | HTML content of the email                          |
 | `text`        | string | No\*     | Plain text content of the email                    |
 | `replyTo`     | string | No       | Reply-to email address                             |
+| `cc`          | string | No       | CC recipient(s), comma-separated email addresses   |
+| `bcc`         | string | No       | BCC recipient(s), comma-separated email addresses  |
 | `attachments` | array  | No       | Array of attachment objects (see below)            |
 
 \*At least one of `html` or `text` is required.
@@ -689,7 +693,7 @@ If you prefer a more developer-friendly experience with type safety, error handl
 ### Available SDKs
 
 - **[JavaScript/TypeScript](/docs/sdk/javascript)** - Full TypeScript support, Node.js & browser compatibility
-- **[Python](/docs/sdk/python)** - Python SDK (Coming Soon)
+- **[Python](/docs/sdk/python)** - Full type annotations, sync API, Python 3.x compatibility
 - **[Go](/docs/sdk/go)** - Go SDK (Coming Soon)
 - **[PHP](/docs/sdk/php)** - PHP SDK (Coming Soon)
 - **[Ruby](/docs/sdk/ruby)** - Ruby SDK (Coming Soon)

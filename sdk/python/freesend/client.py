@@ -142,7 +142,16 @@ class Freesend:
         
         if data.html:
             payload["html"] = data.html
-        
+
+        if data.replyTo:
+            payload["replyTo"] = data.replyTo
+
+        if data.cc:
+            payload["cc"] = data.cc
+
+        if data.bcc:
+            payload["bcc"] = data.bcc
+
         if data.attachments:
             payload["attachments"] = []
             for att in data.attachments:

@@ -26,6 +26,9 @@ class SendEmailRequest:
     fromName: Optional[str] = None
     text: Optional[str] = None
     html: Optional[str] = None
+    replyTo: Optional[str] = None
+    cc: Optional[str] = None
+    bcc: Optional[str] = None
     attachments: Optional[List[Attachment]] = None
 
 

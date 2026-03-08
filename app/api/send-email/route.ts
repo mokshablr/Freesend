@@ -12,6 +12,8 @@ type emailContent = {
   text?: string;
   html?: string;
   replyTo?: string;
+  cc?: string;
+  bcc?: string;
   attachments?: Array<{
     filename: string;
     content?: string;  // base64 encoded content (optional if url is provided)
@@ -378,6 +380,8 @@ export const POST = async (req: Request) => {
       text: message.text,
       html: message.html,
       replyTo: message.replyTo,
+      cc: message.cc,
+      bcc: message.bcc,
       attachments: processedAttachments,
       headers: {
         'X-Mailer': 'Freesend',

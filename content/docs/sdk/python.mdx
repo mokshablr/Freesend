@@ -98,6 +98,9 @@ Sends an email using the Freesend API. Raises `FreesendValidationError` for inva
 | `subject` | str | Yes | Email subject line |
 | `html` | str | No* | HTML content of the email |
 | `text` | str | No* | Plain text content of the email |
+| `replyTo` | str | No | Reply-to email address |
+| `cc` | str | No | CC recipient(s), comma-separated |
+| `bcc` | str | No | BCC recipient(s), comma-separated |
 | `attachments` | list[Attachment] | No | List of attachment objects |
 
 *At least one of `html` or `text` is required.
