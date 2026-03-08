@@ -1,235 +1,132 @@
 # AGENTS.md - Developer Guidelines for Freesend
 
-This file provides guidelines and commands for AI agents working on this codebase.
+Freesend is a Next.js email API that lets developers send email through their own SMTP infrastructure. This file is for AI coding agents — for human setup instructions see `CONTRIBUTING.md`.
 
-## Project Overview
+## Project Structure
 
-Freesend is a Next.js email API application that allows developers to send emails through their own SMTP infrastructure. The codebase consists of:
-
-- **Main App**: Next.js 14 application with TypeScript, Prisma, and shadcn/ui
-- **SDK**: JavaScript/TypeScript SDK in `sdk/javascript/`
-- **Stack**: Next.js, React 18, Prisma, PostgreSQL, Tailwind CSS, Zod
+```
+/actions             # Next.js server actions
+/app                 # Next.js App Router
+  /(auth)/           # Login/signup pages
+  /(docs)/           # Documentation pages
+  /(marketing)/      # Landing, pricing, blog
+  /(protected)/      # Authenticated dashboard/settings
+  /api/              # API routes
+/components          # React components
+  /ui/               # shadcn/ui primitives
+/lib                 # Utilities and server logic
+  /validations/      # Zod schemas
+/prisma              # Database schema
+/sdk/javascript/     # JS/TS SDK (npm package)
+/sdk/python/         # Python SDK (PyPI package)
+```
 
 ---
 
 ## Commands
 
-### Main Application (Root)
+### Main App (root)
 
 ```bash
-# Development
-npm run dev          # Start Next.js dev server
-npm run turbo        # Start with Turbopack
-
-# Build & Production
-npm run build        # Build for production
-npm run preview      # Build and preview production
+npm run dev          # Start dev server (Next.js)
+npm run turbo        # Start dev server (Turbopack)
+npm run build        # Production build
+npm run preview      # Build + preview production
 npm run start        # Start production server (port 5000)
-
-# Linting
-npm run lint         # Run ESLint
-
-# Email Development
-npm run email        # Start React Email dev server (port 3333)
-
-# Database
-npm run postinstall  # Generate Prisma client (runs automatically after npm install)
+npm run lint         # ESLint
+npm run email        # React Email dev server (port 3333)
+npx prisma generate  # Regenerate Prisma client after schema changes
+npx prisma db push   # Push schema changes to database
 ```
 
 ### JavaScript SDK (`sdk/javascript/`)
 
 ```bash
-# Build
-npm run build        # Compile TypeScript
-npm run dev          # Watch mode
+npm run build                           # Compile TypeScript
+npm run dev                             # Watch mode
+npm run test                            # Run all tests
+npm run test -- --testPathPattern=client.test.ts  # Run single file
+npm run test -- --coverage              # With coverage
+```
 
-# Testing
-npm run test                    # Run all tests
-npm run test -- client.test.ts  # Run single test file
-npx jest --testPathPattern=client.test.ts  # Alternative
+### Python SDK (`sdk/python/`)
 
-# Coverage
-npm run test -- --coverage
+```bash
+pip install -e ".[dev]"   # Install with dev dependencies
+pytest                    # Run all tests
+pytest tests/test_client.py  # Run single file
+black .                   # Format code
+flake8 .                  # Lint
+mypy freesend/            # Type check
 ```
 
 ---
 
-## Code Style Guidelines
+## Code Style
+
+### Formatting (Prettier — run automatically on save)
+
+Config is in `prettier.config.js`. Key rules:
+- Double quotes, semicolons, trailing commas (all), 2-space indent, LF line endings, print width 80
+- Import order is enforced by `@ianvs/prettier-plugin-sort-imports` — do not manually reorder imports; Prettier will sort them
 
 ### TypeScript
 
-- Use explicit types for function parameters and return types
-- Use `any` sparingly - prefer specific types or `unknown`
-- Enable `strictNullChecks` in tsconfig
-- Example:
-  ```typescript
-  // Good
-  export function formatDate(input: string | number): string {
-    const date = new Date(input);
-    return date.toLocaleDateString("en-US", { ... });
-  }
-
-  // Avoid
-  export function formatDate(input) { ... }
-  ```
-
-### Imports
-
-- Use path alias `@/` for local imports (configured in tsconfig)
-- Group imports in this order:
-  1. External libraries (React, Next.js)
-  2. UI components (shadcn/ui)
-  3. Internal lib utilities
-  4. Local components
-- Example:
-  ```typescript
-  import { useState, useEffect, useCallback } from "react";
-  import { Mail, KeyRound } from "lucide-react";
-  import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-  import { getCurrentUser } from "@/lib/session";
-  import { DashboardCharts } from "@/components/dashboard/dashboard-charts";
-  ```
-
-### Naming Conventions
-
-- **Components**: PascalCase (`DashboardClient`, `MailServerTable`)
-- **Functions/Variables**: camelCase (`getCurrentUser`, `fetchDashboardData`)
-- **Files**: kebab-case for pages (`dashboard-page.tsx`), PascalCase for components
-- **Interfaces**: PascalCase with `Props` suffix for component props (`DashboardClientProps`)
-- **Constants**: UPPER_SNAKE_CASE for true constants, camelCase for other values
-
-### React Components
-
+- Explicit types for function parameters and return values; avoid `any`
+- Path alias `@/` for all internal imports (configured in tsconfig)
+- Components: PascalCase (`DashboardClient`); files: kebab-case for pages, PascalCase for components
+- Functions/variables: camelCase; true constants: UPPER_SNAKE_CASE
 - Use `"use client"` directive for client components
-- Prefer function declarations for page components:
-  ```typescript
-  export default async function DashboardPage() { ... }
-  ```
-- Prefer arrow functions for client components:
-  ```typescript
-  export function DashboardClient({ prop1, prop2 }: Props) { ... }
-  ```
-- Destructure props in function signature
-- Extract complex interfaces to top of file
-
-### Error Handling
-
-- Use try/catch for async operations
-- Display user-friendly errors with toast notifications:
-  ```typescript
-  try {
-    const response = await fetch('/api/data');
-    if (!response.ok) {
-      throw new Error('Failed to fetch');
-    }
-    const data = await response.json();
-  } catch (error) {
-    console.error('Error:', error);
-    toast({
-      title: "Operation Failed",
-      description: "Please try again later.",
-      variant: "destructive",
-    });
-  }
-  ```
-
-### UI/Styling
-
-- Use Tailwind CSS with shadcn/ui components
-- Use `cn()` utility for conditional class merging:
-  ```typescript
-  import { cn } from "@/lib/utils";
-  <div className={cn("base-class", condition && "conditional-class")} />
-  ```
-- Follow shadcn/ui patterns for component structure
-- Use semantic HTML elements
-
-### Database (Prisma)
-
-- Use Prisma Client for database operations
-- Follow model definitions in `prisma/schema.prisma`
-- Generate client after schema changes: `npx prisma generate`
-
-### Validation
-
-- Use Zod for form validation
-- Define schemas in `lib/validations/`
-- Example:
-  ```typescript
-  import { z } from "zod";
-  export const EmailSchema = z.object({
-    to: z.string().email(),
-    subject: z.string().min(1),
-    body: z.string().optional(),
-  });
-  ```
+- Use `cn()` from `@/lib/utils` for conditional Tailwind class merging
 
 ### API Routes
 
-- Place in `app/api/` directory
-- Use Next.js App Router conventions
+- Place in `app/api/`; use Next.js App Router conventions
+- Validate request bodies with Zod schemas from `lib/validations/`
 - Return appropriate HTTP status codes
-- Use Zod for request body validation
+
+### Database
+
+- Use Prisma Client; follow `prisma/schema.prisma` for model definitions
+- Run `npx prisma generate` after any schema change
+
+### Python SDK
+
+- Follow PEP 8; use `black` for formatting
+- Type annotations required on all public functions
+- Use `unittest` + `unittest.mock` for tests (matches existing suite)
 
 ---
 
-## Directory Structure
+## Git Workflow
 
+Before opening a PR, run:
+
+```bash
+npm run lint    # Must pass with no errors
+npm run build   # Must complete without errors
 ```
-/app                 # Next.js App Router pages
-  /(auth)/          # Auth pages (login, etc.)
-  /(marketing)/     # Marketing pages (landing, pricing, blog)
-  /(protected)/     # Authenticated pages (dashboard, settings)
-  /api/             # API routes
-/components/        # React components
-  /ui/              # shadcn/ui components
-  /dashboard/       # Feature-specific components
-/lib/               # Utility functions
-  /validations/     # Zod schemas
-/prisma/            # Database schema
-/sdk/javascript/    # JS/TS SDK
-```
+
+For Python SDK changes, also run `pytest` and `flake8`.
+
+Commit messages: imperative mood, present tense (e.g. `Add reply-to support`, not `Added`).
 
 ---
 
-## Testing Guidelines
+## Boundaries
 
-- Tests go in `__tests__/` directories
-- Use `.test.ts` extension
-- Follow AAA pattern (Arrange, Act, Assert)
-- Example:
-  ```typescript
-  describe("EmailClient", () => {
-    it("should send email successfully", async () => {
-      // Arrange
-      const client = new EmailClient(apiKey);
-      
-      // Act
-      const result = await client.send({ to: "test@example.com", subject: "Test" });
-      
-      // Assert
-      expect(result.success).toBe(true);
-    });
-  });
-  ```
+**Always:**
+- Run `npm run lint` before marking a task complete on the main app
+- Run `pytest` before marking a task complete on the Python SDK
+- Run `npx prisma generate` after editing `prisma/schema.prisma`
+- Use Zod for all request body validation in API routes
 
----
+**Ask first:**
+- Adding new npm or PyPI production dependencies
+- Changes to `prisma/schema.prisma` that require a migration
+- Modifying authentication logic in `auth.ts` / `auth.config.ts`
 
-## Common Tasks
-
-### Adding a New Page
-1. Create file in appropriate `app/` subdirectory
-2. Add `export const metadata` for SEO
-3. Use async/await for server components
-4. Import and use components from `@/components/`
-
-### Adding a New Component
-1. Follow existing component patterns in `/components/`
-2. Use TypeScript interfaces for props
-3. Use `cn()` for className handling
-4. Export as named export
-
-### Database Changes
-1. Edit `prisma/schema.prisma`
-2. Run `npx prisma db push` or migrations
-3. Run `npx prisma generate` to update client
+**Never:**
+- Commit `.env` files or secrets
+- Run `npm run build` during development (use `npm run dev`)
+- Skip type checking when adding new TypeScript files

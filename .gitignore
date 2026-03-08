@@ -57,6 +57,9 @@ yarn.lock
 # formatter
 .prettierignore
 
+# AI coding agents
+.claude
+
 # SDK specific ignores
 # JavaScript/TypeScript SDK
 sdk/javascript/node_modules/
