@@ -4,6 +4,16 @@ import { getApiKeyStatus, getSmtpConfigByApiKey } from "@/lib/api-key";
 import { createEmail } from "@/lib/emails";
 import { decrypt } from "@/lib/pwd";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+export const OPTIONS = async () => {
+  return new Response(null, { status: 204, headers: corsHeaders });
+};
+
 type emailContent = {
   fromName?: string;
   fromEmail: string;
@@ -29,7 +39,7 @@ export const POST = async (req: Request) => {
       JSON.stringify({ error: "Authorization header not found." }),
       {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       },
     );
   }
@@ -41,7 +51,7 @@ export const POST = async (req: Request) => {
       }),
       {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       },
     );
   }
@@ -52,7 +62,7 @@ export const POST = async (req: Request) => {
       JSON.stringify({ error: "Invalid or missing API Key." }),
       {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       },
     );
   }
@@ -65,7 +75,7 @@ export const POST = async (req: Request) => {
       }),
       {
         status: 403,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       },
     );
   }
@@ -76,7 +86,7 @@ export const POST = async (req: Request) => {
       JSON.stringify({ error: "This API key is currently inactive." }),
       {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       },
     );
   }
@@ -99,7 +109,7 @@ export const POST = async (req: Request) => {
       JSON.stringify({ error: "Missing required field 'fromEmail'." }),
       {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       },
     );
   }
@@ -108,7 +118,7 @@ export const POST = async (req: Request) => {
       JSON.stringify({ error: "Missing required field 'to'." }),
       {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       },
     );
   }
@@ -117,7 +127,7 @@ export const POST = async (req: Request) => {
       JSON.stringify({ error: "Missing required field 'subject'." }),
       {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       },
     );
   }
@@ -126,7 +136,7 @@ export const POST = async (req: Request) => {
       JSON.stringify({ error: "Missing required field 'text' or 'html'." }),
       {
         status: 400,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       },
     );
   }
@@ -139,7 +149,7 @@ export const POST = async (req: Request) => {
         JSON.stringify({ error: "Invalid 'replyTo' email format." }),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...corsHeaders },
         },
       );
     }
@@ -152,7 +162,7 @@ export const POST = async (req: Request) => {
         JSON.stringify({ error: "Attachments must be an array." }),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...corsHeaders },
         },
       );
     }
@@ -165,7 +175,7 @@ export const POST = async (req: Request) => {
           JSON.stringify({ error: `Attachment at index ${i} is missing required field 'filename'.` }),
           {
             status: 400,
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", ...corsHeaders },
           },
         );
       }
@@ -175,7 +185,7 @@ export const POST = async (req: Request) => {
           JSON.stringify({ error: `Attachment '${attachment.filename}' must have either 'content' or 'url' field.` }),
           {
             status: 400,
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", ...corsHeaders },
           },
         );
       }
@@ -186,7 +196,7 @@ export const POST = async (req: Request) => {
           JSON.stringify({ error: `Attachment '${attachment.filename}' cannot have both 'content' and 'url' fields. Use either one.` }),
           {
             status: 400,
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", ...corsHeaders },
           },
         );
       }
@@ -199,7 +209,7 @@ export const POST = async (req: Request) => {
             JSON.stringify({ error: `Attachment '${attachment.filename}' has invalid base64 content.` }),
             {
               status: 400,
-              headers: { "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json", ...corsHeaders },
             },
           );
         }
@@ -214,7 +224,7 @@ export const POST = async (req: Request) => {
               JSON.stringify({ error: `Attachment '${attachment.filename}' has invalid URL protocol. Only HTTP and HTTPS are allowed.` }),
               {
                 status: 400,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", ...corsHeaders },
               },
             );
           }
@@ -242,7 +252,7 @@ export const POST = async (req: Request) => {
               JSON.stringify({ error: `Attachment '${attachment.filename}' URL is not allowed. Internal/local URLs are blocked for security.` }),
               {
                 status: 400,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", ...corsHeaders },
               },
             );
           }
@@ -253,7 +263,7 @@ export const POST = async (req: Request) => {
               JSON.stringify({ error: `Attachment '${attachment.filename}' URL port is not allowed. Internal service ports are blocked for security.` }),
               {
                 status: 400,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", ...corsHeaders },
               },
             );
           }
@@ -264,7 +274,7 @@ export const POST = async (req: Request) => {
               JSON.stringify({ error: `Attachment '${attachment.filename}' URL protocol is not allowed. File system access is blocked for security.` }),
               {
                 status: 400,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", ...corsHeaders },
               },
             );
           }
@@ -276,7 +286,7 @@ export const POST = async (req: Request) => {
               JSON.stringify({ error: `Attachment '${attachment.filename}' URL is not allowed. Access to the hosting server is blocked for security.` }),
               {
                 status: 400,
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", ...corsHeaders },
               },
             );
           }
@@ -286,7 +296,7 @@ export const POST = async (req: Request) => {
             JSON.stringify({ error: `Attachment '${attachment.filename}' has invalid URL format.` }),
             {
               status: 400,
-              headers: { "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json", ...corsHeaders },
             },
           );
         }
@@ -311,7 +321,7 @@ export const POST = async (req: Request) => {
       JSON.stringify({ error: "Could not create the transporter object." }),
       {
         status: 502,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       },
     );
   }
@@ -403,7 +413,7 @@ export const POST = async (req: Request) => {
       JSON.stringify({ message: "Email sent successfully" }),
       {
         status: 200,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       },
     );
   } catch (error) {
@@ -412,7 +422,7 @@ export const POST = async (req: Request) => {
       JSON.stringify({ error: `Error sending email: ${error.message}` }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...corsHeaders },
       },
     );
   }
