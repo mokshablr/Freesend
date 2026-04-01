@@ -39,12 +39,41 @@ Ideal for:
 
 ---
 
+## 🔄 Migrating from Resend?
+
+Freesend is **Resend SDK-compatible**. If you're already using the `resend` npm package, switch to Freesend with one environment variable. Zero code changes.
+
+```bash
+# Just add this to your .env
+RESEND_BASE_URL=https://freesend.metafog.io/api
+```
+
+Your existing code works as-is:
+
+```js
+import { Resend } from 'resend';
+
+const resend = new Resend('YOUR_FREESEND_API_KEY');
+
+await resend.emails.send({
+  from: 'hello@yourdomain.com',
+  to: 'user@example.com',
+  subject: 'Sent via Freesend',
+  text: 'Same Resend SDK. Your own SMTP. No vendor lock-in.',
+});
+```
+
+> The Resend SDK reads `RESEND_BASE_URL` from your environment and routes all requests to your Freesend instance instead of Resend's servers.
+
+---
+
 ## ✨ Key Features
 
 - ⚡ **Easy HTTP API** - Send email with just one `POST` request
+- 🔄 **Resend SDK Compatible** - Drop-in replacement, one env var to switch
 - 📬 **Full SMTP Control** - Bring your own Gmail, Zoho, Outlook, or custom SMTP
 - 📀 **Attachments Support** - Send PDFs, images, etc. via base64
-- 🧠 **Intuitive Schema** - Clean field names (`fromName`, `fromEmail`, etc.)
+- 📊 **Send History Dashboard** - Track every email with status (sent/failed/pending)
 - 🧑‍💻 **Minimal & Hackable** - Fully open source and easy to extend
 - 💬 **Plain Text + HTML** - Support for both formats out of the box
 

@@ -1,0 +1,165 @@
+---
+title: Resend-Compatible API
+description: Send emails using the Resend SDK or API format. Drop-in replacement with zero code changes.
+---
+
+## Overview
+
+Freesend provides a **Resend-compatible API endpoint** that accepts the same request format as the [Resend API](https://resend.com/docs/api-reference/emails/send-email). If you're already using the Resend SDK, you can switch to Freesend by setting one environment variable.
+
+## API Endpoint
+
+- <span className="method-pill rounded-lg bg-blue-400/20 px-1.5 py-0.5 text-sm font-bold leading-5 text-blue-700 dark:bg-blue-400/20 dark:text-blue-400">POST</span> <code>https://freesend.metafog.io/api/emails</code>
+
+## Using the Resend SDK
+
+The official `resend` npm package reads the `RESEND_BASE_URL` environment variable. Point it at your Freesend instance and your existing code works with zero changes.
+
+```bash
+npm install resend
+```
+
+```bash
+# Add to your .env file
+RESEND_BASE_URL=https://freesend.metafog.io/api
+```
+
+```js
+import { Resend } from 'resend';
+
+const resend = new Resend('YOUR_FREESEND_API_KEY');
+
+const { data, error } = await resend.emails.send({
+  from: 'Your Company <hello@yourdomain.com>',
+  to: 'recipient@example.com',
+  subject: 'Hello from Freesend!',
+  html: '<h1>Welcome!</h1><p>Sent via Resend SDK, delivered through your own SMTP.</p>',
+});
+
+console.log(data); // { id: "EM29WQoOU3" }
+```
+
+## Direct API Usage
+
+You can also call the endpoint directly without the Resend SDK.
+
+<CodeTabs>
+  <CodeTabs.Tab label="cURL">
+    ```bash
+    curl -X POST https://freesend.metafog.io/api/emails \
+      -H "Authorization: Bearer YOUR_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "from": "Your Company <hello@yourdomain.com>",
+        "to": "recipient@example.com",
+        "subject": "Hello from Freesend!",
+        "html": "<h1>Welcome!</h1>",
+        "text": "Welcome!"
+      }'
+    ```
+  </CodeTabs.Tab>
+  <CodeTabs.Tab label="JavaScript">
+    ```js
+    const response = await fetch("https://freesend.metafog.io/api/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer YOUR_API_KEY",
+      },
+      body: JSON.stringify({
+        from: "Your Company <hello@yourdomain.com>",
+        to: ["recipient@example.com", "another@example.com"],
+        subject: "Hello from Freesend!",
+        html: "<h1>Welcome!</h1>",
+        cc: "cc@example.com",
+        reply_to: "reply@yourdomain.com",
+      }),
+    });
+
+    const result = await response.json();
+    console.log(result); // { id: "EM29WQoOU3" }
+    ```
+  </CodeTabs.Tab>
+  <CodeTabs.Tab label="Python">
+    ```python
+    import requests
+
+    response = requests.post(
+        "https://freesend.metafog.io/api/emails",
+        headers={
+            "Authorization": "Bearer YOUR_API_KEY",
+            "Content-Type": "application/json",
+        },
+        json={
+            "from": "Your Company <hello@yourdomain.com>",
+            "to": "recipient@example.com",
+            "subject": "Hello from Freesend!",
+            "html": "<h1>Welcome!</h1>",
+            "text": "Welcome!",
+        },
+    )
+
+    print(response.json())  # {"id": "EM29WQoOU3"}
+    ```
+  </CodeTabs.Tab>
+</CodeTabs>
+
+## Field Reference
+
+| Field         | Type              | Required | Description                                         |
+| ------------- | ----------------- | -------- | --------------------------------------------------- |
+| `from`        | string            | Yes      | Sender, e.g. `"Name <email>"` or `"email"`          |
+| `to`          | string \| array   | Yes      | Recipient(s), single email or array of emails        |
+| `subject`     | string            | Yes      | Email subject line                                   |
+| `html`        | string            | No\*     | HTML content of the email                            |
+| `text`        | string            | No\*     | Plain text content of the email                      |
+| `reply_to`    | string \| array   | No       | Reply-to address(es)                                 |
+| `cc`          | string \| array   | No       | CC recipient(s)                                      |
+| `bcc`         | string \| array   | No       | BCC recipient(s)                                     |
+| `attachments` | array             | No       | Array of attachment objects (see below)               |
+
+\*At least one of `html` or `text` is required.
+
+### Attachment Object
+
+| Field         | Type   | Required | Description                                      |
+| ------------- | ------ | -------- | ------------------------------------------------ |
+| `filename`    | string | No       | Name of the attachment file                      |
+| `content`     | string | No       | Base64 encoded file content                      |
+| `contentType` | string | No       | MIME type (e.g., "application/pdf")              |
+
+## Response
+
+### Success (200)
+
+```json
+{
+  "id": "EM29WQoOU3"
+}
+```
+
+### Error (422)
+
+```json
+{
+  "statusCode": 422,
+  "name": "validation_error",
+  "message": "Missing required field 'from'."
+}
+```
+
+## Differences from Resend
+
+| Feature                    | Resend        | Freesend                              |
+| -------------------------- | ------------- | ------------------------------------- |
+| SMTP provider              | Resend's      | Yours (Gmail, Zoho, Mailgun, etc.)    |
+| `POST /emails`             | Yes           | Yes (compatible)                      |
+| `GET /emails/{id}`         | Yes           | Coming soon                           |
+| Webhooks                   | Yes           | Coming soon                           |
+| Batch send                 | Yes           | Coming soon                           |
+| Domains API                | Yes           | Not applicable (you manage your SMTP) |
+| Pricing                    | Usage-based   | Free, self-hostable                   |
+
+## Also Available: Freesend Native API
+
+Freesend also has its own API endpoint at `/api/send-email` with a slightly different field format (`fromName`, `fromEmail` instead of `from`). See the [Send Email docs](/docs/api/send-email) for details. Both endpoints are supported and maintained.
