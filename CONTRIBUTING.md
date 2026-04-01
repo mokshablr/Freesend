@@ -58,8 +58,17 @@ The app should be available at `http://localhost:3000`.
   ```
 
 ### Testing your change
-- Run the dev app and manually verify affected flows.
-- Ensure no type errors remain in the IDE/CI.
+
+Run the test suite before submitting:
+
+```bash
+npm test
+```
+
+- Add tests for new API endpoints and shared helpers in `tests/`.
+- Tests use [Vitest](https://vitest.dev/) with mocked dependencies (Prisma, nodemailer).
+- Run `npm run test:watch` during development for fast feedback.
+- Ensure no type errors remain (`npx tsc --noEmit`).
 
 ### Submitting a pull request
 1. Ensure lint/format are clean and the app runs locally.

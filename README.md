@@ -141,6 +141,22 @@ Use an official SDK for a better developer experience. Full docs, examples, and 
 
 ---
 
+## 🧪 Testing
+
+Freesend uses [Vitest](https://vitest.dev/) for testing.
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+```
+
+Tests are located in the `tests/` directory. When contributing, please add tests for new endpoints and business logic.
+
+---
+
 ## ❤️ Community & Contributions
 
 Freesend is growing because of awesome developers like [you](https://github.com/mokshablr/Freesend/pulls)! If you're interested in:
@@ -155,7 +171,7 @@ Freesend is growing because of awesome developers like [you](https://github.com/
 
 ## 📚 Resources
 - [Documentation](https://freesend.metafog.io/docs)
-- [API Reference](https://freesend.metafog.io/docs/api/send-email)
+- [API Reference](https://freesend.metafog.io/docs/api/send-email) · [Resend-Compatible API](https://freesend.metafog.io/docs/api/resend-compatible)
 - [SMTP Setup Guide](https://freesend.metafog.io/docs/configuration/mail-server)
 - [JavaScript/TypeScript SDK](https://freesend.metafog.io/docs/sdk/javascript) · [Python SDK](https://freesend.metafog.io/docs/sdk/python)
 
