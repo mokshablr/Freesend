@@ -1,11 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { formatDistanceToNow, parseISO, startOfDay, endOfDay } from "date-fns";
-import { isAfter, isBefore, isSameDay } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
+import { useEffect, useState, useCallback } from "react";
+import { startOfDay, endOfDay } from "date-fns";
 import type { DateRange } from "react-day-picker";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { DateRangePicker } from "@/components/ui/DateRangePicker";
 
 import { getEmailsByTenant } from "@/lib/emails";
@@ -14,20 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Icons } from "@/components/shared/icons";
 import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 import EmailTable from "./email-table";
 
@@ -42,19 +31,21 @@ export default function Emails() {
   const [filterMode, setFilterMode] = useState<"dropdown" | "multi">("dropdown");
   const [selectedApiKey, setSelectedApiKey] = useState<string>("all");
 
-  // Map of apiKeyId to apiKey name for display in table
+  // Cursor pagination state
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [cursorHistory, setCursorHistory] = useState<(string | undefined)[]>([undefined]);
+  const [currentPage, setCurrentPage] = useState(0);
+
   const apiKeyMap = apiKeys.reduce((acc, key) => {
     acc[key.id] = key.name;
     return acc;
   }, {} as Record<string, string>);
 
-  // Count emails per API key for display
   const emailCountsByApiKey = data.reduce((acc, email) => {
     acc[email.apiKeyId] = (acc[email.apiKeyId] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  // Handle multi-select API key changes
   const handleApiKeyToggle = (apiKeyId: string, checked: boolean) => {
     if (checked) {
       setSelectedApiKeys(prev => [...prev, apiKeyId]);
@@ -63,37 +54,35 @@ export default function Emails() {
     }
   };
 
-  // Clear all API key filters
   const clearApiKeyFilters = () => {
     setSelectedApiKeys([]);
     setSelectedApiKey("all");
   };
 
-  // Handle API key click from table
   const handleApiKeyClick = (apiKeyId: string, apiKeyName: string) => {
-    // Switch to dropdown mode and select the clicked API key
     setFilterMode("dropdown");
     setSelectedApiKey(apiKeyId);
-    setSelectedApiKeys([]); // Clear multi-select
+    setSelectedApiKeys([]);
   };
 
-  // Handle clear filter from table
   const handleClearFilterFromTable = () => {
     setSelectedApiKey("all");
     setSelectedApiKeys([]);
     setFilterMode("dropdown");
   };
 
-  const fetchEmailsList = async () => {
+  const fetchEmails = useCallback(async (cursor?: string) => {
+    setEmailsLoading(true);
     try {
-      const result = await getEmailsByTenant();
-      setData(result);
+      const result = await getEmailsByTenant(cursor, 50);
+      setData(result.data);
+      setNextCursor(result.nextCursor);
     } catch (error) {
       console.error("Error fetching emails:", error);
     } finally {
       setEmailsLoading(false);
     }
-  };
+  }, []);
 
   const fetchApiKeysList = async () => {
     try {
@@ -107,14 +96,30 @@ export default function Emails() {
   };
 
   useEffect(() => {
-    fetchEmailsList();
+    fetchEmails();
     fetchApiKeysList();
-  }, []);
+  }, [fetchEmails]);
 
-  // Single loading state: true if either is loading
+  const handleNextPage = () => {
+    if (nextCursor) {
+      const newHistory = [...cursorHistory, nextCursor];
+      setCursorHistory(newHistory);
+      setCurrentPage(currentPage + 1);
+      fetchEmails(nextCursor);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      const newPage = currentPage - 1;
+      setCurrentPage(newPage);
+      const prevCursor = cursorHistory[newPage];
+      fetchEmails(prevCursor);
+    }
+  };
+
   const isLoading = emailsLoading || apiKeysLoading;
 
-  // Function to parse the search query
   type FilterKey = "from" | "to" | "subject";
 
   const parseSearchQuery = (query: string) => {
@@ -152,7 +157,7 @@ export default function Emails() {
     return filters;
   };
 
-  // Filter emails based on the search query, selected API Key(s), and date range
+  // Client-side filtering within the current page
   const filteredData = data.filter((email) => {
     const { from, to, subject } = parseSearchQuery(searchQuery);
     const fromMatch = from ? email.from.toLowerCase().includes(from) : true;
@@ -160,37 +165,20 @@ export default function Emails() {
     const subjectMatch = subject
       ? email.subject.toLowerCase().includes(subject)
       : true;
-    
-    // API Key filter logic
+
     let apiKeyMatch = true;
     if (filterMode === "dropdown") {
       apiKeyMatch = selectedApiKey === "all" ? true : email.apiKeyId === selectedApiKey;
     } else {
-      // Multi-select mode
       apiKeyMatch = selectedApiKeys.length === 0 ? true : selectedApiKeys.includes(email.apiKeyId);
     }
-    
+
     let dateMatch = true;
     if (dateRange?.from && dateRange?.to) {
-      // Parse the DB datetime string to a Date object
       let emailDate = new Date(email.createdAt);
       const start = startOfDay(dateRange.from);
       const end = endOfDay(dateRange.to);
-      const inRange = emailDate >= start && emailDate <= end;
-      let emailDateStr;
-      if (isNaN(emailDate.getTime())) {
-        emailDateStr = `Invalid date: ${email.createdAt}`;
-        console.warn("Invalid email date:", email.createdAt);
-      } else {
-        emailDateStr = emailDate.toISOString();
-      }
-      console.log("Checking email:", {
-        emailDate: emailDateStr,
-        rangeStart: start.toISOString(),
-        rangeEnd: end.toISOString(),
-        inRange,
-      });
-      dateMatch = inRange;
+      dateMatch = emailDate >= start && emailDate <= end;
     }
     return fromMatch && toMatch && subjectMatch && apiKeyMatch && dateMatch;
   });
@@ -219,7 +207,7 @@ export default function Emails() {
             />
           </div>
 
-          {/* API Key Filter with Integrated Mode Selection */}
+          {/* API Key Filter */}
           <div className="relative flex items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -243,7 +231,6 @@ export default function Emails() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-64 max-h-80 overflow-y-auto" align="start">
-                {/* Filter Mode Selection Header */}
                 <div className="p-3 border-b bg-muted/30">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-medium">Filter by API Keys</span>
@@ -284,7 +271,6 @@ export default function Emails() {
                   </div>
                 </div>
 
-                {/* Single Select Mode */}
                 {filterMode === "dropdown" && (
                   <div className="p-1">
                     <div
@@ -315,7 +301,6 @@ export default function Emails() {
                   </div>
                 )}
 
-                {/* Multi Select Mode */}
                 {filterMode === "multi" && (
                   <div className="p-1">
                     {apiKeys.map((key) => (
@@ -336,7 +321,6 @@ export default function Emails() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Selected API Keys Display for Multi Mode */}
             {filterMode === "multi" && selectedApiKeys.length > 0 && (
               <div className="flex flex-wrap gap-1.5 ml-2 max-w-xs">
                 {selectedApiKeys.slice(0, 3).map((keyId) => (
@@ -366,10 +350,8 @@ export default function Emails() {
             )}
           </div>
 
-          {/* Date Range Selector */}
           <DateRangePicker value={dateRange} onChange={setDateRange} />
 
-          {/* Clear Filters Button */}
           {(selectedApiKey !== "all" || selectedApiKeys.length > 0 || searchQuery || dateRange) && (
             <Button
               variant="ghost"
@@ -402,6 +384,10 @@ export default function Emails() {
             onApiKeyClick={handleApiKeyClick}
             activeFilterApiKey={filterMode === "dropdown" && selectedApiKey !== "all" ? selectedApiKey : undefined}
             onClearFilter={handleClearFilterFromTable}
+            nextCursor={nextCursor}
+            onNextPage={handleNextPage}
+            onPrevPage={handlePrevPage}
+            canGoPrev={currentPage > 0}
           />
         </div>
       </div>

@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
-// import { Emails } from "@prisma/client";
-import { Edit, MoreHorizontal, Trash } from "lucide-react";
-import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
-import { deleteServer, updateMailServer } from "@/lib/smtp-config";
 import { DataTable } from "@/components/ui/data-table";
 import { Icons } from "@/components/shared/icons";
 import EmailContentModal from "@/components/modals/email-content-modal";
@@ -16,6 +12,7 @@ type Emails = {
   from: string;
   to: string;
   subject: string;
+  status?: string;
   html_body?: string;
   text_body?: string;
   createdAt: string | Date;
@@ -26,8 +23,12 @@ interface EmailTableProps {
   initialIsLoading: boolean;
   apiKeyMap?: Record<string, string>;
   onApiKeyClick?: (apiKeyId: string, apiKeyName: string) => void;
-  activeFilterApiKey?: string; // Add active filter tracking
-  onClearFilter?: () => void; // Add clear filter callback
+  activeFilterApiKey?: string;
+  onClearFilter?: () => void;
+  nextCursor?: string | null;
+  onNextPage?: () => void;
+  onPrevPage?: () => void;
+  canGoPrev?: boolean;
 }
 
 const EmailTable: React.FC<EmailTableProps> = ({
@@ -37,64 +38,20 @@ const EmailTable: React.FC<EmailTableProps> = ({
   onApiKeyClick,
   activeFilterApiKey,
   onClearFilter,
+  nextCursor,
+  onNextPage,
+  onPrevPage,
+  canGoPrev = false,
 }) => {
-  const emptyEmail = {
-    id: "",
-    tenant_id: "",
-    apiKeyId: "",
-    from: "",
-    to: "",
-    subject: "",
-    html_body: "",
-    text_body: "",
-    createdAt: new Date(),
-  };
-
   const [emails, setEmails] = useState<Emails[]>(initialEmailList);
   const [isLoading, setIsLoading] = useState<boolean>(initialIsLoading);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState<Emails | null>(null);
 
-  // Pagination state
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(5); // Default page size
-
   useEffect(() => {
     setEmails(initialEmailList);
     setIsLoading(initialIsLoading);
   }, [initialEmailList, initialIsLoading]);
-
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteServer(id);
-      setEmails((prevKeys) => prevKeys.filter((key) => key.id !== id));
-      toast.success("API Key has been deleted.");
-    } catch (error) {
-      toast.error("Error deleting API Key: " + error);
-    }
-  };
-
-  const handleUpdate = async (
-    id: string,
-    updateData: {
-      name: string;
-      host: string;
-      port: number;
-      security: string;
-    },
-  ) => {
-    try {
-      await updateMailServer(id, updateData);
-      setEmails((prevKeys) =>
-        prevKeys.map((key) =>
-          key.id === id ? { ...key, ...updateData } : key,
-        ),
-      );
-      toast.success("Mail server configuration has been updated.");
-    } catch (error) {
-      toast.error("Error updating mail server: " + error);
-    }
-  };
 
   const handleEmailClick = (email: Emails) => {
     setSelectedEmail(email);
@@ -102,25 +59,43 @@ const EmailTable: React.FC<EmailTableProps> = ({
   };
 
   const columns = [
-    { 
-      id: "from", 
-      header: "From", 
+    {
+      id: "status",
+      header: "Status",
+      accessorKey: "status",
+      cell: ({ getValue }) => {
+        const status = getValue() || "sent";
+        const colors = {
+          sent: "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300",
+          failed: "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300",
+          pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300",
+        };
+        return (
+          <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${colors[status] || colors.sent}`}>
+            {status}
+          </span>
+        );
+      },
+    },
+    {
+      id: "from",
+      header: "From",
       accessorKey: "from",
       cell: ({ getValue }) => (
         <span className="text-xs text-foreground">{getValue()}</span>
-      )
+      ),
     },
-    { 
-      id: "to", 
-      header: "To", 
+    {
+      id: "to",
+      header: "To",
       accessorKey: "to",
       cell: ({ getValue }) => (
         <span className="text-xs text-foreground">{getValue()}</span>
-      )
+      ),
     },
-    { 
-      id: "subject", 
-      header: "Subject", 
+    {
+      id: "subject",
+      header: "Subject",
       accessorKey: "subject",
       cell: ({ row }) => (
         <button
@@ -129,7 +104,7 @@ const EmailTable: React.FC<EmailTableProps> = ({
         >
           {row.original.subject}
         </button>
-      )
+      ),
     },
     {
       id: "apiKey",
@@ -140,11 +115,10 @@ const EmailTable: React.FC<EmailTableProps> = ({
         if (!apiKeyId) return <span className="text-xs text-muted-foreground">-</span>;
         if (apiKeyMap[apiKeyId]) {
           const isActiveFilter = activeFilterApiKey === apiKeyId;
-          
+
           return (
             <div className="flex items-center">
               {isActiveFilter ? (
-                // Show cross to clear filter when this API key is actively filtered
                 <div className="group flex items-center gap-1.5">
                   <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-300/80 text-xs font-medium shadow-md shadow-blue-500/20 dark:from-blue-900/60 dark:to-indigo-900/60 dark:text-blue-200 dark:border-blue-700/80">
                     {apiKeyMap[apiKeyId]}
@@ -161,7 +135,6 @@ const EmailTable: React.FC<EmailTableProps> = ({
                   </button>
                 </div>
               ) : (
-                // Regular clickable API key with hover expansion
                 <button
                   onClick={() => onApiKeyClick?.(apiKeyId, apiKeyMap[apiKeyId])}
                   className="group inline-flex items-center px-2.5 py-1 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200/60 text-xs font-medium shadow-sm hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 hover:border-blue-300/80 hover:from-blue-100 hover:to-indigo-100 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 active:scale-[0.98] active:shadow-md transform hover:scale-[1.02] dark:from-blue-950/50 dark:to-indigo-950/50 dark:text-blue-300 dark:border-blue-800/60 dark:hover:border-blue-700/80 dark:hover:from-blue-900/60 dark:hover:to-indigo-900/60"
@@ -180,7 +153,6 @@ const EmailTable: React.FC<EmailTableProps> = ({
             </div>
           );
         }
-        // Not found in map, treat as deleted
         return (
           <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-background text-muted-foreground border border-border text-xs font-medium shadow-sm">
             Deleted
@@ -204,59 +176,27 @@ const EmailTable: React.FC<EmailTableProps> = ({
     },
   ];
 
-  // Calculate the current data slice based on pagination
-  const paginatedEmails = emails.slice(
-    pageIndex * pageSize,
-    (pageIndex + 1) * pageSize,
-  );
-
   return (
     <>
       <DataTable
         columns={columns}
-        data={paginatedEmails} // Use sliced data for the table
+        data={emails}
         isLoading={isLoading}
       />
-      {/* Pagination Controls */}
-      <div className="mt-4 flex items-center justify-between text-sm text-zinc-400">
-        <div>
-          <label>
-            Rows per page:
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPageIndex(0); // Reset to first page on page size change
-              }}
-              className="ml-2 rounded border p-1"
-            >
-              {[5, 10, 25, 50].map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+      {/* Server-side Pagination Controls */}
+      <div className="mt-4 flex items-center justify-end text-sm text-zinc-400">
         <div>
           <button
-            onClick={() => setPageIndex((old) => Math.max(old - 1, 0))}
-            disabled={pageIndex === 0}
-            className="rounded border p-2"
+            onClick={onPrevPage}
+            disabled={!canGoPrev}
+            className="rounded border p-2 disabled:opacity-50"
           >
             <Icons.chevronLeft className="size-3 text-white" />
           </button>
-          <span className="mx-2">
-            Page {pageIndex + 1} of {Math.ceil(emails.length / pageSize)}
-          </span>
           <button
-            onClick={() =>
-              setPageIndex((old) =>
-                Math.min(old + 1, Math.ceil(emails.length / pageSize) - 1),
-              )
-            }
-            disabled={pageIndex >= Math.ceil(emails.length / pageSize) - 1}
-            className="rounded border p-2"
+            onClick={onNextPage}
+            disabled={!nextCursor}
+            className="ml-2 rounded border p-2 disabled:opacity-50"
           >
             <Icons.chevronRight className="size-3 text-white" />
           </button>

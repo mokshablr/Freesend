@@ -1,4 +1,4 @@
-import { getEmailsByTenant } from "@/lib/emails";
+import { getAllEmailsByTenant } from "@/lib/emails";
 import { getApiKeysByTenant } from "@/lib/api-key";
 
 export interface DashboardData {
@@ -98,7 +98,7 @@ function generateDummyData(): DashboardData {
 
 export async function getDashboardData(): Promise<DashboardData> {
   // Fetch data for dashboard
-  const emails = await getEmailsByTenant();
+  const emails = await getAllEmailsByTenant();
   const apiKeys = await getApiKeysByTenant();
 
   // Filter out deleted API keys - only count active and inactive ones

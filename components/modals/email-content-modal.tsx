@@ -92,7 +92,12 @@ const EmailContentModal: React.FC<EmailContentModalProps> = ({ isOpen, onClose, 
             <ScrollArea className="h-full w-full border rounded-md">
               <div className="p-4">
                 {email.html_body ? (
-                  <div dangerouslySetInnerHTML={{ __html: email.html_body }} />
+                  <iframe
+                    srcDoc={email.html_body}
+                    sandbox=""
+                    className="w-full h-[400px] border-0"
+                    title="Email preview"
+                  />
                 ) : (
                   <p className="whitespace-pre-wrap">{email.text_body}</p>
                 )}
