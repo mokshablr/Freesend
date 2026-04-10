@@ -23,7 +23,7 @@ class Freesend:
             config: Configuration object containing API key and optional base URL
         """
         self.api_key = config.api_key
-        self.base_url = config.base_url or "https://freesend.metafog.io"
+        self.base_url = config.base_url or "http://localhost:3000"
         self.session = requests.Session()
         self.session.headers.update({
             "Authorization": f"Bearer {self.api_key}",

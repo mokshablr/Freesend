@@ -7,7 +7,7 @@ setup(
     name="freesend",
     version="1.0.0",
     author="Freesend Team",
-    author_email="team@freesend.metafog.io",
+    author_email="",
     description="Official Python SDK for the Freesend email API",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -45,6 +45,6 @@ setup(
     project_urls={
         "Bug Reports": "https://github.com/mokshablr/Freesend/issues",
         "Source": "https://github.com/mokshablr/Freesend",
-        "Documentation": "https://freesend.metafog.io/docs",
+        "Documentation": "https://github.com/mokshablr/Freesend#readme",
     },
 ) 

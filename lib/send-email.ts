@@ -292,7 +292,7 @@ export async function sendEmail(
       attachments: processedAttachments,
       headers: {
         "X-Mailer": "Freesend",
-        "X-Sent-By": "Freesend Email API - https://freesend.metafog.io",
+        "X-Sent-By": "Freesend Email API - https://github.com/mokshablr/Freesend",
       },
     });
 

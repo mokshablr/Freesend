@@ -51,6 +51,9 @@
 package-lock.json
 yarn.lock
 
+# typescript
+tsconfig.tsbuildinfo
+
 # other config files
 .postcssrc.js
 

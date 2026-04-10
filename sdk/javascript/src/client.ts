@@ -6,7 +6,7 @@ export class Freesend {
 
   constructor(config: FreesendConfig) {
     this.apiKey = config.apiKey;
-    this.baseUrl = config.baseUrl || 'https://freesend.metafog.io';
+    this.baseUrl = config.baseUrl || 'http://localhost:3000';
   }
 
   async sendEmail(data: SendEmailRequest): Promise<SendEmailResponse> {

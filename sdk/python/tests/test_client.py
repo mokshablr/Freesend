@@ -28,7 +28,7 @@ class TestFreesendClient(unittest.TestCase):
     def test_client_initialization(self):
         """Test client initialization with default base URL."""
         client = Freesend(FreesendConfig(api_key="test-key"))
-        self.assertEqual(client.base_url, "https://freesend.metafog.io")
+        self.assertEqual(client.base_url, "http://localhost:3000")
 
     def test_client_initialization_custom_url(self):
         """Test client initialization with custom base URL."""

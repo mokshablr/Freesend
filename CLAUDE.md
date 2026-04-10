@@ -25,8 +25,8 @@ Only do this if there is something worthwhile to record. Skip if the session was
 **Freesend** — open-source self-hostable email API layer over user-owned SMTP servers.
 
 - Local path: `~/Desktop/Arjun/github-repos/Freesend/`
-- Production: freesend.metafog.io
 - Version: 0.3.1
+- Self-hosted only (no hosted instance)
 
 ---
 

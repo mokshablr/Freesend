@@ -43,7 +43,7 @@ new Freesend(config: FreesendConfig)
 | Option | Type | Required | Description |
 |--------|------|----------|-------------|
 | `apiKey` | string | Yes | Your Freesend API key |
-| `baseUrl` | string | No | Custom base URL (defaults to `https://freesend.metafog.io`) |
+| `baseUrl` | string | No | Custom base URL (defaults to `http://localhost:3000`) |
 
 ### sendEmail
 

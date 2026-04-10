@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       from: smtpConfig.user,
       to: recipient,
       subject: "Freesend SMTP Test Email: It works!",
-      text: `Hello from Freesend!\n\nThis is a test email to confirm that your SMTP settings are working perfectly.\n\nSender: ${smtpConfig.user}\nServer: ${smtpConfig.host}:${smtpConfig.port}\n\nIf you're seeing this, you're all set to start sending emails from your server through Freesend!\n\nTo start sending actual emails, check out our API guide:\nhttps://freesend.metafog.io/docs/api/send-email\n`,
+      text: `Hello from Freesend!\n\nThis is a test email to confirm that your SMTP settings are working perfectly.\n\nSender: ${smtpConfig.user}\nServer: ${smtpConfig.host}:${smtpConfig.port}\n\nIf you're seeing this, you're all set to start sending emails from your server through Freesend!\n\nTo start sending actual emails, check out the docs:\nhttps://github.com/mokshablr/Freesend#readme\n`,
     });
     return new Response(JSON.stringify({ message: "Test email sent successfully" }), {
       status: 200,

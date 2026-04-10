@@ -6,9 +6,9 @@
 
 **Freesend** is a lightweight email API built for developers who want full control over email delivery without the complexity or cost of third-party platforms.
 
-Hosted at **[freesend.metafog.io](https://freesend.metafog.io)**, it lets you send emails through a simple HTTP API using **your own SMTP provider** (like Gmail, Zoho, Mailgun, etc.).
+Self-host it on your own infrastructure and send emails through a simple HTTP API using **your own SMTP provider** (like Gmail, Zoho, Mailgun, etc.).
 
-Designed with **serverless apps, indie hackers, and backend engineers** in mind, Freesend lets you send emails through a simple HTTP API — powered entirely by **your own SMTP server** (like Gmail, Zoho, Mailgun, etc.).
+Designed with **serverless apps, indie hackers, and backend engineers** in mind, Freesend is powered entirely by **your own SMTP server**.
 
 No vendor lock-in. No usage caps. No surprise pricing.
 
@@ -29,7 +29,7 @@ Freesend flips that model:
 
 ✅ **Use Your Own SMTP**  
 ✅ **Simple HTTP API**  
-✅ **Free & Open Source (and you don't need to self-host!)**  
+✅ **Free & Open Source / Self-Hosted**  
 
 Ideal for:
 
@@ -45,7 +45,7 @@ Freesend is **Resend SDK-compatible**. If you're already using the `resend` npm 
 
 ```bash
 # Just add this to your .env
-RESEND_BASE_URL=https://freesend.metafog.io/api
+RESEND_BASE_URL=https://your-freesend-instance.com/api
 ```
 
 Your existing code works as-is:
@@ -79,20 +79,20 @@ await resend.emails.send({
 
 ---
 
-## 👨‍💻 Try It Instantly (Hosted API)
+## 👨‍💻 Quick Start (Self-Hosted)
 
-Use our hosted Freesend instance right now:
+Deploy Freesend on your own infrastructure, then send emails via the API:
 
 ### API URL
 ```
-https://freesend.metafog.io/api/send-email
+http://localhost:3000/api/send-email
 ```
 
 ### Example Usage (Node.js)
 ```js
 const sendEmail = async () => {
-  const url = "https://freesend.metafog.io/api/send-email";
-  const apiKey = "YOUR_API_KEY"; // Get one at https://freesend.metafog.io
+  const url = "http://localhost:3000/api/send-email";
+  const apiKey = "YOUR_API_KEY"; // From your Freesend instance dashboard
 
   const emailData = {
     fromName: "Your Company",
@@ -123,12 +123,12 @@ sendEmail();
 
 ## 🚀 Official SDKs
 
-Use an official SDK for a better developer experience. Full docs, examples, and API reference are on the [documentation site](https://freesend.metafog.io/docs).
+Use an official SDK for a better developer experience.
 
 | Language       | Install | Documentation |
 |----------------|---------|----------------|
-| **JavaScript/TypeScript** | `npm install @freesend/sdk` | [JS/TS SDK docs](https://freesend.metafog.io/docs/sdk/javascript) |
-| **Python**     | `pip install freesend` | [Python SDK docs](https://freesend.metafog.io/docs/sdk/python) |
+| **JavaScript/TypeScript** | `npm install @freesend/sdk` | [JS/TS SDK docs](sdk/javascript/README.md) |
+| **Python**     | `pip install freesend` | [Python SDK docs](sdk/python/README.md) |
 
 ---
 
@@ -170,10 +170,9 @@ Freesend is growing because of awesome developers like [you](https://github.com/
 ---
 
 ## 📚 Resources
-- [Documentation](https://freesend.metafog.io/docs)
-- [API Reference](https://freesend.metafog.io/docs/api/send-email) · [Resend-Compatible API](https://freesend.metafog.io/docs/api/resend-compatible)
-- [SMTP Setup Guide](https://freesend.metafog.io/docs/configuration/mail-server)
-- [JavaScript/TypeScript SDK](https://freesend.metafog.io/docs/sdk/javascript) · [Python SDK](https://freesend.metafog.io/docs/sdk/python)
+- [JavaScript/TypeScript SDK](sdk/javascript/README.md) · [Python SDK](sdk/python/README.md)
+- [Contributing](CONTRIBUTING.md)
+- [Resend Migration Guide](docs/resend-migration-guide.md)
 
 ---
 

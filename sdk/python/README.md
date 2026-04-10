@@ -46,7 +46,7 @@ from freesend import FreesendConfig
 
 config = FreesendConfig(
     api_key="your-api-key-here",
-    base_url="https://freesend.metafog.io"  # Optional, defaults to this value
+    base_url="http://localhost:3000"  # Optional, defaults to this value
 )
 ```
 

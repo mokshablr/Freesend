@@ -5,7 +5,7 @@ description: Sending emails through Freesend.
 
 ## API Endpoint
 
-- <span className="method-pill rounded-lg bg-blue-400/20 px-1.5 py-0.5 text-sm font-bold leading-5 text-blue-700 dark:bg-blue-400/20 dark:text-blue-400">POST</span> <code>https://freesend.metafog.io/api/send-email</code>
+- <span className="method-pill rounded-lg bg-blue-400/20 px-1.5 py-0.5 text-sm font-bold leading-5 text-blue-700 dark:bg-blue-400/20 dark:text-blue-400">POST</span> <code>http://localhost:3000/api/send-email</code>
 
 ## Prerequisites
 
@@ -50,7 +50,7 @@ Ensure you put your API Key as a Bearer token in the Authorization header of the
 
 ### API Endpoint
 
-Send a `POST` Request to `https://freesend.metafog.io/api/send-email`
+Send a `POST` Request to `http://localhost:3000/api/send-email`
 
 </Steps>
 
@@ -65,7 +65,7 @@ Include the `url` parameter to send attachments from a remote file. This paramet
 <CodeTabs>
   <CodeTabs.Tab label="cURL">
     ```bash
-    curl -X POST https://freesend.metafog.io/api/send-email \
+    curl -X POST http://localhost:3000/api/send-email \
       -H "Authorization: Bearer YOUR_API_KEY" \
       -H "Content-Type: application/json" \
       -d '{
@@ -119,7 +119,7 @@ Include the `url` parameter to send attachments from a remote file. This paramet
         ]
       };
 
-      const response = await fetch("https://freesend.metafog.io/api/send-email", {
+      const response = await fetch("http://localhost:3000/api/send-email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -241,7 +241,7 @@ Include the `url` parameter to send attachments from a remote file. This paramet
     import requests
 
     def send_email_with_url_attachments():
-        url = "https://freesend.metafog.io/api/send-email"
+        url = "http://localhost:3000/api/send-email"
         headers = {
             "Authorization": "Bearer YOUR_API_KEY",
             "Content-Type": "application/json"
@@ -287,7 +287,7 @@ Include the `url` parameter to send attachments from a remote file. This paramet
     const axios = require('axios');
 
     const sendEmailWithUrlAttachments = async () => {
-      const url = "https://freesend.metafog.io/api/send-email";
+      const url = "http://localhost:3000/api/send-email";
       const apiKey = "YOUR_API_KEY";
 
       const emailData = {
@@ -346,7 +346,7 @@ Include the `content` parameter to send attachments from a local file. This para
 <CodeTabs>
   <CodeTabs.Tab label="cURL">
     ```bash
-    curl -X POST https://freesend.metafog.io/api/send-email \
+    curl -X POST http://localhost:3000/api/send-email \
       -H "Authorization: Bearer YOUR_API_KEY" \
       -H "Content-Type: application/json" \
       -d '{
@@ -395,7 +395,7 @@ Include the `content` parameter to send attachments from a local file. This para
         ]
       };
 
-      const response = await fetch("https://freesend.metafog.io/api/send-email", {
+      const response = await fetch("http://localhost:3000/api/send-email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -498,7 +498,7 @@ Include the `content` parameter to send attachments from a local file. This para
     import base64
 
     def send_email_with_attachment(file_path):
-        url = "https://freesend.metafog.io/api/send-email"
+        url = "http://localhost:3000/api/send-email"
         headers = {
             "Authorization": "Bearer YOUR_API_KEY",
             "Content-Type": "application/json"
@@ -546,7 +546,7 @@ Include the `content` parameter to send attachments from a local file. This para
     const path = require('path');
 
     const sendEmailWithAttachment = async (filePath) => {
-      const url = "https://freesend.metafog.io/api/send-email";
+      const url = "http://localhost:3000/api/send-email";
       const apiKey = "YOUR_API_KEY";
 
       // Read and encode file

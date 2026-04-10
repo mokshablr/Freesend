@@ -46,7 +46,7 @@ new Freesend(config: FreesendConfig)
 | Option | Type | Required | Description |
 |--------|------|----------|-------------|
 | `apiKey` | string | Yes | Your Freesend API key |
-| `baseUrl` | string | No | Custom base URL (defaults to `https://freesend.metafog.io`) |
+| `baseUrl` | string | No | Custom base URL (defaults to `http://localhost:3000`) |
 
 ### Example with Custom Base URL
 
@@ -336,7 +336,7 @@ If you're currently using the HTTP API directly, migrating to the SDK is straigh
 
 ### Before (HTTP API)
 ```typescript
-const response = await fetch('https://freesend.metafog.io/api/send-email', {
+const response = await fetch('http://localhost:3000/api/send-email', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',

@@ -45,14 +45,14 @@ from freesend import FreesendConfig
 
 config = FreesendConfig(
     api_key="your-api-key-here",
-    base_url="https://freesend.metafog.io"  # Optional
+    base_url="http://localhost:3000"  # Optional
 )
 ```
 
 | Option | Type | Required | Description |
 |--------|------|----------|-------------|
 | `api_key` | str | Yes | Your Freesend API key |
-| `base_url` | str | No | Custom base URL (defaults to `https://freesend.metafog.io`) |
+| `base_url` | str | No | Custom base URL (defaults to `http://localhost:3000`) |
 
 ### Example with Custom Base URL
 
@@ -338,7 +338,7 @@ If you're calling the Freesend API with `requests` or `urllib` directly, you can
 import requests
 
 response = requests.post(
-    "https://freesend.metafog.io/api/send-email",
+    "http://localhost:3000/api/send-email",
     headers={
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}",

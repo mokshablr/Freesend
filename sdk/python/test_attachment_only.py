@@ -6,7 +6,7 @@ def test_attachment_only():
     # Set FREESEND_API_KEY and optionally FREESEND_BASE_URL (e.g. http://localhost:3000)
     config = FreesendConfig(
         api_key=os.getenv('FREESEND_API_KEY', 'your-api-key-here'),
-        base_url=os.getenv('FREESEND_BASE_URL', 'https://freesend.metafog.io')
+        base_url=os.getenv('FREESEND_BASE_URL', 'http://localhost:3000')
     )
     freesend = Freesend(config)
     

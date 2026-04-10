@@ -28,7 +28,7 @@
   "bugs": {
     "url": "https://github.com/mokshablr/Freesend/issues"
   },
-  "homepage": "https://freesend.metafog.io",
+  "homepage": "https://github.com/mokshablr/Freesend",
   "devDependencies": {
     "@types/node": "^20.0.0",
     "typescript": "^5.0.0",

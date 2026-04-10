@@ -9,7 +9,7 @@ description = "Official Python SDK for the Freesend email API"
 readme = "README.md"
 license = { text = "MIT" }
 authors = [
-    { name = "Freesend Team", email = "team@freesend.metafog.io" }
+    { name = "Freesend Team" }
 ]
 keywords = ["freesend", "email", "api", "smtp", "python"]
 classifiers = [
@@ -44,7 +44,7 @@ dev = [
 [project.urls]
 "Bug Reports" = "https://github.com/mokshablr/Freesend/issues"
 Source = "https://github.com/mokshablr/Freesend"
-Documentation = "https://freesend.metafog.io/docs"
+Documentation = "https://github.com/mokshablr/Freesend#readme"
 
 [tool.setuptools.packages.find]
 where = ["."]

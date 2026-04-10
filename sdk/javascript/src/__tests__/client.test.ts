@@ -44,7 +44,7 @@ describe('Freesend Client', () => {
       const result = await freesend.sendEmail(mockEmailData);
 
       expect(fetch).toHaveBeenCalledWith(
-        'https://freesend.metafog.io/api/send-email',
+        'http://localhost:3000/api/send-email',
         {
           method: 'POST',
           headers: {
