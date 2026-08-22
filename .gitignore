@@ -30,6 +30,7 @@
 .env.development.local
 .env.test.local
 .env.production.local
+.env.backup-*
 
 # prisma
 /prisma/migrations
@@ -48,7 +49,6 @@
 .pnp.*
 
 # lock files
-package-lock.json
 yarn.lock
 
 # typescript

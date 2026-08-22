@@ -1,0 +1,67 @@
+# Dependencies (reinstalled in container)
+node_modules
+.pnp
+.pnp.*
+.yarn
+
+# Build artifacts (regenerated in container)
+.next
+out
+build
+.contentlayer
+tsconfig.tsbuildinfo
+
+# Environment files - NEVER bake secrets into the image
+.env
+.env.*
+!.env.example
+
+# Version control
+.git
+.github
+.gitignore
+.gitattributes
+
+# Testing
+tests
+coverage
+.nyc_output
+vitest.config.ts
+
+# Editor / AI tooling
+.claude
+.idea
+.vscode
+.cursor
+
+# OS / misc
+.DS_Store
+*.log
+*.pem
+misc
+
+# Vercel
+.vercel
+
+# SDKs are independent packages, not imported by the Next.js app.
+sdk
+
+# React-email dev sandbox, not imported by the app runtime.
+emails
+
+# Docs / repo metadata (not needed at runtime)
+README.md
+CONTRIBUTING.md
+CLAUDE.md
+AGENTS.md
+TODOS.md
+LICENSE
+
+# Dev-only config
+prettier.config.js
+
+# Docker files themselves (avoid recursive context)
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml
+.dockerignore

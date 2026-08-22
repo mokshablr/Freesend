@@ -1,3 +1,4 @@
+import { getSmtpConfigByApiKey } from "@/lib/api-key";
 import { sendEmail } from "@/lib/send-email";
 
 const corsHeaders = {
@@ -64,6 +65,16 @@ export const POST = async (req: Request) => {
     return new Response(
       JSON.stringify({ statusCode: 400, name: "missing_api_key", message: "Invalid or missing API Key." }),
       { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
+    );
+  }
+
+  // Auth before body validation so invalid keys get a 403 without the response
+  // leaking which body fields are expected.
+  const smtpConfig = await getSmtpConfigByApiKey(token);
+  if (!smtpConfig) {
+    return new Response(
+      JSON.stringify({ statusCode: 403, name: "invalid_api_key", message: "Invalid API Key or no SMTP configuration found." }),
+      { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders } },
     );
   }
 

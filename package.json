@@ -12,8 +12,10 @@
     "turbo": "next dev --turbo",
     "start": "next start -p 5000",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
     "preview": "next build && next start",
     "postinstall": "prisma generate",
+    "db:push": "prisma db push --skip-generate",
     "email": "email dev --dir emails --port 3333",
     "test": "vitest run",
     "test:watch": "vitest"

@@ -12,7 +12,7 @@ Designed with **serverless apps, indie hackers, and backend engineers** in mind,
 
 No vendor lock-in. No usage caps. No surprise pricing.
 
-> _"I needed to send 1-2k emails/day from my serverless app. Freesend just worked — and saved me time and money."_  
+> _"I needed to send 1-2k emails/day from my serverless app. Freesend just worked, and saved me time and money."_  
 > ~ A real user
 
 ---
@@ -79,6 +79,60 @@ await resend.emails.send({
 
 ---
 
+## 🐳 Self-Hosting with Docker
+
+The quickest way to run Freesend is with Docker and Docker Compose. It bundles the app and a PostgreSQL database, and uses the internal Docker network so the database is never exposed to the host.
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) 20.10+
+- [Docker Compose](https://docs.docker.com/compose/install/) v2+
+- A Google OAuth client (Client ID + Client Secret) for sign-in. See the [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/mokshablr/Freesend.git
+cd Freesend
+```
+
+### 2. Create `.env` and fill in secrets
+
+```bash
+cp .env.example .env
+```
+
+`.env.example` has a generation command above each secret. Fill in `AUTH_SECRET`, `ENCRYPTION_KEY`, `ENCRYPTION_IV`, `POSTGRES_PASSWORD`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and (optionally) `NEXT_PUBLIC_APP_URL` (default: `http://localhost:5000`). Leave `DATABASE_URL` blank; Docker Compose builds it from `POSTGRES_PASSWORD`.
+
+### 3. Start the containers
+
+```bash
+docker compose up -d
+```
+
+The app will be available at [http://localhost:5000](http://localhost:5000). On first start, the database schema is synced automatically.
+
+### Important notes
+
+- **`NEXT_PUBLIC_APP_URL` is baked in at build time.** Next.js inlines `NEXT_PUBLIC_*` variables into the client bundle. To change the public URL, rebuild the image:
+  ```bash
+  docker compose build --no-cache app && docker compose up -d
+  ```
+- **Never rotate `ENCRYPTION_KEY` or `ENCRYPTION_IV` after first use.** All stored SMTP passwords become unrecoverable. Back these values up alongside your database.
+- **Postgres is not published to the host.** The app reaches it over the internal Docker network. If you need local `psql` access, uncomment the `ports` block in `docker-compose.yml`.
+- **Schema changes that would drop data fail by design.** The container runs `prisma db push` without `--accept-data-loss`, so destructive migrations require manual intervention. Back up the `pgdata` volume first, then run:
+  ```bash
+  docker compose exec app ./node_modules/.bin/prisma db push --accept-data-loss --skip-generate
+  ```
+
+### Production considerations
+
+- Put Freesend behind a reverse proxy (Caddy, nginx, Traefik) to terminate HTTPS.
+- Back up the `pgdata` Docker volume regularly.
+- Keep `.env` out of version control (it is already gitignored).
+
+---
+
 ## 👨‍💻 Quick Start (Self-Hosted)
 
 Deploy Freesend on your own infrastructure, then send emails via the API:
@@ -134,7 +188,7 @@ Use an official SDK for a better developer experience.
 
 ## 💡 Real Use Cases
 
-- Seamlessly send **transactional emails** from your JAMstack or serverless app — signups, OTPs, receipts & more
+- Seamlessly send **transactional emails** from your JAMstack or serverless app: signups, OTPs, receipts & more
 - Use Gmail SMTP to avoid setting up Postfix or Mailgun
 - Replace expensive email APIs with your own hosted function
 - Maintain **full data ownership** of your outbound emails
