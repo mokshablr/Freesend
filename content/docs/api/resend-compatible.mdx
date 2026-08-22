@@ -148,6 +148,27 @@ You can also call the endpoint directly without the Resend SDK.
 }
 ```
 
+## Rate Limiting
+
+Each API key may make **100 requests per 60 seconds**, shared with
+`POST /api/send-email`. Responses carry `RateLimit-Limit`,
+`RateLimit-Remaining` and `RateLimit-Reset`, and a `429` adds `Retry-After`.
+
+Over the limit, this endpoint returns the Resend-shaped error body:
+
+```json
+{
+  "statusCode": 429,
+  "name": "rate_limit_exceeded",
+  "message": "Too many requests. Please retry later."
+}
+```
+
+The limit is configurable and is counted **per process, not across a whole
+deployment**. See [Rate Limiting](/docs/api/send-email#rate-limiting) for the
+environment variables and the caveats that apply when running more than one
+instance.
+
 ## Differences from Resend
 
 | Feature                    | Resend        | Freesend                              |

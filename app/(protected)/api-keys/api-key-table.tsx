@@ -17,6 +17,7 @@ import {
   toggleApiKeyStatus,
   updateApiKeyName,
 } from "@/lib/api-key";
+import { maskApiKey } from "@/lib/api-key-display";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
@@ -178,7 +179,7 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
         return (
           <div className="flex items-center group">
             <span className="inline-flex h-6 items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-mono text-gray-700 dark:bg-gray-800 dark:text-gray-300 transition-all duration-200 group-hover:bg-gray-200 dark:group-hover:bg-gray-700">
-              {tokenValue.slice(0, 3)}...{tokenValue.slice(-5)}
+              {maskApiKey(tokenValue)}
             </span>
             <div className="relative ml-2">
               <Button

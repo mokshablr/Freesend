@@ -76,6 +76,7 @@ await resend.emails.send({
 - 📊 **Send History Dashboard** - Track every email with status (sent/failed/pending)
 - 🧑‍💻 **Minimal & Hackable** - Fully open source and easy to extend
 - 💬 **Plain Text + HTML** - Support for both formats out of the box
+- 🔐 **Encrypted Credentials & Rate Limiting** - SMTP passwords encrypted at rest, per-key request limits
 
 ---
 
@@ -118,6 +119,47 @@ const sendEmail = async () => {
 
 sendEmail();
 ```
+
+---
+
+## 🔐 Security
+
+### API keys
+
+Keys look like `fsk_live_9f2a7c41b8e35d06a1c9f4e72b8d5a30`: a `fsk_live_`
+prefix so a leaked key is recognisable in logs and matchable by secret scanners,
+followed by 128 bits of randomness. Keys issued before this format existed are
+bare UUIDs and keep working, since authentication compares the key to the stored
+value exactly and never inspects its shape.
+
+### SMTP passwords
+
+Stored encrypted with AES-256-CBC under `ENCRYPTION_KEY`, using a fresh random
+initialisation vector per password. Older releases reused a single IV from
+`ENCRYPTION_IV`; that variable is now ignored, and passwords written by those
+releases still decrypt, so upgrading needs no migration. To retire the old
+ciphertexts entirely, run:
+
+```bash
+node --env-file=.env scripts/reencrypt-smtp-passwords.mjs          # preview
+node --env-file=.env scripts/reencrypt-smtp-passwords.mjs --commit # apply
+```
+
+### Rate limiting
+
+Each API key is limited to **100 requests per 60 seconds**, shared across
+`POST /api/send-email` and `POST /api/emails`. Responses carry `RateLimit-Limit`,
+`RateLimit-Remaining` and `RateLimit-Reset`; a `429` adds `Retry-After`. Tune it
+with `RATE_LIMIT_MAX` and `RATE_LIMIT_WINDOW_MS`, or set `RATE_LIMIT_MAX=0` to
+turn it off.
+
+> **The limit is per process, not distributed.** Counters live in the memory of
+> the Node process serving the request, so behind a load balancer or with forked
+> workers the effective limit is roughly `RATE_LIMIT_MAX` times the number of
+> processes, and all counters reset on restart. It is a safety valve against one
+> runaway client saturating your SMTP relay, not an exact quota. For a hard
+> global limit, put nginx `limit_req`, Cloudflare, or a Redis-backed limiter in
+> front of Freesend.
 
 ---
 

@@ -875,6 +875,66 @@ For complete SDK documentation, examples, and advanced usage, visit our [SDK doc
 }
 ```
 
+## Rate Limiting
+
+Each API key may make **100 requests per 60 seconds**. The limit is shared
+between `POST /api/send-email` and `POST /api/emails`, so using both endpoints
+draws down a single allowance.
+
+Every response carries the current state of your allowance:
+
+| Header | Meaning |
+| --- | --- |
+| `RateLimit-Limit` | Requests permitted per window |
+| `RateLimit-Remaining` | Requests left in the current window |
+| `RateLimit-Reset` | Seconds until the window resets |
+| `Retry-After` | Seconds to wait. Sent only on a `429` |
+
+Exceeding the limit returns `429 Too Many Requests`:
+
+```json
+{
+  "error": "Too many requests. Please retry later."
+}
+```
+
+Wait for the number of seconds given in `Retry-After` before retrying.
+
+### Configuring the limit
+
+Self-hosted instances set the limit with two environment variables:
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `RATE_LIMIT_MAX` | `100` | Requests per window, per key. `0` disables the limiter |
+| `RATE_LIMIT_WINDOW_MS` | `60000` | Window length in milliseconds |
+
+<Callout type="warning">
+  **The limit is counted per process, not across your whole deployment.**
+
+  Counters live in the memory of the Node process that handles the request. If
+  you run Freesend behind a load balancer, across several containers, or under a
+  process manager that forks workers, each process keeps its own counters and the
+  effective limit is roughly `RATE_LIMIT_MAX` multiplied by the number of
+  processes. All counters also reset when the process restarts or redeploys.
+
+  Treat it as a safety valve that stops one runaway client from saturating your
+  SMTP relay, not as an exact quota. If you need a hard global limit, put a
+  shared limiter in front of Freesend, such as nginx `limit_req`, Cloudflare, or
+  a Redis-backed limiter.
+</Callout>
+
+Two further details worth knowing:
+
+- Because the window is fixed rather than sliding, a client can send up to twice
+  the limit across a window boundary, for example 100 requests at 59.9s and
+  another 100 at 60.1s. For the purpose the limiter serves, that is not
+  meaningfully different from the limit itself.
+- Requests with a missing or malformed `Authorization` header are rejected
+  before the limiter runs and are not counted, because there is no key to
+  attribute them to. They cost a header check and no database or SMTP work.
+  Volumetric flood protection belongs in front of the application.
+
 ## Common MIME Types
 
 | File Extension  | MIME Type                                                                   |

@@ -37,6 +37,30 @@ You can now [send emails](/docs/api/send-email) from the configured SMTP Server!
 
 </Steps>
 
+## Key format
+
+Keys created by current versions of Freesend look like this:
+
+```
+fsk_live_9f2a7c41b8e35d06a1c9f4e72b8d5a30
+```
+
+The `fsk_live_` prefix makes a key recognisable at a glance in logs, config
+files and pull requests, and lets secret scanners match on it. After the prefix
+are 32 hexadecimal characters carrying 128 bits of randomness from the operating
+system's cryptographic random source.
+
+<Callout type="note">
+  Keys issued before this format existed are bare UUIDs, and they keep working.
+  Freesend authenticates by comparing the key to the stored value exactly and
+  never inspects its shape, so there is nothing to migrate. If you would rather
+  move to the new format, create a new key and delete the old one.
+</Callout>
+
+Treat the whole string as the secret. Store it in an environment variable rather
+than in source control, and rotate it by creating a replacement key and deleting
+the old one.
+
 ## Next Steps
 
 - **[Send Emails via HTTP API](/docs/api/send-email)** - Use the REST API directly

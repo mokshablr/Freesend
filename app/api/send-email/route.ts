@@ -1,9 +1,14 @@
+import { checkRateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/send-email";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  // Without this, browser clients can see a 429 status but cannot read
+  // Retry-After or any RateLimit-* header from the response.
+  "Access-Control-Expose-Headers":
+    "RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After",
 };
 
 export const OPTIONS = async () => {
@@ -52,13 +57,32 @@ export const POST = async (req: Request) => {
     );
   }
 
+  // Rate limit before parsing the body. The token is not verified against the
+  // database yet, which is deliberate: a refused request then costs one hash
+  // and one map lookup, with no database round trip and no buffering of a body
+  // that may carry megabytes of base64 attachments.
+  const rateLimit = checkRateLimit(token);
+  if (!rateLimit.allowed) {
+    return new Response(
+      JSON.stringify({ error: "Too many requests. Please retry later." }),
+      {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders,
+          ...rateLimitHeaders(rateLimit),
+        },
+      },
+    );
+  }
+
   const body = await req.json();
   const message = body as EmailContent;
 
   if (!message.fromEmail) {
     return new Response(
       JSON.stringify({ error: "Missing required field 'fromEmail'." }),
-      { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders, ...rateLimitHeaders(rateLimit) } },
     );
   }
 
@@ -86,12 +110,12 @@ export const POST = async (req: Request) => {
   if (result.success) {
     return new Response(
       JSON.stringify({ message: "Email sent successfully" }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders, ...rateLimitHeaders(rateLimit) } },
     );
   }
 
   return new Response(
     JSON.stringify({ error: result.error }),
-    { status: result.statusCode, headers: { "Content-Type": "application/json", ...corsHeaders } },
+    { status: result.statusCode, headers: { "Content-Type": "application/json", ...corsHeaders, ...rateLimitHeaders(rateLimit) } },
   );
 };

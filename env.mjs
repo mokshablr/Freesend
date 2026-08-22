@@ -11,6 +11,10 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: z.string().min(1),
     // GITHUB_OAUTH_TOKEN: z.string().min(1),
     DATABASE_URL: z.string().min(1),
+    // Rate limiting for the public send endpoints, per API key and per
+    // process. Set RATE_LIMIT_MAX to 0 to disable the limiter entirely.
+    RATE_LIMIT_MAX: z.coerce.number().int().min(0).default(100),
+    RATE_LIMIT_WINDOW_MS: z.coerce.number().int().min(1000).default(60000),
     // RESEND_API_KEY: z.string().min(1),
     // EMAIL_FROM: z.string().min(1),
     // STRIPE_API_KEY: z.string().min(1),
@@ -30,6 +34,12 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     // GITHUB_OAUTH_TOKEN: process.env.GITHUB_OAUTH_TOKEN,
     DATABASE_URL: process.env.DATABASE_URL,
+    // The `.trim() || undefined` is load-bearing, not cosmetic.
+    // z.coerce.number() turns "" into 0, and 0 is the "disabled" sentinel, so
+    // a bare `RATE_LIMIT_MAX=` left in a copied .env would silently switch the
+    // limiter off. Falling through to undefined lets the zod default apply.
+    RATE_LIMIT_MAX: process.env.RATE_LIMIT_MAX?.trim() || undefined,
+    RATE_LIMIT_WINDOW_MS: process.env.RATE_LIMIT_WINDOW_MS?.trim() || undefined,
     // RESEND_API_KEY: process.env.RESEND_API_KEY,
     // EMAIL_FROM: process.env.EMAIL_FROM,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
