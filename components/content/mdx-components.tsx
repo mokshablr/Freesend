@@ -1,7 +1,7 @@
 import * as React from "react";
 import NextImage, { ImageProps } from "next/image";
 import Link from "next/link";
-import { useMDXComponent } from "next-contentlayer2/hooks";
+import { MDXContent } from "@content-collections/mdx/react";
 
 import { cn } from "@/lib/utils";
 import { MdxCard } from "@/components/content/mdx-card";
@@ -203,12 +203,19 @@ const components = {
 
 interface MdxProps {
   code: string;
-  images?: { alt: string; src: string; blurDataURL: string }[];
+  // No caller supplies `alt`, and MDXImage only ever reads `src` (to match) and
+  // `blurDataURL`. The field was previously declared as required but never
+  // populated; contentlayer's untyped `images` meant the mismatch was never
+  // checked. Typed accurately now that `images` is a real string[].
+  images?: { src: string; blurDataURL: string }[];
 }
 
 export function Mdx({ code, images }: MdxProps) {
-  const Component = useMDXComponent(code);
-
+  // Deliberately no "use client" in this file. @content-collections/mdx ships a
+  // react-server export condition resolving to a hook-free build, so MDXContent
+  // renders in the RSC layer and the component map below never reaches the
+  // browser bundle. Adding "use client" here would ship all of it to the client
+  // and move MDX evaluation from build time to page load.
   const MDXImage = (props: any) => {
     if (!images) return null;
     const blurDataURL = images.find(
@@ -228,7 +235,8 @@ export function Mdx({ code, images }: MdxProps) {
 
   return (
     <div className="mdx">
-      <Component
+      <MDXContent
+        code={code}
         components={{
           ...components,
           Image: MDXImage,

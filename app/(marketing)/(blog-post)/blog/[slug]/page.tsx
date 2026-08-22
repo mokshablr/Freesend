@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { allPosts } from "contentlayer/generated";
+import { allPosts } from "content-collections";
 
 import { Mdx } from "@/components/content/mdx-components";
 

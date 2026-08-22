@@ -8,8 +8,8 @@
 /out
 /.next.cache
 
-# contentlayer
-/.contentlayer
+# content-collections
+/.content-collections
 
 # testing
 /coverage

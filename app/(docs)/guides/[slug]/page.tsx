@@ -1,4 +1,4 @@
-import { allGuides } from "contentlayer/generated";
+import { allGuides } from "content-collections";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
