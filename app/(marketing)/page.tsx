@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import { infos } from "@/config/landing";
 import BentoGrid from "@/components/sections/bentogrid";
 import Features from "@/components/sections/features";
@@ -9,6 +11,8 @@ import Testimonials from "@/components/sections/testimonials";
 import { SiteFooter } from "@/components/layout/site-footer";
 
 export default function IndexPage() {
+  if (process.env.LANDING_PAGE === "false") redirect("/login");
+
   return (
     <>
       <HeroLanding />
