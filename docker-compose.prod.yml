@@ -15,8 +15,10 @@ services:
     environment:
       DOMAIN: ${DOMAIN:?}
       ACME_EMAIL: ${ACME_EMAIL}
-      BASIC_AUTH_USER: ${BASIC_AUTH_USER:?}
-      BASIC_AUTH_HASH: "${BASIC_AUTH_HASH:?generate with: docker run --rm caddy:2-alpine caddy hash-password --plaintext 'secret'}"
+      # optional; leave empty to disable
+      BASIC_AUTH_USER: ${BASIC_AUTH_USER:-}
+      # generate with: docker run --rm caddy:2-alpine caddy hash-password --plaintext 'secret'}
+      BASIC_AUTH_HASH: ${BASIC_AUTH_HASH:-}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

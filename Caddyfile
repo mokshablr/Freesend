@@ -4,8 +4,11 @@
 
 # Web UI, auth, dashboard - extra basic-auth layer in front of the app (because it is a javascript hell).
 {$DOMAIN} {
-    basic_auth {
-        {$BASIC_AUTH_USER} {$BASIC_AUTH_HASH}
+    # optional: only enforced when BASIC_AUTH_HASH is set
+    @basic expression `"{$BASIC_AUTH_HASH}" != ""`
+    basic_auth @basic {
+        # fallback to dummy hash for config validation pass
+        {$BASIC_AUTH_USER:disabled} {$BASIC_AUTH_HASH:$2a$14$g9HOwoG9OvZ8Cj4hXThE..pjFr3oh3NuSrLidHcZms08njbh9FJva}
     }
     reverse_proxy app:5000
 }
