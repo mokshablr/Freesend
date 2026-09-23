@@ -43,9 +43,8 @@ RUN addgroup --system --gid 1001 nodejs \
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-# Contentlayer output is imported via the `contentlayer/generated` alias and
-# is not part of the next standalone traced bundle.
-COPY --from=builder --chown=nextjs:nodejs /app/.contentlayer/generated ./.contentlayer/generated
+# Generated content, imported via the `content-collections` alias.
+COPY --from=builder --chown=nextjs:nodejs /app/.content-collections/generated ./.content-collections/generated
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 # Prisma engines are version-matched to the generated client; copying them
 # from the builder avoids a network install and keeps them in sync.

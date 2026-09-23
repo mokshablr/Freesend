@@ -2,10 +2,10 @@ import crypto from "crypto";
 
 import { describe, it, expect, vi } from "vitest";
 
-// lib/pwd.ts reads ENCRYPTION_KEY at module load and throws if it is missing.
-// Vitest does not load .env, and vitest.config.ts sets no setupFiles and no
-// test.env, so the variable has to exist before the static import below is
-// evaluated. vi.hoisted() runs above the imports, which is early enough.
+// lib/pwd.ts reads ENCRYPTION_KEY each time encrypt() or decrypt() runs and
+// throws if it is missing. Vitest does not load .env, and vitest.config.ts sets
+// no setupFiles and no test.env, so the variable is set here. vi.hoisted() runs
+// above the imports, before any test calls into the module.
 const { TEST_KEY_B64, LEGACY_IV_B64 } = vi.hoisted(() => {
   const keyB64 = Buffer.alloc(32, 0x2b).toString("base64");
   const ivB64 = Buffer.alloc(16, 0x7f).toString("base64");
@@ -135,5 +135,24 @@ describe("pwd random IV", () => {
     expect(stored.split(":")).toHaveLength(2);
     expect(ivPrefixOf(stored)).toMatch(/^[0-9a-f]{32}$/);
     expect(ciphertextOf(stored)).toMatch(/^[0-9a-f]+$/);
+  });
+});
+
+describe("pwd key lookup", () => {
+  it("loads without ENCRYPTION_KEY and fails only when used", async () => {
+    // `next build` imports route modules to collect page data, and the Docker
+    // image is built without secrets, so a check at module load would fail
+    // that build.
+    const savedKey = process.env.ENCRYPTION_KEY;
+    delete process.env.ENCRYPTION_KEY;
+    try {
+      vi.resetModules();
+      const fresh = await import("@/lib/pwd");
+
+      expect(() => fresh.encrypt("anything")).toThrow("ENCRYPTION_KEY");
+      expect(() => fresh.decrypt(legacyFixedIvEncrypt("anything"))).toThrow("ENCRYPTION_KEY");
+    } finally {
+      process.env.ENCRYPTION_KEY = savedKey;
+    }
   });
 });

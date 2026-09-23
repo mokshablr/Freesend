@@ -9,8 +9,15 @@ vi.mock("@/lib/send-email", () => ({
   sendEmail: vi.fn(async () => ({ success: true, id: "email-1" })),
 }));
 
+// Both routes look the key up after the limiter and before reading the body.
+// Every key is valid unless a test says otherwise.
+vi.mock("@/lib/api-key", () => ({
+  getSmtpConfigByApiKey: vi.fn(async () => ({ id: "smtp-1" })),
+}));
+
 import { POST as postEmails } from "@/app/api/emails/route";
 import { OPTIONS as optionsSendEmail, POST as postSendEmail } from "@/app/api/send-email/route";
+import { getSmtpConfigByApiKey } from "@/lib/api-key";
 import { sendEmail } from "@/lib/send-email";
 
 // The limiter is a process-wide singleton pinned to globalThis, so tests share
@@ -73,6 +80,21 @@ describe("rate limiting across both send endpoints", () => {
     expect(sendEmail).not.toHaveBeenCalled();
   });
 
+  it("refuses without looking up the key", async () => {
+    // The limiter runs ahead of the database check, so a flood of requests
+    // costs no database round trips.
+    const token = freshToken();
+
+    await postSendEmail(sendEmailRequest(token));
+    await postSendEmail(sendEmailRequest(token));
+    vi.clearAllMocks();
+
+    const refused = await postSendEmail(sendEmailRequest(token));
+
+    expect(refused.status).toBe(429);
+    expect(getSmtpConfigByApiKey).not.toHaveBeenCalled();
+  });
+
   it("refuses before parsing the request body", async () => {
     // /api/emails answers malformed JSON with 400 invalid_request. Getting a
     // 429 instead is the direct evidence that the limiter runs ahead of
@@ -108,6 +130,33 @@ describe("rate limiting across both send endpoints", () => {
       name: "rate_limit_exceeded",
       message: expect.any(String),
     });
+  });
+});
+
+describe("API key check", () => {
+  it("rejects an unknown key before parsing the body", async () => {
+    // /api/emails answers malformed JSON with 400 invalid_request, so a 403
+    // here shows the key is checked before req.json().
+    vi.mocked(getSmtpConfigByApiKey).mockResolvedValueOnce(null);
+
+    const res = await postEmails(emailsRequest(freshToken(), "{not valid json"));
+
+    expect(res.status).toBe(403);
+    expect(await res.json()).toMatchObject({ name: "invalid_api_key" });
+    expect(sendEmail).not.toHaveBeenCalled();
+  });
+
+  it("counts a rejected key against the limit", async () => {
+    // The check runs after the limiter, so the request has already been
+    // counted and the 403 carries the same headers as any other response.
+    vi.mocked(getSmtpConfigByApiKey).mockResolvedValueOnce(null);
+
+    const res = await postSendEmail(sendEmailRequest(freshToken()));
+
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({ error: expect.any(String) });
+    expect(res.headers.get("RateLimit-Remaining")).toBe("1");
+    expect(sendEmail).not.toHaveBeenCalled();
   });
 });
 

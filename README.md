@@ -103,7 +103,7 @@ cd Freesend
 cp .env.example .env
 ```
 
-`.env.example` has a generation command above each secret. Fill in `AUTH_SECRET`, `ENCRYPTION_KEY`, `ENCRYPTION_IV`, `POSTGRES_PASSWORD`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and (optionally) `NEXT_PUBLIC_APP_URL` (default: `http://localhost:5000`). Leave `DATABASE_URL` blank; Docker Compose builds it from `POSTGRES_PASSWORD`.
+`.env.example` has a generation command above each secret. Fill in `AUTH_SECRET`, `ENCRYPTION_KEY`, `POSTGRES_PASSWORD`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and (optionally) `NEXT_PUBLIC_APP_URL` (default: `http://localhost:5000`). Leave `DATABASE_URL` blank; Docker Compose builds it from `POSTGRES_PASSWORD`.
 
 ### 3. Start the containers
 
@@ -119,7 +119,7 @@ The app will be available at [http://localhost:5000](http://localhost:5000). On 
   ```bash
   docker compose build --no-cache app && docker compose up -d
   ```
-- **Never rotate `ENCRYPTION_KEY` or `ENCRYPTION_IV` after first use.** All stored SMTP passwords become unrecoverable. Back these values up alongside your database.
+- **Never rotate `ENCRYPTION_KEY` after first use.** All stored SMTP passwords become unrecoverable. Back it up alongside your database.
 - **Postgres is not published to the host.** The app reaches it over the internal Docker network. If you need local `psql` access, uncomment the `ports` block in `docker-compose.yml`.
 - **Schema changes that would drop data fail by design.** The container runs `prisma db push` without `--accept-data-loss`, so destructive migrations require manual intervention. Back up the `pgdata` volume first, then run:
   ```bash

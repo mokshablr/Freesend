@@ -8,7 +8,7 @@ node_modules
 .next
 out
 build
-.contentlayer
+.content-collections
 tsconfig.tsbuildinfo
 
 # Environment files - NEVER bake secrets into the image
