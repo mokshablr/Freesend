@@ -1,15 +1,6 @@
 import crypto from "crypto";
 
-const encryptionKey = process.env.ENCRYPTION_KEY;
-
-if (!encryptionKey) {
-  throw new Error(
-    "ENCRYPTION_KEY must be set in the environment variables.",
-  );
-}
-
 const algorithm = "aes-256-cbc";
-const key = Buffer.from(encryptionKey, "base64"); // Ensure you store and reuse this key securely
 
 // AES block size. A fresh IV of this length is generated for every encrypt()
 // call and stored alongside the ciphertext.
@@ -22,6 +13,18 @@ const IV_LENGTH = 16;
 // from the environment, so no migration is required. Existing deployments can
 // leave ENCRYPTION_IV set; it is ignored.
 
+// Resolved at call time so `next build`'s page-data collection (which imports
+// route modules without executing them) does not fail when secrets are absent.
+function getKey(): Buffer {
+  const encryptionKey = process.env.ENCRYPTION_KEY;
+  if (!encryptionKey) {
+    throw new Error(
+      "ENCRYPTION_KEY must be set in the environment variables.",
+    );
+  }
+  return Buffer.from(encryptionKey, "base64"); // Ensure you store and reuse this key securely
+}
+
 /**
  * Encrypts a text using AES-256-CBC encryption.
  *
@@ -32,6 +35,7 @@ const IV_LENGTH = 16;
  * @returns The encrypted text, formatted as `${iv_hex}:${ciphertext_hex}`.
  */
 export function encrypt(text: string): string {
+  const key = getKey();
   const iv = crypto.randomBytes(IV_LENGTH);
   const cipher = crypto.createCipheriv(algorithm, key, iv);
   let encrypted = cipher.update(text, "utf8", "hex");
@@ -53,6 +57,7 @@ export function decrypt(text: string): string {
   const [ivText, encryptedText] = text.split(":");
   const ivBuffer = Buffer.from(ivText, "hex");
   const encryptedBuffer = Buffer.from(encryptedText, "hex");
+  const key = getKey();
   const decipher = crypto.createDecipheriv(algorithm, key, ivBuffer);
   let decrypted = decipher.update(encryptedBuffer, undefined, "utf8");
   decrypted += decipher.final("utf8");

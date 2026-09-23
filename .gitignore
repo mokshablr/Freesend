@@ -49,7 +49,6 @@
 .pnp.*
 
 # lock files
-package-lock.json
 yarn.lock
 
 # typescript

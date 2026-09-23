@@ -55,4 +55,5 @@ export const env = createEnv({
     // NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PLAN_ID:
     //   process.env.NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PLAN_ID,
   },
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
 });

@@ -1,3 +1,4 @@
+import { getSmtpConfigByApiKey } from "@/lib/api-key";
 import { checkRateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/send-email";
 
@@ -73,6 +74,16 @@ export const POST = async (req: Request) => {
           ...rateLimitHeaders(rateLimit),
         },
       },
+    );
+  }
+
+  // Auth before body validation so invalid keys get a 403 without the response
+  // leaking which body fields are expected.
+  const smtpConfig = await getSmtpConfigByApiKey(token);
+  if (!smtpConfig) {
+    return new Response(
+      JSON.stringify({ error: "Invalid API Key or no SMTP configuration found." }),
+      { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders, ...rateLimitHeaders(rateLimit) } },
     );
   }
 
