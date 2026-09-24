@@ -6,6 +6,10 @@ import("./env.mjs");
 const nextConfig = {
   output: "standalone",
   reactStrictMode: true,
+  // Lint the whole repo, not only Next's default app/, components/ and lib/.
+  eslint: {
+    dirs: ["."],
+  },
   swcMinify: true,
   images: {
     remotePatterns: [
