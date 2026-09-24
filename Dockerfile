@@ -20,5 +20,6 @@ COPY --from=build /app/node_modules/bcryptjs ./node_modules/bcryptjs
 COPY --from=build /app/node_modules/prisma ./node_modules/prisma
 COPY --from=build /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
+ENV HOSTNAME=0.0.0.0
 EXPOSE 5000
 CMD ["sh", "-c", "node node_modules/prisma/build/index.js db push --skip-generate && node server.js"]
