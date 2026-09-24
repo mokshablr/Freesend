@@ -61,6 +61,72 @@ interface ApiKeyTableProps {
   initialIsLoading: boolean;
 }
 
+const ApiKeyTokenCell: React.FC<{ tokenValue: string }> = ({ tokenValue }) => {
+  const [copied, setCopied] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(tokenValue);
+      setIsAnimating(true);
+      setCopied(true);
+
+      // Reset animations
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 300);
+
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  return (
+    <div className="flex items-center group">
+      <span className="inline-flex h-6 items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-mono text-gray-700 dark:bg-gray-800 dark:text-gray-300 transition-all duration-200 group-hover:bg-gray-200 dark:group-hover:bg-gray-700">
+        {maskApiKey(tokenValue)}
+      </span>
+      <div className="relative ml-2">
+        <Button
+          className={`h-6 w-6 transition-all duration-200 ${
+            copied
+              ? 'bg-green-100 border-green-300 hover:bg-green-200 dark:bg-green-900 dark:border-green-700 dark:hover:bg-green-800'
+              : 'hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900 dark:hover:border-blue-700'
+          } ${
+            isAnimating ? 'scale-110 shadow-md' : 'scale-100'
+          }`}
+          variant={"outline"}
+          size={"icon"}
+          onClick={handleCopy}
+        >
+          <div className={`transition-all duration-200 ${isAnimating ? 'rotate-12' : 'rotate-0'}`}>
+            {copied ? (
+              <CopyCheck className={`h-3 w-3 text-green-600 dark:text-green-400 transition-all duration-200 ${
+                isAnimating ? 'scale-125' : 'scale-100'
+              }`} />
+            ) : (
+              <CopyIcon className="h-3 w-3 transition-all duration-200 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
+            )}
+          </div>
+        </Button>
+
+        {/* Copy success indicator */}
+        {copied && (
+          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="bg-green-600 text-white text-xs px-2 py-1 rounded-md shadow-lg">
+              Copied!
+            </div>
+            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-t-4 border-transparent border-t-green-600"></div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
   initialApiKeys,
   initialIsLoading = false,
@@ -152,72 +218,7 @@ const ApiKeyTable: React.FC<ApiKeyTableProps> = ({
       id: "token",
       header: "API Key",
       accessorKey: "token",
-      cell: ({ getValue }) => {
-        const tokenValue = getValue();
-        const [copied, setCopied] = useState(false);
-        const [isAnimating, setIsAnimating] = useState(false);
-
-        const handleCopy = async () => {
-          try {
-            await navigator.clipboard.writeText(tokenValue);
-            setIsAnimating(true);
-            setCopied(true);
-            
-            // Reset animations
-            setTimeout(() => {
-              setIsAnimating(false);
-            }, 300);
-            
-            setTimeout(() => {
-              setCopied(false);
-            }, 2000);
-          } catch (err) {
-            console.error('Failed to copy:', err);
-          }
-        };
-
-        return (
-          <div className="flex items-center group">
-            <span className="inline-flex h-6 items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-mono text-gray-700 dark:bg-gray-800 dark:text-gray-300 transition-all duration-200 group-hover:bg-gray-200 dark:group-hover:bg-gray-700">
-              {maskApiKey(tokenValue)}
-            </span>
-            <div className="relative ml-2">
-              <Button
-                className={`h-6 w-6 transition-all duration-200 ${
-                  copied 
-                    ? 'bg-green-100 border-green-300 hover:bg-green-200 dark:bg-green-900 dark:border-green-700 dark:hover:bg-green-800' 
-                    : 'hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900 dark:hover:border-blue-700'
-                } ${
-                  isAnimating ? 'scale-110 shadow-md' : 'scale-100'
-                }`}
-                variant={"outline"}
-                size={"icon"}
-                onClick={handleCopy}
-              >
-                <div className={`transition-all duration-200 ${isAnimating ? 'rotate-12' : 'rotate-0'}`}>
-                  {copied ? (
-                    <CopyCheck className={`h-3 w-3 text-green-600 dark:text-green-400 transition-all duration-200 ${
-                      isAnimating ? 'scale-125' : 'scale-100'
-                    }`} />
-                  ) : (
-                    <CopyIcon className="h-3 w-3 transition-all duration-200 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
-                  )}
-                </div>
-              </Button>
-              
-              {/* Copy success indicator */}
-              {copied && (
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="bg-green-600 text-white text-xs px-2 py-1 rounded-md shadow-lg">
-                    Copied!
-                  </div>
-                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-t-4 border-transparent border-t-green-600"></div>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      },
+      cell: ({ getValue }) => <ApiKeyTokenCell tokenValue={getValue()} />,
     },
     {
       id: "smtpConfig",
