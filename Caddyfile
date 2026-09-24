@@ -1,0 +1,30 @@
+{
+    email {$ACME_EMAIL}
+}
+
+# Web UI, auth, dashboard - extra basic-auth layer in front of the app (because it is a javascript hell).
+{$DOMAIN} {
+    # optional: only enforced when BASIC_AUTH_HASH is set
+    @basic expression `"{$BASIC_AUTH_HASH}" != ""`
+    basic_auth @basic {
+        # fallback to dummy hash for config validation pass
+        {$BASIC_AUTH_USER:disabled} {$BASIC_AUTH_HASH:$2a$14$g9HOwoG9OvZ8Cj4hXThE..pjFr3oh3NuSrLidHcZms08njbh9FJva}
+    }
+    reverse_proxy app:5000
+}
+
+# Public email API only. Bearer API key is checked by the app. (Unnessary if basic auth is not enabled)
+api.{$DOMAIN} {
+    @short path /send-email /emails
+    handle @short {
+        rewrite * /api{uri}
+        reverse_proxy app:5000
+    }
+    @full path /api/send-email /api/emails
+    handle @full {
+        reverse_proxy app:5000
+    }
+    handle {
+        respond 404
+    }
+}

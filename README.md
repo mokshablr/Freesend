@@ -45,7 +45,9 @@ Freesend is **Resend SDK-compatible**. If you're already using the `resend` npm 
 
 ```bash
 # Just add this to your .env
-RESEND_BASE_URL=https://your-freesend-instance.com/api
+RESEND_BASE_URL=https://api.your-domain.com/
+-OR-
+RESEND_BASE_URL=https://api.your-domain.com/api
 ```
 
 Your existing code works as-is:
@@ -81,17 +83,63 @@ await resend.emails.send({
 
 ## 👨‍💻 Quick Start (Self-Hosted)
 
-Deploy Freesend on your own infrastructure, then send emails via the API:
+### Run with Docker
+
+```bash
+cp .env.example .env
+# fill in AUTH_SECRET, ENCRYPTION_KEY, ENCRYPTION_IV (see comments in .env.example)
+docker compose up -d --build
+
+# create your login
+docker compose exec app node scripts/set-password.mjs admin@example.com yourpassword
+```
+
+Open http://localhost:5000/login, sign in, add an SMTP server and create an API key.
+
+- Login is email + password. Google login is enabled only if `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` are set.
+- `LANDING_PAGE=false` sends `/` straight to `/login`.
+- `APP_URL` is read at runtime — no rebuild when the domain changes.
+
+### Production (HTTPS + Let's Encrypt)
+
+Point `DOMAIN` and `api.DOMAIN` at your server (ports 80/443 open), then:
+
+```bash
+# in .env
+DOMAIN=example.com
+ACME_EMAIL=you@example.com
+BASIC_AUTH_USER=admin
+BASIC_AUTH_HASH=$$2a$$14$$...   # docker run --rm caddy:2-alpine caddy hash-password --plaintext 'secret'  (escape $ as $$)
+
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+```
+
+| URL | What | Protected by |
+|---|---|---|
+| `https://DOMAIN` | Dashboard, docs, login | Basic auth + app login |
+| `https://api.DOMAIN/send-email` | Email API (`/emails` for the Resend-compatible endpoint) | API key only |
+
+### Behind an existing mailcow (or other nginx) proxy
+
+If mailcow already owns ports 80/443 on the host, skip Caddy and let mailcow's nginx terminate TLS:
+
+```bash
+# .env: DOMAIN=freesend.example.com
+docker compose -f docker-compose.yml -f docker-compose.mailcow.yml up -d --build
+```
+
+Then copy [`examples/mailcow-nginx.conf`](examples/mailcow-nginx.conf) into `mailcow-dockerized/data/conf/nginx/` and follow the comments at its top (adds both hostnames to `ADDITIONAL_SAN`, restarts acme + nginx).
 
 ### API URL
 ```
-http://localhost:3000/api/send-email
+https://api.DOMAIN/send-email        # production
+http://localhost:5000/api/send-email # local
 ```
 
 ### Example Usage (Node.js)
 ```js
 const sendEmail = async () => {
-  const url = "http://localhost:3000/api/send-email";
+  const url = "http://localhost:5000/api/send-email";
   const apiKey = "YOUR_API_KEY"; // From your Freesend instance dashboard
 
   const emailData = {

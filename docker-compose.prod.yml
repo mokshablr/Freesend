@@ -1,0 +1,32 @@
+# Production overlay: Caddy in front with Let's Encrypt.
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+services:
+  app:
+    ports: !reset []
+    environment:
+      APP_URL: https://${DOMAIN}
+
+  proxy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?}
+      ACME_EMAIL: ${ACME_EMAIL}
+      # optional; leave empty to disable
+      BASIC_AUTH_USER: ${BASIC_AUTH_USER:-}
+      # generate with: docker run --rm caddy:2-alpine caddy hash-password --plaintext 'secret'}
+      BASIC_AUTH_HASH: ${BASIC_AUTH_HASH:-}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

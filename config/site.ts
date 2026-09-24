@@ -1,7 +1,6 @@
 import { SidebarNavItem, SiteConfig } from "types";
-import { env } from "@/env.mjs";
-
-const site_url = env.NEXT_PUBLIC_APP_URL;
+// Read at runtime (server only). Client components see the fallback; use relative links there.
+const site_url = process.env.APP_URL ?? "http://localhost:5000";
 
 export const siteConfig: SiteConfig = {
   name: "Freesend",

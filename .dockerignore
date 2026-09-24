@@ -1,0 +1,8 @@
+node_modules
+.next
+.contentlayer
+.git
+.env*
+!.env.example
+sdk
+tests

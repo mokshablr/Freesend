@@ -14,6 +14,7 @@ interface RootLayoutProps {
   children: React.ReactNode;
 }
 
+export const dynamic = "force-dynamic"; // APP_URL is runtime config
 export const metadata = constructMetadata();
 
 export default function RootLayout({ children }: RootLayoutProps) {
