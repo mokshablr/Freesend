@@ -1,0 +1,14 @@
+# Run behind an existing mailcow nginx instead of Caddy (see examples/mailcow-nginx.conf).
+#   docker compose -f docker-compose.yml -f docker-compose.mailcow.yml up -d --build
+services:
+  app:
+    container_name: freesend
+    ports: !reset []
+    environment:
+      APP_URL: https://${DOMAIN:?}
+    networks: [default, mailcow]
+
+networks:
+  mailcow:
+    name: mailcowdockerized_mailcow-network   # `docker network ls` if yours differs
+    external: true

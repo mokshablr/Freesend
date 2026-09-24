@@ -13,7 +13,7 @@
     reverse_proxy app:5000
 }
 
-# Public email API only. Bearer API key is checked by the app.
+# Public email API only. Bearer API key is checked by the app. (Unnessary if basic auth is not enabled)
 api.{$DOMAIN} {
     @short path /send-email /emails
     handle @short {
