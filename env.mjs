@@ -55,5 +55,9 @@ export const env = createEnv({
     // NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PLAN_ID:
     //   process.env.NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PLAN_ID,
   },
-  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  // `next lint` loads next.config.js, which imports this file. Linting needs
+  // no runtime config, so `npm run lint` must not fail on a missing .env.
+  skipValidation:
+    !!process.env.SKIP_ENV_VALIDATION ||
+    process.env.npm_lifecycle_event === "lint",
 });

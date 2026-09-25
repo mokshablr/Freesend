@@ -124,7 +124,7 @@ export default function Component() {
                           <span className="text-purple-400">import</span>{" "}
                           &#123; <span className="text-cyan-300">Freesend</span> &#125;{" "}
                           <span className="text-purple-400">from</span>{" "}
-                          <span className="text-amber-400">'@freesend/sdk'</span>;
+                          <span className="text-amber-400">&apos;@freesend/sdk&apos;</span>;
                         </div>
                         <div>&nbsp;</div>
                         <div>
@@ -133,7 +133,7 @@ export default function Component() {
                           <span className="text-purple-400">new</span>{" "}
                           <span className="text-cyan-300">Freesend</span>(&#123;
                         </div>
-                        <div>&nbsp;&nbsp;apiKey: <span className="text-amber-400">'your-api-key-here'</span></div>
+                        <div>&nbsp;&nbsp;apiKey: <span className="text-amber-400">&apos;your-api-key-here&apos;</span></div>
                         <div>&#125;);</div>
                         <div>&nbsp;</div>
                         <div>
@@ -141,11 +141,11 @@ export default function Component() {
                           <span className="text-purple-400">await</span>{" "}
                           freesend.<span className="text-cyan-400">sendEmail</span>(&#123;
                         </div>
-                        <div>&nbsp;&nbsp;fromName: <span className="text-amber-400">'Freesend Team'</span>,</div>
-                        <div>&nbsp;&nbsp;fromEmail: <span className="text-amber-400">'team@freesend.io'</span>,</div>
-                        <div>&nbsp;&nbsp;to: <span className="text-amber-400">'user@customer.xyz'</span>,</div>
-                        <div>&nbsp;&nbsp;subject: <span className="text-amber-400">'Welcome to Freesend'</span>,</div>
-                        <div>&nbsp;&nbsp;html: <span className="text-amber-400">'&lt;h1&gt;Hey there 👋&lt;/h1&gt;'</span></div>
+                        <div>&nbsp;&nbsp;fromName: <span className="text-amber-400">&apos;Freesend Team&apos;</span>,</div>
+                        <div>&nbsp;&nbsp;fromEmail: <span className="text-amber-400">&apos;team@freesend.io&apos;</span>,</div>
+                        <div>&nbsp;&nbsp;to: <span className="text-amber-400">&apos;user@customer.xyz&apos;</span>,</div>
+                        <div>&nbsp;&nbsp;subject: <span className="text-amber-400">&apos;Welcome to Freesend&apos;</span>,</div>
+                        <div>&nbsp;&nbsp;html: <span className="text-amber-400">&apos;&lt;h1&gt;Hey there 👋&lt;/h1&gt;&apos;</span></div>
                         <div>&#125;);</div>
                       </div>
                     </Card>
@@ -378,7 +378,7 @@ export default function Component() {
               <div>
                 <Badge variant="secondary" className="mb-4 gap-2 bg-teal-500/20 border-teal-500/40 text-teal-200 shadow-[0_0_8px_rgba(20,184,166,0.3)]">
                   <span className="h-1.5 w-1.5 rounded-full bg-teal-400 shadow-[0_0_4px_rgba(20,184,166,0.6)]"></span>
-                  Pricing? What's that?
+                  Pricing? What&apos;s that?
                 </Badge>
                 <h2 className="text-lg font-semibold md:text-xl lg:text-2xl">
                   100% free. No hidden costs.
@@ -463,7 +463,7 @@ export default function Component() {
                     <div>
                       <strong className="text-foreground">No email costs</strong>
                       <br />
-                      Since you're using your own SMTP server, you only pay what your provider charges
+                      Since you&apos;re using your own SMTP server, you only pay what your provider charges
                       (often free for small volumes). Freesend adds zero markup.
                     </div>
                   </div>
