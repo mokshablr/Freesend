@@ -6,9 +6,12 @@ import("./env.mjs");
 const nextConfig = {
   output: "standalone",
   reactStrictMode: true,
-  // Lint the whole repo, not only Next's default app/, components/ and lib/.
   eslint: {
+    // Lint the whole repo, not only Next's default app/, components/ and lib/.
     dirs: ["."],
+    // Linting is its own check (`npm run lint`), so a lint error never fails
+    // a build, including the Docker image build.
+    ignoreDuringBuilds: true,
   },
   swcMinify: true,
   images: {
