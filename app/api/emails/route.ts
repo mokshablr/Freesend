@@ -29,6 +29,9 @@ type ResendEmailRequest = {
     filename?: string;
     content?: string;
     contentType?: string;
+    content_type?: string;
+    contentId?: string;
+    content_id?: string;
   }>;
 };
 
@@ -140,7 +143,8 @@ export const POST = async (req: Request) => {
   const attachments = body.attachments?.map((a) => ({
     filename: a.filename || "attachment",
     content: a.content,
-    contentType: a.contentType,
+    contentType: a.contentType ?? a.content_type,
+    contentId: a.contentId ?? a.content_id,
   }));
 
   const result = await sendEmail(
