@@ -1,4 +1,4 @@
-FROM node:lts-alpine3.24 AS build
+FROM node:26.12-alpine3.24 AS build
 RUN apk add --no-cache openssl
 WORKDIR /app
 COPY package.json prisma ./
@@ -7,7 +7,7 @@ COPY . .
 ENV SKIP_ENV_VALIDATION=1 NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-FROM node:lts-alpine3.24
+FROM node:26.12-alpine3.24
 RUN apk add --no-cache openssl
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=5000 AUTH_TRUST_HOST=true
