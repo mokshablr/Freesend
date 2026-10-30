@@ -42,7 +42,8 @@ Ensure you put your API Key as a Bearer token in the Authorization header of the
             "filename": "invoice.pdf",  // Name of the file
             "content": "base64EncodedContent",  // Base64 encoded file content (optional if url is provided)
             "url": "https://example.com/file.pdf",  // URL to external file (optional if content is provided)
-            "contentType": "application/pdf"  // (optional) MIME type
+            "contentType": "application/pdf",  // (optional) MIME type
+            "contentId": "logo"  // (optional) shows the file inline where html has <img src="cid:logo">
         }
     ]
 }

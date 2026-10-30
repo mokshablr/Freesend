@@ -261,6 +261,39 @@ describe("sendEmail", () => {
     );
   });
 
+  it("passes contentId to nodemailer as cid for inline images", async () => {
+    vi.mocked(getSmtpConfigByApiKey).mockResolvedValue(mockSmtpConfig);
+    vi.mocked(getApiKeyStatus).mockResolvedValue("active");
+    vi.mocked(prisma.apiKey.findUnique).mockResolvedValue({ id: "key1", tenant_id: "tenant1" } as any);
+    vi.mocked(createEmail).mockResolvedValue({ id: "email-123" } as any);
+    vi.mocked(updateEmailStatus).mockResolvedValue({} as any);
+    const mockSendMail = vi.fn().mockResolvedValue({});
+    vi.mocked(nodemailer.createTransport).mockReturnValue({ sendMail: mockSendMail } as any);
+
+    const result = await sendEmail({
+      ...validInput,
+      html: '<img src="cid:shot">',
+      attachments: [{ filename: "shot.png", content: "aGk=", contentType: "image/png", contentId: "shot" }],
+    });
+
+    expect(result.success).toBe(true);
+    const sent = mockSendMail.mock.calls[0][0];
+    expect(sent.attachments[0]).toMatchObject({ filename: "shot.png", contentType: "image/png", cid: "shot" });
+  });
+
+  it("rejects a contentId with spaces or angle brackets", async () => {
+    vi.mocked(getSmtpConfigByApiKey).mockResolvedValue(mockSmtpConfig);
+    vi.mocked(getApiKeyStatus).mockResolvedValue("active");
+
+    const result = await sendEmail({
+      ...validInput,
+      attachments: [{ filename: "a.png", content: "aGk=", contentId: "<bad id>" }],
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.statusCode).toBe(400);
+  });
+
   it("rejects attachment URLs to private 172.16-31.x.x range", async () => {
     vi.mocked(getSmtpConfigByApiKey).mockResolvedValue(mockSmtpConfig);
     vi.mocked(getApiKeyStatus).mockResolvedValue("active");

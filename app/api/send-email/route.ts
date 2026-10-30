@@ -31,6 +31,7 @@ type EmailContent = {
     content?: string;
     url?: string;
     contentType?: string;
+    contentId?: string;
   }>;
 };
 

@@ -20,6 +20,8 @@ export type SendEmailInput = {
     content?: string;
     url?: string;
     contentType?: string;
+    /** Content-ID for inline use: an attachment with one is referenced from html as `cid:<contentId>`. */
+    contentId?: string;
   }>;
 };
 
@@ -114,6 +116,10 @@ async function validateAttachments(
       }
     }
 
+    if (attachment.contentId !== undefined && !/^[^\s<>"]{1,255}$/.test(attachment.contentId)) {
+      return `Attachment '${attachment.filename}' has an invalid 'contentId'.`;
+    }
+
     if (attachment.url) {
       try {
         const url = new URL(attachment.url);
@@ -130,7 +136,7 @@ async function validateAttachments(
 
 async function processAttachments(
   attachments?: SendEmailInput["attachments"],
-): Promise<Array<{ filename: string; content: Buffer; contentType?: string }>> {
+): Promise<Array<{ filename: string; content: Buffer; contentType?: string; cid?: string }>> {
   if (!attachments) return [];
 
   return Promise.all(
@@ -177,6 +183,7 @@ async function processAttachments(
         filename: attachment.filename,
         content,
         contentType: attachment.contentType,
+        ...(attachment.contentId ? { cid: attachment.contentId } : {}),
       };
     }),
   );
