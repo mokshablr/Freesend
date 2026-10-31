@@ -32,6 +32,7 @@ type ResendEmailRequest = {
     content_type?: string;
     contentId?: string;
     content_id?: string;
+    inline_content_id?: string; // what Resend's Node SDK v4 and v5 send
   }>;
 };
 
@@ -144,7 +145,7 @@ export const POST = async (req: Request) => {
     filename: a.filename || "attachment",
     content: a.content,
     contentType: a.contentType ?? a.content_type,
-    contentId: a.contentId ?? a.content_id,
+    contentId: a.contentId ?? a.content_id ?? a.inline_content_id,
   }));
 
   const result = await sendEmail(

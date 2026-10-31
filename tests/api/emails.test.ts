@@ -294,6 +294,39 @@ describe("sendEmail", () => {
     if (!result.success) expect(result.statusCode).toBe(400);
   });
 
+  it("rejects a contentId that is not a string", async () => {
+    vi.mocked(getSmtpConfigByApiKey).mockResolvedValue(mockSmtpConfig);
+    vi.mocked(getApiKeyStatus).mockResolvedValue("active");
+
+    for (const contentId of [42, true, ["logo"]]) {
+      const result = await sendEmail({
+        ...validInput,
+        attachments: [{ filename: "a.png", content: "aGk=", contentId: contentId as unknown as string }],
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) expect(result.statusCode).toBe(400);
+    }
+  });
+
+  it("treats a null contentId as a plain attachment", async () => {
+    vi.mocked(getSmtpConfigByApiKey).mockResolvedValue(mockSmtpConfig);
+    vi.mocked(getApiKeyStatus).mockResolvedValue("active");
+    vi.mocked(prisma.apiKey.findUnique).mockResolvedValue({ id: "key1", tenant_id: "tenant1" } as any);
+    vi.mocked(createEmail).mockResolvedValue({ id: "email-123" } as any);
+    vi.mocked(updateEmailStatus).mockResolvedValue({} as any);
+    const mockSendMail = vi.fn().mockResolvedValue({});
+    vi.mocked(nodemailer.createTransport).mockReturnValue({ sendMail: mockSendMail } as any);
+
+    const result = await sendEmail({
+      ...validInput,
+      attachments: [{ filename: "a.png", content: "aGk=", contentId: null as unknown as string }],
+    });
+
+    expect(result.success).toBe(true);
+    expect(mockSendMail.mock.calls[0][0].attachments[0]).not.toHaveProperty("cid");
+  });
+
   it("rejects attachment URLs to private 172.16-31.x.x range", async () => {
     vi.mocked(getSmtpConfigByApiKey).mockResolvedValue(mockSmtpConfig);
     vi.mocked(getApiKeyStatus).mockResolvedValue("active");

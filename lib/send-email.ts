@@ -116,7 +116,14 @@ async function validateAttachments(
       }
     }
 
-    if (attachment.contentId !== undefined && !/^[^\s<>"]{1,255}$/.test(attachment.contentId)) {
+    // null or missing means "not inline". Check the type first: RegExp.test()
+    // coerces numbers and arrays to strings, which then crash nodemailer.
+    const { contentId } = attachment;
+    if (
+      contentId !== undefined &&
+      contentId !== null &&
+      (typeof contentId !== "string" || !/^[^\s<>"]{1,255}$/.test(contentId))
+    ) {
       return `Attachment '${attachment.filename}' has an invalid 'contentId'.`;
     }
 
